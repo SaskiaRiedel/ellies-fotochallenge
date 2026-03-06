@@ -3,7 +3,7 @@ window.APP_CONFIG = {
   uploadPreset: "Geburtstagsparty Ellies",
 
   eventTag: "ellie60",
-  eventTitle: "Ellies Fotochallenge",
+  eventTitle: "Fotochallenge",
 
   tasks: [
     {

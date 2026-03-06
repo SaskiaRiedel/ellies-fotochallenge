@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ellies Fotochallenge – Diashow</title>
+  <title>Fotochallenge – Diashow</title>
   <script src="config.js"></script>
 
   <style>
@@ -139,7 +139,7 @@
 </head>
 <body>
   <div class="stage" id="stage">
-    <div class="headline">Ellies Fotochallenge</div>
+    <div class="headline">Fotochallenge</div>
     <div class="empty-note" id="emptyNote">
       Noch keine Bilder in der Diashow gefunden.
     </div>
@@ -192,7 +192,7 @@
 
     function addPolaroid(asset) {
       const task = getTaskByAsset(asset);
-      const captionText = task ? task.caption : "Ellies Fotochallenge";
+      const captionText = task ? task.caption : "Fotochallenge";
       const bgColor = task ? task.color : "#f3f3f3";
 
       const card = document.createElement("div");
