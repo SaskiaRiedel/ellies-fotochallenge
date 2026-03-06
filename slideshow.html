@@ -1,139 +1,249 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ellies Fotochallenge – Diashow</title>
+  <script src="config.js"></script>
 
-<meta charset="UTF-8">
+  <style>
+    :root {
+      --bg1: #242424;
+      --bg2: #2c2c2c;
+      --tape: rgba(202, 171, 122, 0.82);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+      --polaroid: #ffffff;
+    }
 
-<title>Ellies Diashow</title>
+    * {
+      box-sizing: border-box;
+    }
 
-<script src="config.js"></script>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, #3b3b3b 0%, transparent 28%),
+        radial-gradient(circle at bottom right, #353535 0%, transparent 24%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      width: 100vw;
+      height: 100vh;
+    }
 
-<style>
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-body{
-background:#222;
-overflow:hidden;
-}
+    .headline {
+      position: absolute;
+      z-index: 2;
+      left: 24px;
+      top: 20px;
+      color: rgba(255,255,255,0.88);
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      letter-spacing: 0.02em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
 
-.polaroid{
+    .polaroid {
+      position: absolute;
+      width: min(28vw, 340px);
+      min-width: 230px;
+      background: var(--polaroid);
+      border-radius: 4px;
+      padding: 16px 16px 68px 16px;
+      box-shadow: var(--shadow);
+      transform-origin: center center;
+      animation: dropIn 900ms cubic-bezier(.2,.8,.2,1);
+    }
 
-position:absolute;
+    .tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      width: 104px;
+      height: 26px;
+      transform: translateX(-50%) rotate(-6deg);
+      background: var(--tape);
+      opacity: 0.92;
+      border-radius: 2px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
 
-width:260px;
+    .photo-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #111;
+      overflow: hidden;
+    }
 
-background:white;
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-padding:10px;
+    .caption-box {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 14px 16px 16px;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+      line-height: 1.25;
+      font-size: clamp(0.9rem, 1.3vw, 1.08rem);
+    }
 
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    .empty-note {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,0.72);
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+      text-align: center;
+      padding: 24px;
+    }
 
-animation:fall 1s ease;
+    @keyframes dropIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-320px) scale(0.92) rotate(-12deg);
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
 
-}
-
-.polaroid img{
-
-width:100%;
-
-}
-
-.caption{
-
-padding:10px;
-
-font-size:14px;
-
-text-align:center;
-
-}
-
-@keyframes fall{
-
-from{
-
-transform:translateY(-200px) rotate(-10deg);
-
-opacity:0;
-
-}
-
-to{
-
-transform:translateY(0) rotate(0);
-
-opacity:1;
-
-}
-
-}
-
-</style>
-
+    @media (max-width: 900px) {
+      .polaroid {
+        width: min(40vw, 310px);
+        min-width: 210px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="stage" id="stage">
+    <div class="headline">Ellies Fotochallenge</div>
+    <div class="empty-note" id="emptyNote">
+      Noch keine Bilder in der Diashow gefunden.
+    </div>
+  </div>
 
-<script>
+  <script>
+    const stage = document.getElementById("stage");
+    const emptyNote = document.getElementById("emptyNote");
+    const shown = new Set();
 
-const cloud = APP_CONFIG.cloudName
+    const taskMap = Object.fromEntries(
+      APP_CONFIG.tasks.map(task => [task.id, task])
+    );
 
-let shown = []
+    function getTaskByAsset(asset) {
+      const tags = asset.tags || [];
+      return APP_CONFIG.tasks.find(task => tags.includes(task.id)) || null;
+    }
 
-function load(){
+    function loadAssets() {
+      fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/${APP_CONFIG.eventTag}.json`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Asset-Liste konnte nicht geladen werden.");
+          }
+          return response.json();
+        })
+        .then(data => {
+          const resources = Array.isArray(data.resources) ? data.resources : [];
 
-fetch(`https://res.cloudinary.com/${cloud}/image/list/${APP_CONFIG.eventTag}.json`)
+          const newItems = resources.filter(asset => {
+            if (!asset.public_id) return false;
+            if (shown.has(asset.public_id)) return false;
+            return true;
+          });
 
-.then(r=>r.json())
+          if (newItems.length > 0) {
+            emptyNote.style.display = "none";
+          }
 
-.then(data=>{
+          newItems.forEach(asset => {
+            shown.add(asset.public_id);
+            addPolaroid(asset);
+          });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
 
-data.resources.forEach(img=>{
+    function addPolaroid(asset) {
+      const task = getTaskByAsset(asset);
+      const captionText = task ? task.caption : "Ellies Fotochallenge";
+      const bgColor = task ? task.color : "#f3f3f3";
 
-if(!shown.includes(img.public_id)){
+      const card = document.createElement("div");
+      card.className = "polaroid";
 
-shown.push(img.public_id)
+      const angle = (Math.random() * 20) - 10;
+      const left = Math.random() * 72 + 4;
+      const top = Math.random() * 58 + 14;
 
-addImage(img)
+      card.style.left = `${left}%`;
+      card.style.top = `${top}%`;
+      card.style.transform = `rotate(${angle}deg)`;
 
-}
+      const tape = document.createElement("div");
+      tape.className = "tape";
 
-})
+      const photoWrap = document.createElement("div");
+      photoWrap.className = "photo-wrap";
 
-})
+      const img = document.createElement("img");
+      img.alt = captionText;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_900,h_900,q_auto,f_auto/${asset.public_id}`;
 
-}
+      const captionBox = document.createElement("div");
+      captionBox.className = "caption-box";
+      captionBox.style.background = bgColor;
+      captionBox.textContent = captionText;
 
-function addImage(img){
+      photoWrap.appendChild(img);
+      card.appendChild(tape);
+      card.appendChild(photoWrap);
+      card.appendChild(captionBox);
+      stage.appendChild(card);
 
-const div = document.createElement("div")
+      limitCards();
+    }
 
-div.className="polaroid"
+    function limitCards() {
+      const cards = Array.from(document.querySelectorAll(".polaroid"));
+      const maxCards = 18;
 
-div.style.left=Math.random()*80+"%"
+      if (cards.length > maxCards) {
+        const overflow = cards.length - maxCards;
+        for (let i = 0; i < overflow; i++) {
+          cards[i].remove();
+        }
+      }
+    }
 
-div.style.top=Math.random()*80+"%"
-
-const image=document.createElement("img")
-
-image.src=`https://res.cloudinary.com/${cloud}/image/upload/${img.public_id}.jpg`
-
-const cap=document.createElement("div")
-
-cap.className="caption"
-
-cap.innerText="Ellies Party"
-
-div.appendChild(image)
-
-div.appendChild(cap)
-
-document.body.appendChild(div)
-
-}
-
-setInterval(load,5000)
-
-</script>
-
+    loadAssets();
+    setInterval(loadAssets, 5000);
+  </script>
 </body>
 </html>
