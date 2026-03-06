@@ -1,153 +1,296 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fotochallenge</title>
+  <script src="config.js"></script>
 
-<meta charset="UTF-8">
-<title>Fotochallenge</title>
+  <style>
+    :root {
+      --bg1: #242424;
+      --bg2: #2c2c2c;
+      --tape: rgba(202, 171, 122, 0.82);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+      --polaroid: #ffffff;
+    }
 
-<script src="config.js"></script>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, #3b3b3b 0%, transparent 28%),
+        radial-gradient(circle at bottom right, #353535 0%, transparent 24%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      width: 100vw;
+      height: 100vh;
+    }
 
-body{
-margin:0;
-overflow:hidden;
-background:#222;
-font-family:Arial;
-}
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-#stage{
-position:relative;
-width:100vw;
-height:100vh;
-}
+    .headline {
+      position: absolute;
+      z-index: 20;
+      left: 22px;
+      top: 18px;
+      color: rgba(255,255,255,0.88);
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      letter-spacing: 0.02em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
 
-.polaroid{
-position:absolute;
-width:280px;
-background:white;
-padding:15px 15px 70px 15px;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-animation:drop 0.8s ease;
-}
+    .empty-note {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,0.72);
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+      text-align: center;
+      padding: 24px;
+      z-index: 5;
+    }
 
-.photo{
-width:100%;
-height:260px;
-object-fit:cover;
-}
+    .polaroid {
+      position: absolute;
+      width: 360px;
+      background: var(--polaroid);
+      border-radius: 4px;
+      padding: 14px 14px 86px 14px;
+      box-shadow: var(--shadow);
+      transform-origin: center center;
+      opacity: 0;
+      transition:
+        left 1s ease,
+        top 1s ease,
+        transform 1s ease,
+        opacity 0.8s ease;
+    }
 
-.caption{
-position:absolute;
-bottom:0;
-left:0;
-right:0;
-padding:15px;
-font-weight:bold;
-text-align:center;
-}
+    .polaroid.show {
+      opacity: 1;
+    }
 
-.tape{
-position:absolute;
-top:-12px;
-left:50%;
-width:90px;
-height:24px;
-background:#d9c9a3;
-transform:translateX(-50%) rotate(-5deg);
-opacity:0.9;
-}
+    .tape {
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      width: 110px;
+      height: 26px;
+      transform: translateX(-50%) rotate(-6deg);
+      background: var(--tape);
+      opacity: 0.92;
+      border-radius: 2px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
 
-@keyframes drop{
-0%{
-transform:translateY(-300px) rotate(-10deg);
-opacity:0;
-}
-100%{
-opacity:1;
-}
-}
+    .photo-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #111;
+      overflow: hidden;
+      border: 14px solid #ffffff;
+      border-bottom: 0;
+    }
 
-</style>
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
+    .caption-box {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      min-height: 58px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+      line-height: 1.2;
+      font-size: 1.05rem;
+      border-radius: 0 0 3px 3px;
+      color: #111;
+    }
+
+    @media (max-width: 1500px) {
+      .polaroid {
+        width: 320px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .polaroid {
+        width: 280px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="stage" id="stage">
+    <div class="headline">Fotochallenge</div>
+    <div class="empty-note" id="emptyNote">
+      Noch keine Bilder in der Diashow gefunden.
+    </div>
+  </div>
 
-<div id="stage"></div>
+  <script>
+    const stage = document.getElementById("stage");
+    const emptyNote = document.getElementById("emptyNote");
 
-<script>
+    const assets = [];
+    const assetIds = new Set();
 
-const shown = new Set()
+    let cycleIndex = 0;
 
-function loadImages(){
+    // 5 feste Slots statt Zufallschaos
+    const slots = [
+      { left: 6,  top: 12, angle: -8 },
+      { left: 36, top: 8,  angle: 6 },
+      { left: 66, top: 14, angle: -5 },
+      { left: 18, top: 50, angle: 7 },
+      { left: 56, top: 48, angle: -6 }
+    ];
 
-fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/fotochallenge.json`)
+    function getTaskStyle(asset) {
+      const taskId = asset?.context?.custom?.task_id || "";
+      const task = APP_CONFIG.tasks.find(t => t.id === taskId);
 
-.then(r=>r.json())
+      return {
+        caption: asset?.context?.custom?.caption || "Fotochallenge",
+        color: task?.color || "#f3f3f3"
+      };
+    }
 
-.then(data=>{
+    function sortByUploadOrder(list) {
+      return list.sort((a, b) => {
+        const va = Number(a.version || 0);
+        const vb = Number(b.version || 0);
+        return va - vb;
+      });
+    }
 
-data.resources.forEach(asset=>{
+    function fetchAssets() {
+      fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/fotochallenge.json`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const resources = Array.isArray(data.resources) ? data.resources : [];
 
-if(shown.has(asset.public_id)) return
+          // nur Bilder, keine Videos
+          const onlyImages = resources.filter(asset => {
+            const format = (asset.format || "").toLowerCase();
+            return ["jpg", "jpeg", "png", "webp", "heic"].includes(format);
+          });
 
-shown.add(asset.public_id)
+          sortByUploadOrder(onlyImages).forEach(asset => {
+            if (!assetIds.has(asset.public_id)) {
+              assetIds.add(asset.public_id);
+              assets.push(asset);
+            }
+          });
 
-addImage(asset)
+          if (assets.length > 0) {
+            emptyNote.style.display = "none";
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
 
-})
+    function createCard(asset, slotIndex) {
+      const style = getTaskStyle(asset);
+      const slot = slots[slotIndex];
 
-})
+      const card = document.createElement("div");
+      card.className = "polaroid";
 
-}
+      card.style.left = `${slot.left}%`;
+      card.style.top = `${slot.top}%`;
+      card.style.transform = `rotate(${slot.angle}deg)`;
 
-function addImage(asset){
+      const tape = document.createElement("div");
+      tape.className = "tape";
 
-const stage = document.getElementById("stage")
+      const photoWrap = document.createElement("div");
+      photoWrap.className = "photo-wrap";
+      photoWrap.style.borderColor = style.color;
 
-const card = document.createElement("div")
-card.className = "polaroid"
+      const img = document.createElement("img");
+      img.alt = style.caption;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_1000,h_1000,q_auto,f_auto/${asset.public_id}`;
 
-const left = Math.random()*70 + 10
-const top = Math.random()*60 + 10
-const angle = Math.random()*20 - 10
+      const captionBox = document.createElement("div");
+      captionBox.className = "caption-box";
+      captionBox.style.background = style.color;
+      captionBox.textContent = style.caption;
 
-card.style.left = left+"%"
-card.style.top = top+"%"
-card.style.transform = `rotate(${angle}deg)`
+      photoWrap.appendChild(img);
+      card.appendChild(tape);
+      card.appendChild(photoWrap);
+      card.appendChild(captionBox);
+      stage.appendChild(card);
 
-const tape = document.createElement("div")
-tape.className = "tape"
+      requestAnimationFrame(() => {
+        card.classList.add("show");
+      });
 
-const img = document.createElement("img")
-img.className = "photo"
-img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_800,h_800/${asset.public_id}`
+      return card;
+    }
 
-const caption = document.createElement("div")
-caption.className = "caption"
+    function renderWindow() {
+      const oldCards = Array.from(document.querySelectorAll(".polaroid"));
+      oldCards.forEach(card => card.remove());
 
-let text = "Fotochallenge"
+      if (assets.length === 0) {
+        emptyNote.style.display = "grid";
+        return;
+      }
 
-if(asset.context && asset.context.custom && asset.context.custom.caption){
-text = asset.context.custom.caption
-}
+      emptyNote.style.display = "none";
 
-caption.innerText = text
+      const visibleCount = Math.min(5, assets.length);
 
-card.appendChild(tape)
-card.appendChild(img)
-card.appendChild(caption)
+      for (let i = 0; i < visibleCount; i++) {
+        const asset = assets[(cycleIndex + i) % assets.length];
+        createCard(asset, i);
+      }
 
-stage.appendChild(card)
+      cycleIndex = (cycleIndex + 1) % assets.length;
+    }
 
-}
+    // initial laden
+    fetchAssets();
 
-loadImages()
+    // leicht verzögert erstes Rendern, damit fetch Zeit hat
+    setTimeout(renderWindow, 1000);
 
-setInterval(loadImages,5000)
+    // alle 10s nach neuen Uploads schauen
+    setInterval(fetchAssets, 10000);
 
-</script>
-
+    // alle 30s ein neues "Fenster" zeigen
+    setInterval(renderWindow, 30000);
+  </script>
 </body>
 </html>
