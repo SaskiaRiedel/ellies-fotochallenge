@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ellies Fotochallenge</title>
-
-  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
   <script src="config.js"></script>
 
   <style>
     :root {
       --bg: #f5f3f1;
       --text: #161616;
-      --muted: #5a5a5a;
-      --card-shadow: 0 10px 28px rgba(0, 0, 0, 0.10);
-      --radius: 28px;
+      --muted: #5b5b5b;
+      --shadow: 0 10px 28px rgba(0,0,0,0.10);
+      --radius: 26px;
+      --btn-dark: #222;
+      --btn-light: #fff;
     }
 
     * {
@@ -29,14 +29,14 @@
     }
 
     .wrap {
-      width: min(1100px, calc(100vw - 32px));
+      width: min(1100px, calc(100vw - 28px));
       margin: 0 auto;
-      padding: 28px 0 42px;
+      padding: 24px 0 40px;
     }
 
     h1 {
-      margin: 10px 0 8px;
       text-align: center;
+      margin: 10px 0 10px;
       font-size: clamp(2.2rem, 5vw, 4.5rem);
       line-height: 1.05;
     }
@@ -44,30 +44,10 @@
     .subtitle {
       text-align: center;
       color: var(--muted);
-      font-size: clamp(1rem, 2.6vw, 1.55rem);
+      font-size: clamp(1rem, 2.2vw, 1.4rem);
       line-height: 1.35;
-      margin: 0 auto 26px;
       max-width: 820px;
-    }
-
-    .top-actions {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-
-    .pill-link {
-      display: inline-block;
-      text-decoration: none;
-      color: #111;
-      background: #fff;
-      padding: 14px 22px;
-      border-radius: 999px;
-      box-shadow: var(--card-shadow);
-      font-size: 1.15rem;
-      font-weight: 700;
+      margin: 0 auto 28px;
     }
 
     .grid {
@@ -76,147 +56,235 @@
       gap: 24px;
     }
 
-    .task-btn {
-      border: none;
+    .task-card {
       border-radius: var(--radius);
-      padding: 28px 26px 26px;
-      min-height: 240px;
-      text-align: left;
-      cursor: pointer;
-      box-shadow: var(--card-shadow);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      color: #111;
-    }
-
-    .task-btn:hover,
-    .task-btn:focus-visible {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
-      outline: none;
+      padding: 26px 24px 22px;
+      box-shadow: var(--shadow);
     }
 
     .task-title {
-      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-size: clamp(1.45rem, 2.8vw, 2rem);
       line-height: 1.18;
       font-weight: 800;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
 
     .task-caption {
-      font-size: clamp(1.05rem, 2vw, 1.22rem);
-      line-height: 1.45;
+      font-size: clamp(1.02rem, 1.9vw, 1.18rem);
+      line-height: 1.4;
       color: #444;
+      margin-bottom: 22px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 18px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .action-btn:hover,
+    .action-btn:focus-visible {
+      transform: translateY(-1px);
+      opacity: 0.95;
+      outline: none;
+    }
+
+    .btn-camera {
+      background: var(--btn-dark);
+      color: var(--btn-light);
+    }
+
+    .btn-upload {
+      background: rgba(255,255,255,0.85);
+      color: #111;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: #444;
+      min-height: 1.3em;
     }
 
     .hint {
-      margin-top: 26px;
+      margin-top: 24px;
       text-align: center;
       color: var(--muted);
-      font-size: 1rem;
+      font-size: 0.98rem;
       line-height: 1.4;
+    }
+
+    input[type="file"] {
+      display: none;
     }
 
     @media (max-width: 640px) {
       .wrap {
-        width: min(100vw - 24px, 1000px);
-        padding-top: 18px;
+        width: min(calc(100vw - 20px), 1000px);
+        padding-top: 14px;
       }
 
-      .task-btn {
-        min-height: 210px;
-        padding: 24px 22px;
+      .task-card {
+        padding: 22px 20px 20px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .action-btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>📸 Ellies Fotochallenge</h1>
+    <h1>📸 Fotochallenge</h1>
     <p class="subtitle">
-      Tippe auf eine Aufgabe und lade direkt ein Foto oder Video hoch.
+      Wähle eine Aufgabe und lade direkt ein Foto oder Video hoch.
     </p>
-
-    <div class="top-actions">
-      <a class="pill-link" href="slideshow.html" target="_blank" rel="noopener">Diashow öffnen</a>
-    </div>
 
     <div id="taskGrid" class="grid"></div>
 
     <p class="hint">
-      Es stehen nur <strong>Datei/Galerie</strong> und <strong>Kamera</strong> zur Auswahl.
-      Videos dürfen hochgeladen werden, werden in der Diashow aber nicht abgespielt.
+      Mit <strong>Aufnehmen</strong> startest du Kamera oder Videoaufnahme. Mit <strong>Hochladen</strong> wählst du aus Galerie oder Dateien.
     </p>
   </div>
 
   <script>
     const grid = document.getElementById("taskGrid");
 
-    function openUpload(task) {
-      const widget = cloudinary.createUploadWidget(
-        {
-          cloudName: APP_CONFIG.cloudName,
-          uploadPreset: APP_CONFIG.uploadPreset,
+    function createHiddenInput(task, mode) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*,video/*";
 
-          sources: ["local", "camera"],
-          showAdvancedOptions: false,
-          showCompletedButton: true,
+      // Nur beim Kamera-Button setzen wir capture.
+      // Damit wird NICHT automatisch beim Öffnen der Seite die Kamera geöffnet,
+      // sondern erst nach Klick auf den Button.
+      if (mode === "camera") {
+        input.setAttribute("capture", "environment");
+      }
 
-          multiple: false,
-          maxFiles: 1,
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-          resourceType: "auto",
-          clientAllowedFormats: [
-            "jpg", "jpeg", "png", "webp", "heic",
-            "mp4", "mov", "m4v", "webm"
-          ],
+        const status = document.getElementById(`status-${task.id}`);
+        status.textContent = "Upload läuft ...";
 
-          cameraModes: ["photo", "video"],
-          // wichtig: KEIN showCamera:true, damit nicht automatisch die Kamera aufgeht
-
-          tags: task.tags,
-          context: {
-            event_title: APP_CONFIG.eventTitle,
-            event_tag: APP_CONFIG.eventTag,
-            task_id: task.id,
-            task_title: task.title,
-            caption: task.caption
-          },
-
-          // diese Werte sind okay, auch wenn Cloudinary den Ordner
-          // bei unsigned Uploads nicht immer wie gewünscht umsetzt
-          folder: APP_CONFIG.eventTag,
-          publicIdPrefix: `${APP_CONFIG.eventTag}/${task.id}`,
-
-          cropping: false,
-          thumbnailTransformation: [{ width: 400, crop: "limit" }]
-        },
-        (error, result) => {
-          if (error) {
-            console.error("Upload-Fehler:", error);
-            alert("Der Upload hat leider nicht funktioniert.");
-            return;
-          }
-
-          if (result && result.event === "success") {
-            alert("Upload erfolgreich. Danke!");
-          }
+        try {
+          await uploadToCloudinary(file, task);
+          status.textContent = "Upload erfolgreich. Danke!";
+        } catch (err) {
+          console.error(err);
+          status.textContent = "Upload fehlgeschlagen.";
+          alert("Der Upload hat leider nicht funktioniert.");
         }
-      );
 
-      widget.open();
+        // Zurücksetzen, damit dieselbe Datei ggf. erneut gewählt werden kann
+        input.value = "";
+      });
+
+      return input;
     }
 
-    APP_CONFIG.tasks.forEach(task => {
-      const button = document.createElement("button");
-      button.className = "task-btn";
-      button.style.background = task.color;
-      button.innerHTML = `
-        <div class="task-title">${task.title}</div>
-        <div class="task-caption">${task.caption}</div>
-      `;
-      button.addEventListener("click", () => openUpload(task));
-      grid.appendChild(button);
-    });
+    async function uploadToCloudinary(file, task) {
+      const endpoint = `https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudName}/auto/upload`;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", APP_CONFIG.uploadPreset);
+      formData.append("folder", APP_CONFIG.eventTag);
+
+      // Tags
+      formData.append("tags", task.tags.join(","));
+
+      // Kontext
+      formData.append(
+        "context",
+        [
+          `event_title=${APP_CONFIG.eventTitle}`,
+          `event_tag=${APP_CONFIG.eventTag}`,
+          `task_id=${task.id}`,
+          `task_title=${task.title}`,
+          `caption=${task.caption}`
+        ].join("|")
+      );
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Cloudinary Upload fehlgeschlagen: ${text}`);
+      }
+
+      return response.json();
+    }
+
+    function renderTask(task) {
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.style.background = task.color;
+
+      const title = document.createElement("div");
+      title.className = "task-title";
+      title.textContent = task.title;
+
+      const caption = document.createElement("div");
+      caption.className = "task-caption";
+      caption.textContent = task.caption;
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const cameraInput = createHiddenInput(task, "camera");
+      const uploadInput = createHiddenInput(task, "upload");
+
+      const cameraBtn = document.createElement("button");
+      cameraBtn.className = "action-btn btn-camera";
+      cameraBtn.type = "button";
+      cameraBtn.textContent = "📷 Aufnehmen";
+      cameraBtn.addEventListener("click", () => cameraInput.click());
+
+      const uploadBtn = document.createElement("button");
+      uploadBtn.className = "action-btn btn-upload";
+      uploadBtn.type = "button";
+      uploadBtn.textContent = "📁 Hochladen";
+      uploadBtn.addEventListener("click", () => uploadInput.click());
+
+      const status = document.createElement("div");
+      status.className = "status";
+      status.id = `status-${task.id}`;
+
+      actions.appendChild(cameraBtn);
+      actions.appendChild(uploadBtn);
+
+      card.appendChild(title);
+      card.appendChild(caption);
+      card.appendChild(actions);
+      card.appendChild(status);
+      card.appendChild(cameraInput);
+      card.appendChild(uploadInput);
+
+      grid.appendChild(card);
+    }
+
+    APP_CONFIG.tasks.forEach(renderTask);
   </script>
 </body>
 </html>
