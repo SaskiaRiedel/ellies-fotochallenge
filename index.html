@@ -158,7 +158,8 @@
     <div id="taskGrid" class="grid"></div>
 
     <p class="hint">
-      Mit <strong>Aufnehmen</strong> startest du Kamera oder Videoaufnahme. Mit <strong>Hochladen</strong> wählst du aus Galerie oder Dateien.
+      <strong>Aufnehmen</strong> öffnet die Kamera für ein neues Foto.
+      <strong>Hochladen</strong> öffnet Galerie oder Dateien und erlaubt Fotos und Videos.
     </p>
   </div>
 
@@ -168,13 +169,15 @@
     function createHiddenInput(task, mode) {
       const input = document.createElement("input");
       input.type = "file";
-      input.accept = "image/*,video/*";
 
-      // Nur beim Kamera-Button setzen wir capture.
-      // Damit wird NICHT automatisch beim Öffnen der Seite die Kamera geöffnet,
-      // sondern erst nach Klick auf den Button.
       if (mode === "camera") {
+        // Für zuverlässige Kameraöffnung auf Mobilgeräten:
+        // nur Bilder + capture setzen
+        input.accept = "image/*";
         input.setAttribute("capture", "environment");
+      } else {
+        // Galerie/Dateien: Bilder und Videos erlaubt
+        input.accept = "image/*,video/*";
       }
 
       input.addEventListener("change", async (event) => {
@@ -193,7 +196,6 @@
           alert("Der Upload hat leider nicht funktioniert.");
         }
 
-        // Zurücksetzen, damit dieselbe Datei ggf. erneut gewählt werden kann
         input.value = "";
       });
 
@@ -207,11 +209,8 @@
       formData.append("file", file);
       formData.append("upload_preset", APP_CONFIG.uploadPreset);
       formData.append("folder", APP_CONFIG.eventTag);
-
-      // Tags
       formData.append("tags", task.tags.join(","));
 
-      // Kontext
       formData.append(
         "context",
         [
