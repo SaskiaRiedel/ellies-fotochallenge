@@ -171,12 +171,9 @@
       input.type = "file";
 
       if (mode === "camera") {
-        // Für zuverlässige Kameraöffnung auf Mobilgeräten:
-        // nur Bilder + capture setzen
         input.accept = "image/*";
         input.setAttribute("capture", "environment");
       } else {
-        // Galerie/Dateien: Bilder und Videos erlaubt
         input.accept = "image/*,video/*";
       }
 
@@ -189,7 +186,7 @@
 
         try {
           await uploadToCloudinary(file, task);
-          status.textContent = "Upload erfolgreich. Danke!";
+          status.textContent = "✓ Upload erfolgreich!";
         } catch (err) {
           console.error(err);
           status.textContent = "Upload fehlgeschlagen.";
@@ -208,9 +205,17 @@
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", APP_CONFIG.uploadPreset);
-      formData.append("folder", APP_CONFIG.eventTag);
-      formData.append("tags", task.tags.join(","));
 
+      // Ordner nur zur Übersicht im Backend
+      formData.append("folder", APP_CONFIG.eventTag);
+
+      // Tags explizit und robust setzen
+      formData.append(
+        "tags",
+        `${APP_CONFIG.eventTag},fotochallenge,${task.id}`
+      );
+
+      // Kontext für spätere Auswertung / Anzeige
       formData.append(
         "context",
         [

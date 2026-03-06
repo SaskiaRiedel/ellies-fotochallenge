@@ -150,10 +150,6 @@
     const emptyNote = document.getElementById("emptyNote");
     const shown = new Set();
 
-    const taskMap = Object.fromEntries(
-      APP_CONFIG.tasks.map(task => [task.id, task])
-    );
-
     function getTaskByAsset(asset) {
       const tags = asset.tags || [];
       return APP_CONFIG.tasks.find(task => tags.includes(task.id)) || null;
@@ -163,7 +159,7 @@
       fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/${APP_CONFIG.eventTag}.json`)
         .then(response => {
           if (!response.ok) {
-            throw new Error("Asset-Liste konnte nicht geladen werden.");
+            throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
           }
           return response.json();
         })
