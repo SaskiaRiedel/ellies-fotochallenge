@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<title>Ellies Diashow</title>
+
+<script src="config.js"></script>
+
+<style>
+
+body{
+background:#222;
+overflow:hidden;
+}
+
+.polaroid{
+
+position:absolute;
+
+width:260px;
+
+background:white;
+
+padding:10px;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+
+animation:fall 1s ease;
+
+}
+
+.polaroid img{
+
+width:100%;
+
+}
+
+.caption{
+
+padding:10px;
+
+font-size:14px;
+
+text-align:center;
+
+}
+
+@keyframes fall{
+
+from{
+
+transform:translateY(-200px) rotate(-10deg);
+
+opacity:0;
+
+}
+
+to{
+
+transform:translateY(0) rotate(0);
+
+opacity:1;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script>
+
+const cloud = APP_CONFIG.cloudName
+
+let shown = []
+
+function load(){
+
+fetch(`https://res.cloudinary.com/${cloud}/image/list/${APP_CONFIG.eventTag}.json`)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+data.resources.forEach(img=>{
+
+if(!shown.includes(img.public_id)){
+
+shown.push(img.public_id)
+
+addImage(img)
+
+}
+
+})
+
+})
+
+}
+
+function addImage(img){
+
+const div = document.createElement("div")
+
+div.className="polaroid"
+
+div.style.left=Math.random()*80+"%"
+
+div.style.top=Math.random()*80+"%"
+
+const image=document.createElement("img")
+
+image.src=`https://res.cloudinary.com/${cloud}/image/upload/${img.public_id}.jpg`
+
+const cap=document.createElement("div")
+
+cap.className="caption"
+
+cap.innerText="Ellies Party"
+
+div.appendChild(image)
+
+div.appendChild(cap)
+
+document.body.appendChild(div)
+
+}
+
+setInterval(load,5000)
+
+</script>
+
+</body>
+</html>

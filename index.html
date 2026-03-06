@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Ellies Fotochallenge</title>
+
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial;
+text-align:center;
+background:#f4f4f4;
+}
+
+button{
+padding:20px;
+margin:20px;
+font-size:18px;
+border-radius:10px;
+border:none;
+cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>📸 Ellies Fotochallenge</h1>
+
+<div id="tasks"></div>
+
+<script>
+
+const tasksDiv = document.getElementById("tasks")
+
+APP_CONFIG.tasks.forEach(task => {
+
+const btn = document.createElement("button")
+
+btn.style.background = task.color
+
+btn.innerText = task.title
+
+btn.onclick = () => upload(task)
+
+tasksDiv.appendChild(btn)
+
+})
+
+function upload(task){
+
+const widget = cloudinary.createUploadWidget({
+
+cloudName: APP_CONFIG.cloudName,
+
+uploadPreset: APP_CONFIG.uploadPreset,
+
+tags: [APP_CONFIG.eventTag, task.id]
+
+},
+
+(error,result)=>{
+
+if(!error && result.event === "success"){
+
+alert("Foto hochgeladen!")
+
+}
+
+})
+
+widget.open()
+
+}
+
+</script>
+
+</body>
+</html>
