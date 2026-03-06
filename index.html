@@ -1,83 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ellies Fotochallenge</title>
+  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+  <script src="config.js"></script>
+  <style>
+    :root{
+      --bg:#f5f3f1;
+      --text:#1e1e1e;
+      --card:#ffffff;
+      --shadow:0 8px 24px rgba(0,0,0,0.10);
+      --radius:24px;
+    }
 
-<meta charset="UTF-8">
-<title>Ellies Fotochallenge</title>
+    *{box-sizing:border-box}
 
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-<script src="config.js"></script>
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
-<style>
-body{
-font-family:Arial;
-text-align:center;
-background:#f4f4f4;
-}
+    .wrap{
+      max-width:1000px;
+      margin:0 auto;
+      padding:32px 20px 48px;
+    }
 
-button{
-padding:20px;
-margin:20px;
-font-size:18px;
-border-radius:10px;
-border:none;
-cursor:pointer;
-}
-</style>
+    h1{
+      text-align:center;
+      font-size: clamp(2rem, 4vw, 4rem);
+      margin:12px 0 16px;
+    }
 
+    .sub{
+      text-align:center;
+      font-size:1.1rem;
+      margin-bottom:32px;
+      color:#444;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+      gap:22px;
+    }
+
+    .task{
+      border:none;
+      border-radius:var(--radius);
+      padding:26px 22px;
+      min-height:170px;
+      text-align:left;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:transform .15s ease, box-shadow .15s ease;
+      color:#111;
+    }
+
+    .task:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 28px rgba(0,0,0,0.14);
+    }
+
+    .task-title{
+      font-size:1.55rem;
+      line-height:1.2;
+      margin:0 0 18px;
+      font-weight:700;
+    }
+
+    .task-caption{
+      font-size:1rem;
+      line-height:1.35;
+      opacity:.85;
+    }
+
+    .hint{
+      margin-top:28px;
+      text-align:center;
+      font-size:0.98rem;
+      color:#555;
+    }
+
+    .top-actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      margin:0 0 24px;
+      flex-wrap:wrap;
+    }
+
+    .link-btn{
+      display:inline-block;
+      text-decoration:none;
+      color:#111;
+      background:white;
+      border-radius:999px;
+      padding:12px 18px;
+      box-shadow:var(--shadow);
+      font-weight:600;
+    }
+
+    @media (max-width:640px){
+      .task{
+        min-height:150px;
+        padding:22px 18px;
+      }
+      .task-title{
+        font-size:1.25rem;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <h1>📸 Ellies Fotochallenge</h1>
+    <div class="sub">Tippe auf eine Aufgabe und lade direkt ein Foto oder Video hoch.</div>
 
-<h1>📸 Ellies Fotochallenge</h1>
+    <div class="top-actions">
+      <a class="link-btn" href="slideshow.html" target="_blank">Diashow öffnen</a>
+    </div>
 
-<div id="tasks"></div>
+    <div id="taskGrid" class="grid"></div>
 
-<script>
+    <div class="hint">
+      Videos dürfen hochgeladen werden, werden aber in der Diashow nicht abgespielt.
+    </div>
+  </div>
 
-const tasksDiv = document.getElementById("tasks")
+  <script>
+    const grid = document.getElementById("taskGrid");
 
-APP_CONFIG.tasks.forEach(task => {
+    function openUpload(task){
+      const widget = cloudinary.createUploadWidget(
+        {
+          cloudName: APP_CONFIG.cloudName,
+          uploadPreset: APP_CONFIG.uploadPreset,
+          multiple: false,
+          maxFiles: 1,
+          sources: ["local", "camera"],
+          folder: task.folder,
+          tags: task.tags,
+          context: {
+            event: APP_CONFIG.eventTitle,
+            task_id: task.id,
+            task_title: task.title,
+            caption: task.caption
+          },
+          clientAllowedFormats: ["jpg","jpeg","png","webp","heic","mp4","mov","m4v","webm"],
+          resourceType: "auto",
+          showAdvancedOptions: false,
+          cropping: false
+        },
+        (error, result) => {
+          if (error) {
+            console.error(error);
+            alert("Der Upload hat leider nicht funktioniert.");
+            return;
+          }
 
-const btn = document.createElement("button")
+          if (result && result.event === "success") {
+            alert("Upload erfolgreich. Danke!");
+          }
+        }
+      );
 
-btn.style.background = task.color
+      widget.open();
+    }
 
-btn.innerText = task.title
-
-btn.onclick = () => upload(task)
-
-tasksDiv.appendChild(btn)
-
-})
-
-function upload(task){
-
-const widget = cloudinary.createUploadWidget({
-
-cloudName: APP_CONFIG.cloudName,
-
-uploadPreset: APP_CONFIG.uploadPreset,
-
-tags: [APP_CONFIG.eventTag, task.id]
-
-},
-
-(error,result)=>{
-
-if(!error && result.event === "success"){
-
-alert("Foto hochgeladen!")
-
-}
-
-})
-
-widget.open()
-
-}
-
-</script>
-
+    APP_CONFIG.tasks.forEach(task => {
+      const btn = document.createElement("button");
+      btn.className = "task";
+      btn.style.background = task.color;
+      btn.innerHTML = `
+        <div class="task-title">${task.title}</div>
+        <div class="task-caption">${task.caption}</div>
+      `;
+      btn.addEventListener("click", () => openUpload(task));
+      grid.appendChild(btn);
+    });
+  </script>
 </body>
 </html>
