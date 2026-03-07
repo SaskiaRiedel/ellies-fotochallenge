@@ -7,24 +7,23 @@
   <script src="config.js"></script>
   <style>
     :root{
-      --page-bg: #000;
-      --wall-bg: #ece7dc;
-      --button-bg: rgba(255,255,255,.72);
-      --button-bg-active: rgba(255,255,255,.92);
-      --button-text: #3f352d;
-      --card-shadow: 0 10px 24px rgba(0,0,0,.16);
+      --page-bg:#000;
+      --wall-bg:#ece7dc;
+      --btn-bg:rgba(255,255,255,.72);
+      --btn-bg-active:rgba(255,255,255,.92);
+      --btn-text:#3f352d;
     }
 
     *{ box-sizing:border-box; }
 
-    html, body{
+    html,body{
       margin:0;
       padding:0;
       width:100%;
       height:100%;
       overflow:hidden;
       background:var(--page-bg);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family:Arial, Helvetica, sans-serif;
     }
 
     body{
@@ -46,18 +45,14 @@
       inset:0;
       margin:auto;
       overflow:hidden;
-      background:var(--wall-bg);
+      background:#ece7dc;
       transform-origin:center center;
     }
 
     #wall{
       position:absolute;
       inset:0;
-      background-color:var(--wall-bg);
-      background-image:url("assets/bg_16_9.png");
-      background-repeat:no-repeat;
-      background-position:center center;
-      background-size:100% 100%;
+      background:#ece7dc url("assets/bg_16_9.png") center center / 100% 100% no-repeat;
       pointer-events:none;
     }
 
@@ -72,8 +67,8 @@
       position:absolute;
       transform-origin:50% 0%;
       will-change:transform, opacity;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.16));
       opacity:1;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.16));
     }
 
     .polaroid.entering{
@@ -86,30 +81,16 @@
       height:100%;
       overflow:visible;
       border-radius:2px;
-      box-shadow:var(--card-shadow);
-    }
-
-    .clip{
-      position:absolute;
-      left:50%;
-      top:0;
-      transform-origin:center top;
-      z-index:8;
-      pointer-events:none;
-      user-select:none;
-      -webkit-user-drag:none;
-      width:auto;
-      height:auto;
-      display:block;
+      box-shadow:0 10px 22px rgba(0,0,0,.14);
     }
 
     .inner{
       position:absolute;
       inset:0;
-      border-radius:2px;
-      overflow:hidden;
       display:flex;
       flex-direction:column;
+      overflow:hidden;
+      border-radius:2px;
     }
 
     .photo-wrap{
@@ -134,27 +115,51 @@
 
     .caption{
       flex:0 0 auto;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      line-clamp:2;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       text-align:center;
       font-weight:700;
       color:#111;
+      overflow:hidden;
+      line-height:1.07;
+      padding:0 .4em;
       word-break:break-word;
       hyphens:auto;
     }
 
+    .caption-text{
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      line-clamp:2;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+
+    .clip{
+      position:absolute;
+      left:50%;
+      top:0;
+      transform-origin:center top;
+      z-index:10;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+      display:block;
+      width:auto;
+      height:auto;
+    }
+
     #controls{
       position:absolute;
-      right:10px;
-      bottom:10px;
+      right:9px;
+      bottom:9px;
       z-index:999;
       display:grid;
       grid-template-columns:repeat(2, auto);
-      gap:6px;
+      gap:5px;
       transition:opacity .25s ease;
     }
 
@@ -167,52 +172,45 @@
       appearance:none;
       border:none;
       border-radius:999px;
-      background:var(--button-bg);
-      color:var(--button-text);
+      background:var(--btn-bg);
+      color:var(--btn-text);
       font-size:11px;
       font-weight:700;
       line-height:1;
       padding:7px 11px;
-      min-width:48px;
+      min-width:52px;
       cursor:pointer;
-      backdrop-filter: blur(3px);
+      backdrop-filter:blur(3px);
       box-shadow:0 2px 7px rgba(0,0,0,.08);
       transition:.18s ease;
     }
 
-    .fmt-btn:hover{
-      background:rgba(255,255,255,.85);
-    }
+    .fmt-btn:hover{ background:rgba(255,255,255,.84); }
+    .fmt-btn.active{ background:var(--btn-bg-active); }
 
-    .fmt-btn.active{
-      background:var(--button-bg-active);
-    }
-
-    @keyframes cardIn {
-      0% {
+    @keyframes cardIn{
+      0%{
         opacity:0;
         transform:
           translate(var(--in-x0), var(--in-y0))
           rotate(var(--in-r0))
-          scale(.93);
+          scale(.94);
       }
-      18% {
-        opacity:.7;
-      }
-      45% {
+      18%{ opacity:.75; }
+      45%{
         opacity:1;
         transform:
           translate(var(--in-x1), var(--in-y1))
           rotate(var(--in-r1))
-          scale(1.01);
+          scale(1.012);
       }
-      70% {
+      72%{
         transform:
           translate(var(--in-x2), var(--in-y2))
           rotate(var(--in-r2))
           scale(1);
       }
-      100% {
+      100%{
         opacity:1;
         transform:
           translate(0,0)
@@ -221,41 +219,41 @@
       }
     }
 
-    @keyframes clipIn {
-      0% {
+    @keyframes clipIn{
+      0%{
         opacity:0;
         transform:
-          translate(-50%, 0)
+          translate(-50%,0)
           translate(var(--clip-x0), var(--clip-y0))
           rotate(var(--clip-r0))
-          scale(.9);
+          scale(.94);
       }
-      55% {
+      50%{
         opacity:1;
         transform:
-          translate(-50%, 0)
+          translate(-50%,0)
           translate(var(--clip-x1), var(--clip-y1))
           rotate(var(--clip-r1))
-          scale(1.02);
+          scale(1.01);
       }
-      100% {
+      100%{
         opacity:1;
         transform:
-          translate(-50%, 0)
+          translate(-50%,0)
           translate(var(--clip-xf), var(--clip-yf))
           rotate(var(--clip-rf))
           scale(1);
       }
     }
 
-    @keyframes cardOut {
-      0% {
+    @keyframes cardOut{
+      0%{
         opacity:1;
         transform:
           translate(0,0)
           rotate(var(--rest-r));
       }
-      100% {
+      100%{
         opacity:0;
         transform:
           translate(var(--out-x), var(--out-y))
@@ -264,19 +262,19 @@
       }
     }
 
-    @keyframes clipOut {
-      0% {
+    @keyframes clipOut{
+      0%{
         opacity:1;
         transform:
-          translate(-50%, 0)
+          translate(-50%,0)
           translate(var(--clip-xf), var(--clip-yf))
           rotate(var(--clip-rf))
           scale(1);
       }
-      100% {
+      100%{
         opacity:0;
         transform:
-          translate(-50%, 0)
+          translate(-50%,0)
           translate(var(--clip-ox), var(--clip-oy))
           rotate(calc(var(--clip-rf) + var(--clip-or)))
           scale(.92);
@@ -321,7 +319,6 @@
 
       const MIN_VISIBLE = 2;
       const MAX_VISIBLE = 5;
-
       const FETCH_INTERVAL = 15000;
 
       let currentFormat = "16:9";
@@ -330,21 +327,11 @@
       let fetchTimer = null;
       let cycleTimer = null;
       let cycleIndex = 0;
-
       const slotMemory = new Map();
 
-      function clamp(v, min, max){
-        return Math.max(min, Math.min(max, v));
-      }
-
-      function rand(min, max){
-        return min + Math.random() * (max - min);
-      }
-
-      function pick(arr){
-        return arr[Math.floor(Math.random() * arr.length)];
-      }
-
+      function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+      function rand(min, max){ return min + Math.random() * (max - min); }
+      function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
       function shuffle(arr){
         const a = [...arr];
         for(let i = a.length - 1; i > 0; i--){
@@ -417,20 +404,20 @@
         const x = xNorm;
 
         if(row === 1){
-          return 0.042 + 0.31 * Math.pow(x - 0.5, 2);
+          return 0.040 + 0.31 * Math.pow(x - 0.5, 2);
         }
         if(row === 2){
-          return 0.379 + 0.37 * Math.pow(x - 0.5, 2);
+          return 0.382 + 0.37 * Math.pow(x - 0.5, 2);
         }
-        return 0.725 + 0.39 * Math.pow(x - 0.5, 2);
+        return 0.723 + 0.39 * Math.pow(x - 0.5, 2);
       }
 
       function buildSlots(){
-        // dichter und gezielter über die Stricke verteilt
+        // enger an den realen Seilverlauf angepasst
         const base = [
-          { row:1, x:0.12 }, { row:1, x:0.30 }, { row:1, x:0.50 }, { row:1, x:0.70 }, { row:1, x:0.88 },
-          { row:2, x:0.12 }, { row:2, x:0.31 }, { row:2, x:0.50 }, { row:2, x:0.69 }, { row:2, x:0.88 },
-          { row:3, x:0.13 }, { row:3, x:0.33 }, { row:3, x:0.52 }, { row:3, x:0.72 }, { row:3, x:0.88 }
+          { row:1, x:0.11 }, { row:1, x:0.28 }, { row:1, x:0.46 }, { row:1, x:0.64 }, { row:1, x:0.84 },
+          { row:2, x:0.12 }, { row:2, x:0.31 }, { row:2, x:0.50 }, { row:2, x:0.69 }, { row:2, x:0.86 },
+          { row:3, x:0.14 }, { row:3, x:0.33 }, { row:3, x:0.52 }, { row:3, x:0.72 }, { row:3, x:0.87 }
         ];
 
         return base.map((s, i) => {
@@ -508,12 +495,17 @@
         }
       }
 
-      function getCaptionFont(cardW, title){
-        let fs = clamp(cardW * 0.067, 14, 22);
-        if(title.length > 24) fs *= 0.94;
-        if(title.length > 34) fs *= 0.89;
-        if(title.length > 44) fs *= 0.84;
-        if(title.length > 58) fs *= 0.79;
+      function estimateTitleWidth(title, fontSize){
+        const chars = title.length;
+        return chars * fontSize * 0.56;
+      }
+
+      function getCaptionFont(baseW, title){
+        let fs = clamp(baseW * 0.067, 16, 24);
+        if(title.length > 26) fs *= 0.94;
+        if(title.length > 36) fs *= 0.88;
+        if(title.length > 48) fs *= 0.82;
+        if(title.length > 60) fs *= 0.77;
         return Math.round(fs);
       }
 
@@ -522,42 +514,53 @@
         const o = resource.orientation;
         const ar = resource.width / resource.height;
 
-        const outerBorder = Math.round(stageW * 0.0032);
-        const innerPadX = Math.round(stageW * 0.0065);
-        const innerPadTop = Math.round(stageH * 0.009);
+        const outerBorder = Math.round(stageW * 0.0024);
+        const innerPadX = Math.round(stageW * 0.0054);
+        const innerPadTop = Math.round(stageH * 0.0065);
 
         let photoW, photoH, minCardW;
 
         if(o === "landscape"){
-          photoW = stageW * 0.205;
+          photoW = stageW * 0.225;
           photoH = photoW / ar;
-          minCardW = stageW * 0.16;
+          minCardW = stageW * 0.18;
         } else if(o === "portrait"){
-          photoH = stageH * 0.255;
+          photoH = stageH * 0.285;
           photoW = photoH * ar;
-          minCardW = stageW * 0.145;
+          minCardW = stageW * 0.155;
         } else {
-          photoW = stageW * 0.185;
+          photoW = stageW * 0.198;
           photoH = photoW;
-          minCardW = stageW * 0.16;
+          minCardW = stageW * 0.17;
         }
 
-        // bei sehr schmalen Fotos Rahmen etwas breiter für lesbaren Text
-        const cardW = Math.round(Math.max(photoW + innerPadX * 2, minCardW));
-        const captionFont = getCaptionFont(cardW, resource.title);
-        const captionLineH = 1.08;
-        const captionPadY = Math.round(captionFont * 0.34);
-        const captionH = Math.round(captionFont * captionLineH * 2 + captionPadY * 2);
+        const baseW = Math.max(photoW + innerPadX * 2, minCardW);
+        let captionFont = getCaptionFont(baseW, resource.title);
+
+        let estimatedNeededW =
+          estimateTitleWidth(resource.title, captionFont) / 2 + stageW * 0.028;
+
+        estimatedNeededW = clamp(
+          estimatedNeededW,
+          minCardW,
+          o === "portrait" ? stageW * 0.215 : stageW * 0.29
+        );
+
+        const cardW = Math.round(Math.max(baseW, estimatedNeededW));
+
+        captionFont = getCaptionFont(cardW, resource.title);
+        const captionPadY = Math.round(captionFont * 0.30);
+        const captionH = Math.round(captionFont * 2.22 + captionPadY * 2);
 
         const cardH = Math.round(
           outerBorder * 2 +
           innerPadTop +
           photoH +
-          4 +
           captionH
         );
 
-        const clipH = Math.round(stageH * 0.115); // nochmals größer
+        const clipH = Math.round(stageH * 0.138);
+
         return {
           photoW: Math.round(photoW),
           photoH: Math.round(photoH),
@@ -577,36 +580,38 @@
         return true;
       }
 
-      function scoreSlot(slot, orientation){
+      function scoreSlot(slot, orientation, metrics){
         let score = (cycleIndex - slot.lastUsed) * 10;
-        score -= slot.hits * 22;
+        score -= slot.hits * 18;
         score += rand(0, 4);
 
         if(orientation === "portrait"){
-          if(slot.row === 1) score += 12;
-          if(slot.row === 2) score += 7;
+          if(slot.row === 1) score += 14;
+          if(slot.row === 2) score += 8;
           if(slot.row === 3) score -= 200;
         } else if(orientation === "landscape"){
-          if(slot.row === 2) score += 10;
-          if(slot.row === 1) score += 5;
+          if(slot.row === 2) score += 12;
+          if(slot.row === 1) score += 7;
           if(slot.row === 3) score += 4;
         } else {
-          if(slot.row === 2) score += 8;
-          if(slot.row === 1) score += 6;
-          if(slot.row === 3) score += 3;
+          if(slot.row === 2) score += 9;
+          if(slot.row === 1) score += 7;
+          if(slot.row === 3) score += 4;
         }
+
+        if(metrics.cardW > stageEl.clientWidth * 0.22 && slot.x > 0.78) score -= 7;
+        if(metrics.cardW > stageEl.clientWidth * 0.22 && slot.x < 0.22) score -= 7;
 
         return score;
       }
 
-      function getTopLeftFromSlot(slot, metrics, angleDeg){
+      function getTopLeftFromSlot(slot, metrics){
         const { w, h } = stageSize();
         const ropeX = slot.x * w;
         const ropeYpx = slot.y * h;
 
-        // Klammeranker: Karte hängt am oberen Rand, nicht in der Luft
-        const clipOverlapIntoCard = metrics.clipH * 0.18;
-        const cardTop = ropeYpx - clipOverlapIntoCard + 2;
+        const clipOverlapIntoCard = metrics.clipH * 0.11;
+        const cardTop = ropeYpx - clipOverlapIntoCard;
 
         return {
           x: ropeX - metrics.cardW / 2,
@@ -627,7 +632,7 @@
         };
       }
 
-      function overlaps(a, b, pad = 16){
+      function overlaps(a, b, pad = 18){
         return !(
           a.right < b.left + pad ||
           a.left > b.right - pad ||
@@ -637,14 +642,14 @@
       }
 
       function choosePlacement(resource, previewPlacements = []){
+        const { w: stageW, h: stageH } = stageSize();
+        const metrics = getCardMetrics(resource);
+
         const slots = buildSlots()
           .filter(s => slotCompatible(s, resource.orientation))
           .filter(s => !activeCards.some(c => c.slotId === s.id))
           .filter(s => !previewPlacements.some(p => p.slotId === s.id))
-          .sort((a,b) => scoreSlot(b, resource.orientation) - scoreSlot(a, resource.orientation));
-
-        const { w: stageW, h: stageH } = stageSize();
-        const metrics = getCardMetrics(resource);
+          .sort((a,b) => scoreSlot(b, resource.orientation, metrics) - scoreSlot(a, resource.orientation, metrics));
 
         const anglePool =
           resource.orientation === "portrait"
@@ -653,38 +658,55 @@
               ? [-8,-7,-6,-5,5,6,7,8]
               : [-7,-6,-5,-4,4,5,6,7];
 
+        let best = null;
+
         for(const slot of slots){
           const angles = shuffle(anglePool);
 
           for(const angle of angles){
-            const pos = getTopLeftFromSlot(slot, metrics, angle);
+            const pos = getTopLeftFromSlot(slot, metrics);
             const box = getBBox(pos.x, pos.y, metrics.cardW, metrics.cardH, angle);
 
-            if(box.left < 6 || box.right > stageW - 6) continue;
-            if(box.top < 4) continue;
-            if(box.bottom > stageH - 6) continue;
+            if(box.left < 8 || box.right > stageW - 8) continue;
+            if(box.top < 6) continue;
+            if(box.bottom > stageH - 8) continue;
 
-            const conflict1 = activeCards.some(c => overlaps(box, c.bbox, 24));
-            if(conflict1) continue;
+            let collisionCount = 0;
+            activeCards.forEach(c => { if(overlaps(box, c.bbox, 28)) collisionCount++; });
+            previewPlacements.forEach(p => { if(overlaps(box, p.bbox, 28)) collisionCount++; });
 
-            const conflict2 = previewPlacements.some(p => overlaps(box, p.bbox, 24));
-            if(conflict2) continue;
+            if(collisionCount === 0){
+              return {
+                slotId: slot.id,
+                row: slot.row,
+                xNorm: slot.x,
+                yNorm: slot.y,
+                x: pos.x,
+                y: pos.y,
+                angle,
+                metrics,
+                bbox: box
+              };
+            }
 
-            return {
-              slotId: slot.id,
-              row: slot.row,
-              xNorm: slot.x,
-              yNorm: slot.y,
-              x: pos.x,
-              y: pos.y,
-              angle,
-              metrics,
-              bbox: box
-            };
+            if(!best || collisionCount < best.collisionCount){
+              best = {
+                slotId: slot.id,
+                row: slot.row,
+                xNorm: slot.x,
+                yNorm: slot.y,
+                x: pos.x,
+                y: pos.y,
+                angle,
+                metrics,
+                bbox: box,
+                collisionCount
+              };
+            }
           }
         }
 
-        return null;
+        return best && best.collisionCount <= 1 ? best : null;
       }
 
       function createCard(resource, placement){
@@ -698,18 +720,18 @@
 
         const card = document.createElement("div");
         card.className = "card";
-        card.style.background = resource.color;
+        card.style.background = "#fff";
         card.style.border = `${placement.metrics.outerBorder}px solid rgba(255,255,255,.98)`;
 
         const inner = document.createElement("div");
         inner.className = "inner";
-        inner.style.padding =
-          `${placement.metrics.innerPadTop}px ${placement.metrics.innerPadX}px 0`;
+        inner.style.background = resource.color;
+        inner.style.padding = `${placement.metrics.innerPadTop}px ${placement.metrics.innerPadX}px 0`;
 
         const photoWrap = document.createElement("div");
         photoWrap.className = "photo-wrap";
         photoWrap.style.height = `${placement.metrics.photoH}px`;
-        photoWrap.style.marginBottom = `4px`;
+        photoWrap.style.marginBottom = `0px`;
 
         const img = document.createElement("img");
         img.src = resource.secureUrl;
@@ -719,15 +741,17 @@
 
         const caption = document.createElement("div");
         caption.className = "caption";
-        caption.textContent = resource.title;
         caption.style.background = resource.color;
         caption.style.minHeight = `${placement.metrics.captionH}px`;
         caption.style.maxHeight = `${placement.metrics.captionH}px`;
         caption.style.fontSize = `${placement.metrics.captionFont}px`;
-        caption.style.lineHeight = `1.08`;
-        caption.style.padding = `${Math.round(placement.metrics.captionFont * 0.32)}px ${Math.round(placement.metrics.captionFont * 0.34)}px`;
+
+        const captionText = document.createElement("div");
+        captionText.className = "caption-text";
+        captionText.textContent = resource.title;
 
         photoWrap.appendChild(img);
+        caption.appendChild(captionText);
         inner.appendChild(photoWrap);
         inner.appendChild(caption);
         card.appendChild(inner);
@@ -736,16 +760,15 @@
         clip.className = "clip";
         clip.src = pick(CLIP_PATHS);
         clip.alt = "";
-        clip.style.height = `${Math.round(placement.metrics.clipH)}px`;
-        clip.style.maxHeight = `${Math.round(placement.metrics.clipH)}px`;
+        clip.style.height = `${placement.metrics.clipH}px`;
+        clip.style.maxHeight = `${placement.metrics.clipH}px`;
 
-        // Klammer genauer am oberen Kartenrand
-        const clipX = rand(-placement.metrics.cardW * 0.09, placement.metrics.cardW * 0.09);
-        const clipY = -placement.metrics.clipH * 0.76;
+        const clipX = rand(-placement.metrics.cardW * 0.07, placement.metrics.cardW * 0.07);
+        const clipY = -placement.metrics.clipH * 0.83;
         clip.style.setProperty("--clip-xf", `${clipX}px`);
         clip.style.setProperty("--clip-yf", `${clipY}px`);
-        clip.style.setProperty("--clip-rf", `${rand(-8,8)}deg`);
-        clip.style.transform = `translate(-50%, 0) translate(${clipX}px, ${clipY}px) rotate(${rand(-8,8)}deg)`;
+        clip.style.setProperty("--clip-rf", `${rand(-7,7)}deg`);
+        clip.style.transform = `translate(-50%,0) translate(${clipX}px, ${clipY}px) rotate(${rand(-7,7)}deg)`;
 
         wrap.appendChild(card);
         wrap.appendChild(clip);
@@ -754,25 +777,26 @@
       }
 
       function setEnterAnimation(dom, finalAngle, delayMs){
-        dom.wrap.style.setProperty("--in-x0", `${rand(-10, 10)}px`);
+        dom.wrap.style.setProperty("--in-x0", `${rand(-8, 8)}px`);
         dom.wrap.style.setProperty("--in-y0", `${rand(26, 42)}px`);
-        dom.wrap.style.setProperty("--in-r0", `${finalAngle + rand(-18,18)}deg`);
-        dom.wrap.style.setProperty("--in-x1", `${rand(-8, 8)}px`);
-        dom.wrap.style.setProperty("--in-y1", `${rand(-4, 5)}px`);
-        dom.wrap.style.setProperty("--in-r1", `${finalAngle - rand(4,8)}deg`);
-        dom.wrap.style.setProperty("--in-x2", `${rand(-4, 4)}px`);
-        dom.wrap.style.setProperty("--in-y2", `${rand(-2, 3)}px`);
-        dom.wrap.style.setProperty("--in-r2", `${finalAngle + rand(1,4)}deg`);
+        dom.wrap.style.setProperty("--in-r0", `${finalAngle + rand(-16,16)}deg`);
+        dom.wrap.style.setProperty("--in-x1", `${rand(-5, 5)}px`);
+        dom.wrap.style.setProperty("--in-y1", `${rand(-3, 4)}px`);
+        dom.wrap.style.setProperty("--in-r1", `${finalAngle - rand(4,7)}deg`);
+        dom.wrap.style.setProperty("--in-x2", `${rand(-3, 3)}px`);
+        dom.wrap.style.setProperty("--in-y2", `${rand(-2, 2)}px`);
+        dom.wrap.style.setProperty("--in-r2", `${finalAngle + rand(1,3)}deg`);
 
-        dom.clip.style.setProperty("--clip-x0", `${rand(-6,6)}px`);
-        dom.clip.style.setProperty("--clip-y0", `${rand(-16,-8)}px`);
-        dom.clip.style.setProperty("--clip-r0", `${rand(-18,18)}deg`);
+        // kein Sprung mehr nach oben kurz vor Schluss
+        dom.clip.style.setProperty("--clip-x0", `${rand(-4,4)}px`);
+        dom.clip.style.setProperty("--clip-y0", `${rand(-6,2)}px`);
+        dom.clip.style.setProperty("--clip-r0", `${rand(-12,12)}deg`);
         dom.clip.style.setProperty("--clip-x1", `${rand(-2,2)}px`);
-        dom.clip.style.setProperty("--clip-y1", `${rand(-1,2)}px`);
-        dom.clip.style.setProperty("--clip-r1", `${rand(-7,7)}deg`);
+        dom.clip.style.setProperty("--clip-y1", `${rand(-2,2)}px`);
+        dom.clip.style.setProperty("--clip-r1", `${rand(-6,6)}deg`);
 
-        dom.wrap.style.animation = `cardIn 2.15s cubic-bezier(.18,.82,.18,1) ${delayMs}ms forwards`;
-        dom.clip.style.animation = `clipIn 1.45s ease-out ${delayMs}ms forwards`;
+        dom.wrap.style.animation = `cardIn 2.45s cubic-bezier(.18,.82,.18,1) ${delayMs}ms forwards`;
+        dom.clip.style.animation = `clipIn 2s cubic-bezier(.18,.82,.18,1) ${delayMs}ms forwards`;
       }
 
       function setLeaveAnimation(state){
@@ -780,12 +804,12 @@
         state.dom.wrap.style.setProperty("--out-y", `${rand(58,96)}px`);
         state.dom.wrap.style.setProperty("--out-r", `${rand(-10,10)}deg`);
 
-        state.dom.clip.style.setProperty("--clip-ox", `${rand(-18,18)}px`);
-        state.dom.clip.style.setProperty("--clip-oy", `${rand(-22,-6)}px`);
+        state.dom.clip.style.setProperty("--clip-ox", `${rand(-16,16)}px`);
+        state.dom.clip.style.setProperty("--clip-oy", `${rand(-22,-8)}px`);
         state.dom.clip.style.setProperty("--clip-or", `${rand(-16,16)}deg`);
 
         state.dom.wrap.style.animation = `cardOut 1.2s ease-in forwards`;
-        state.dom.clip.style.animation = `clipOut .75s ease-in forwards`;
+        state.dom.clip.style.animation = `clipOut .8s ease-in forwards`;
       }
 
       function addCard(resource, placement, delayMs){
@@ -794,7 +818,7 @@
 
         setEnterAnimation(dom, placement.angle, delayMs);
 
-        const cardState = {
+        const state = {
           id: resource.assetId,
           resource,
           slotId: placement.slotId,
@@ -808,7 +832,7 @@
           bornCycle: cycleIndex
         };
 
-        activeCards.push(cardState);
+        activeCards.push(state);
 
         slotMemory.set(placement.slotId, {
           lastUsed: cycleIndex,
@@ -822,7 +846,7 @@
 
         setTimeout(() => {
           dom.wrap.classList.remove("entering");
-        }, delayMs + 2300);
+        }, delayMs + 2600);
       }
 
       function removeCards(cardsToRemove){
@@ -840,7 +864,7 @@
               activeCards = activeCards.filter(x => x.id !== c.id);
             });
             resolve();
-          }, 1250);
+          }, 1300);
         });
       }
 
@@ -886,7 +910,7 @@
       }
 
       function decaySlotMemory(){
-        for(const [k, v] of slotMemory.entries()){
+        for(const [k,v] of slotMemory.entries()){
           slotMemory.set(k, {
             lastUsed: v.lastUsed,
             hits: Math.max(0, (v.hits || 0) - 1)
@@ -895,21 +919,22 @@
       }
 
       function relayoutAll(){
-        const oldCards = [...activeCards];
+        const old = [...activeCards];
         cardsEl.innerHTML = "";
         activeCards = [];
 
         const preview = [];
-        oldCards.forEach((old, idx) => {
-          const placement = choosePlacement(old.resource, preview);
+        old.forEach((c, i) => {
+          const placement = choosePlacement(c.resource, preview);
           if(!placement) return;
           preview.push(placement);
-          addCard(old.resource, placement, idx * 120);
+          addCard(c.resource, placement, i * 160);
         });
       }
 
       async function initialFill(){
         if(!resources.length) return;
+
         const wanted = clamp(Math.min(4, resources.length), MIN_VISIBLE, MAX_VISIBLE);
         const chosen = chooseResources(wanted);
         const preview = [];
@@ -970,9 +995,7 @@
         await removeCards(toRemove);
         await new Promise(r => setTimeout(r, 700));
 
-        planned.forEach((p, i) => {
-          addCard(p.res, p.placement, i * 500);
-        });
+        planned.forEach((p, i) => addCard(p.res, p.placement, i * 500));
 
         const delay =
           planned.length >= 3 ? 15000 :
