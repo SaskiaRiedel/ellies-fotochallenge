@@ -15,7 +15,7 @@
       --aspect-den:9;
     }
 
-    *{ box-sizing:border-box; }
+    *{box-sizing:border-box}
 
     html,body{
       margin:0;
@@ -65,7 +65,6 @@
       background-repeat:no-repeat;
       background-position:center center;
       background-size:100% 100%;
-      pointer-events:none;
     }
 
     .empty-note{
@@ -83,37 +82,32 @@
 
     .controls{
       position:fixed;
-      right:14px;
-      bottom:14px;
+      right:16px;
+      bottom:16px;
       z-index:200;
-      display:grid;
-      grid-template-columns:repeat(2, auto);
-      gap:6px;
-      opacity:.78;
-      transition:opacity .25s ease;
-    }
-
-    .controls.hidden{
-      opacity:0;
-      pointer-events:none;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      max-width:340px;
     }
 
     .control-btn{
       border:none;
       border-radius:999px;
-      padding:6px 10px;
-      background:rgba(255,255,255,.72);
+      padding:10px 16px;
+      background:rgba(255,255,255,.78);
       color:#4b4b4b;
       cursor:pointer;
-      font-size:.78rem;
+      font-size:.95rem;
       font-weight:700;
-      backdrop-filter:blur(5px);
-      box-shadow:0 4px 14px rgba(0,0,0,.14);
-      min-width:56px;
+      backdrop-filter:blur(6px);
+      box-shadow:0 6px 18px rgba(0,0,0,.14);
+      min-width:72px;
     }
 
     .control-btn.active{
-      background:rgba(255,255,255,.95);
+      background:rgba(255,255,255,.96);
       color:#222;
     }
 
@@ -121,7 +115,6 @@
       position:absolute;
       z-index:30;
       pointer-events:none;
-      will-change:transform, opacity;
     }
 
     .photo-frame{
@@ -129,7 +122,7 @@
       background:#fff;
       box-shadow:var(--shadow);
       border-radius:2px;
-      transform-origin:var(--swing-origin-x, 50%) 0%;
+      transform-origin:top center;
       overflow:visible;
       will-change:transform, opacity;
     }
@@ -153,29 +146,23 @@
     }
 
     .caption{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-weight:700;
-      color:var(--caption-text);
-      line-height:1.1;
-      word-break:break-word;
-      hyphens:auto;
-      overflow:hidden;
-    }
-
-    .caption-text{
       display:-webkit-box;
       -webkit-box-orient:vertical;
       -webkit-line-clamp:2;
       overflow:hidden;
-      text-overflow:ellipsis;
-      width:100%;
+      text-align:center;
+      font-weight:700;
+      color:var(--caption-text);
+      line-height:1.14;
+      word-break:break-word;
+      hyphens:auto;
     }
 
     .clip{
       position:absolute;
+      top:-48px;
+      height:66px; /* ca. 1,5x größer als vorher */
+      width:auto;
       z-index:5;
       transform-origin:center top;
       user-select:none;
@@ -183,28 +170,26 @@
       pointer-events:none;
       filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));
       will-change:transform, opacity;
-      width:auto;
-      height:92px;
     }
 
     .photo-card.attaching .photo-frame{
-      animation:attachPhoto 1.45s cubic-bezier(.2,.86,.22,1) forwards;
+      animation:attachPhoto 1.65s ease forwards;
     }
 
     .photo-card.attaching .clip{
-      animation:attachClip 1.45s cubic-bezier(.2,.86,.22,1) forwards;
+      animation:attachClip 1.25s ease forwards;
     }
 
     .photo-card.swinging .photo-frame{
-      animation:swayPhotoDamped var(--sway-duration,2s) ease-out 1 forwards;
+      animation:swayPhotoDamped var(--sway-duration,3.0s) ease-out 1;
     }
 
     .photo-card.detaching .photo-frame{
-      animation:detachPhoto 1.25s ease forwards;
+      animation:detachPhoto 1.45s ease forwards;
     }
 
     .photo-card.detaching .clip{
-      animation:detachClip .95s ease forwards;
+      animation:detachClip 1.05s ease forwards;
     }
 
     @keyframes attachPhoto{
@@ -213,7 +198,7 @@
         transform:
           translate(var(--photo-start-x), var(--photo-start-y))
           rotate(var(--photo-start-rot))
-          scale(.95);
+          scale(.94);
       }
       100%{
         opacity:1;
@@ -228,18 +213,13 @@
       0%{
         opacity:0;
         transform:
-          translate(-50%, 0)
           translate(var(--clip-start-x), var(--clip-start-y))
           rotate(var(--clip-start-rot))
-          scale(.96);
+          scale(.9);
       }
       100%{
         opacity:1;
-        transform:
-          translate(-50%, 0)
-          translate(var(--clip-final-x), var(--clip-final-y))
-          rotate(var(--clip-rot))
-          scale(1);
+        transform:rotate(var(--clip-rot)) scale(1);
       }
     }
 
@@ -247,19 +227,19 @@
       0%{
         transform:translate(0,0) rotate(var(--photo-rot));
       }
-      12%{
+      14%{
         transform:translate(var(--sway-x1), var(--sway-y1)) rotate(calc(var(--photo-rot) + var(--sway-r1)));
       }
-      24%{
+      28%{
         transform:translate(var(--sway-x2), var(--sway-y2)) rotate(calc(var(--photo-rot) - var(--sway-r2)));
       }
-      38%{
+      42%{
         transform:translate(var(--sway-x3), var(--sway-y3)) rotate(calc(var(--photo-rot) + var(--sway-r3)));
       }
-      55%{
+      58%{
         transform:translate(var(--sway-x4), var(--sway-y4)) rotate(calc(var(--photo-rot) - var(--sway-r4)));
       }
-      72%{
+      74%{
         transform:translate(var(--sway-x5), var(--sway-y5)) rotate(calc(var(--photo-rot) + var(--sway-r5)));
       }
       88%{
@@ -287,16 +267,11 @@
     @keyframes detachClip{
       0%{
         opacity:1;
-        transform:
-          translate(-50%, 0)
-          translate(var(--clip-final-x), var(--clip-final-y))
-          rotate(var(--clip-rot))
-          scale(1);
+        transform:rotate(var(--clip-rot)) scale(1);
       }
       100%{
         opacity:0;
         transform:
-          translate(-50%, 0)
           translate(var(--clip-end-x), var(--clip-end-y))
           rotate(calc(var(--clip-rot) + var(--clip-end-rot)))
           scale(.92);
@@ -304,11 +279,11 @@
     }
 
     @media (max-width:1400px){
-      .clip{ height:84px; }
+      .clip{height:60px; top:-44px}
     }
 
     @media (max-width:1100px){
-      .clip{ height:76px; }
+      .clip{height:54px; top:-39px}
     }
   </style>
 </head>
@@ -322,7 +297,7 @@
     </div>
   </div>
 
-  <div class="controls" id="controls">
+  <div class="controls">
     <button id="btn43" class="control-btn" type="button">4:3</button>
     <button id="btn169" class="control-btn active" type="button">16:9</button>
     <button id="btn1610" class="control-btn" type="button">16:10</button>
@@ -333,7 +308,6 @@
     const stage = document.getElementById("stage");
     const bgLayer = document.getElementById("bgLayer");
     const emptyNote = document.getElementById("emptyNote");
-    const controls = document.getElementById("controls");
 
     const btn43 = document.getElementById("btn43");
     const btn169 = document.getElementById("btn169");
@@ -341,14 +315,14 @@
     const btn75 = document.getElementById("btn75");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260307_basefix";
+    const CACHE_BUSTER = "v=20260307g";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
     }
 
-    const SINGLE_BG = assetUrl("bg_16_9.png");
-    const GUIDE_BG  = assetUrl("bg_16_9_Fadenposition.png");
+    // Falls dein Dateiname anders lautet, nur diese eine Zeile anpassen:
+    const SINGLE_BG = assetUrl("bg_16_9_large.png");
 
     const CLIP_IMAGES = [
       assetUrl("klammer1_uhd.png"),
@@ -360,53 +334,47 @@
     const assetIds = new Set();
     const currentCards = [];
     const recentlyShown = [];
-    const MAX_RECENT_TRACK = 36;
-
-    const MIN_VISIBLE = 2;
-    const MAX_VISIBLE = 5;
+    const MAX_RECENT_TRACK = 30;
 
     let currentFormat = "16:9";
     let nextTimer = null;
-    let guideMap = null;
 
     const aspectMap = {
-      "4:3":   { num:4, den:3 },
-      "16:9":  { num:16, den:9 },
+      "4:3": { num:4, den:3 },
+      "16:9": { num:16, den:9 },
       "16:10": { num:16, den:10 },
-      "7:5":   { num:7, den:5 }
+      "7:5": { num:7, den:5 }
     };
 
-    // Gute Basis aus deinem funktionierenden Code:
-    // nur ergänzt um row + dynamisches ay über Hilfsbild
+    /*
+      Ankerpunkte entlang der von dir markierten Seile.
+      ax/ay = Position, an der die Klammer am Seil "hängt".
+      maxW/maxH = maximaler Platz für die gesamte Karte.
+      clipX = relative horizontale Klammerposition in der Karte.
+    */
     const ropeSlots = [
       // oberes Seil
-      { id:"t1", row:"top",    ax:14, maxW:24, maxH:25, clipX:28 },
-      { id:"t2", row:"top",    ax:34, maxW:23, maxH:24, clipX:45 },
-      { id:"t3", row:"top",    ax:54, maxW:23, maxH:24, clipX:55 },
-      { id:"t4", row:"top",    ax:74, maxW:23, maxH:24, clipX:60 },
-      { id:"t5", row:"top",    ax:88, maxW:22, maxH:24, clipX:72 },
+      { id:"t1", ax:14, ay:8.8,  maxW:23, maxH:22, clipX:52 },
+      { id:"t2", ax:36, ay:11.2, maxW:22, maxH:22, clipX:50 },
+      { id:"t3", ax:58, ay:11.4, maxW:22, maxH:22, clipX:50 },
+      { id:"t4", ax:83, ay:9.0,  maxW:22, maxH:22, clipX:50 },
 
       // mittleres Seil
-      { id:"m1", row:"middle", ax:12, maxW:23, maxH:24, clipX:28 },
-      { id:"m2", row:"middle", ax:30, maxW:22, maxH:24, clipX:42 },
-      { id:"m3", row:"middle", ax:49, maxW:22, maxH:24, clipX:50 },
-      { id:"m4", row:"middle", ax:68, maxW:22, maxH:24, clipX:58 },
-      { id:"m5", row:"middle", ax:86, maxW:22, maxH:24, clipX:72 },
+      { id:"m1", ax:13, ay:37.0, maxW:22, maxH:22, clipX:52 },
+      { id:"m2", ax:31, ay:40.6, maxW:21, maxH:22, clipX:50 },
+      { id:"m3", ax:50, ay:41.4, maxW:21, maxH:22, clipX:50 },
+      { id:"m4", ax:69, ay:40.0, maxW:21, maxH:22, clipX:50 },
+      { id:"m5", ax:84, ay:36.2, maxW:20, maxH:22, clipX:49 },
 
       // unteres Seil
-      { id:"b1", row:"bottom", ax:12, maxW:22, maxH:23, clipX:28 },
-      { id:"b2", row:"bottom", ax:31, maxW:22, maxH:23, clipX:43 },
-      { id:"b3", row:"bottom", ax:50, maxW:22, maxH:23, clipX:50 },
-      { id:"b4", row:"bottom", ax:69, maxW:22, maxH:23, clipX:57 },
-      { id:"b5", row:"bottom", ax:87, maxW:22, maxH:23, clipX:72 }
+      { id:"b1", ax:13, ay:68.0, maxW:22, maxH:21, clipX:52 },
+      { id:"b2", ax:31, ay:73.2, maxW:21, maxH:21, clipX:50 },
+      { id:"b3", ax:50, ay:74.0, maxW:21, maxH:21, clipX:50 },
+      { id:"b4", ax:69, ay:72.6, maxW:21, maxH:21, clipX:50 },
+      { id:"b5", ax:83, ay:68.3, maxW:20, maxH:21, clipX:49 }
     ];
 
     const initialPatterns = {
-      2: [
-        ["t2","m4"],
-        ["m2","b4"],
-        ["t4","b2"]
-      ],
       3: [
         ["t1","m3","b5"],
         ["t2","m4","b2"],
@@ -420,7 +388,12 @@
       5: [
         ["t1","t4","m3","b2","b5"],
         ["t2","m1","m4","b2","b4"],
-        ["t1","t5","m3","b1","b4"]
+        ["t1","t3","m2","m5","b3"]
+      ],
+      6: [
+        ["t1","t3","m2","m4","b2","b4"],
+        ["t2","t4","m1","m3","b3","b5"],
+        ["t1","t4","m2","m5","b2","b4"]
       ]
     };
 
@@ -445,10 +418,6 @@
       return copy;
     }
 
-    function clamp(v,min,max){
-      return Math.max(min, Math.min(max, v));
-    }
-
     function sortByUploadOrder(list){
       return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
     }
@@ -456,8 +425,8 @@
     function preloadBackground(url){
       return new Promise(resolve => {
         const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
         img.src = url;
       });
     }
@@ -465,6 +434,7 @@
     async function setFormat(format){
       currentFormat = format;
       const cfg = aspectMap[format];
+
       document.documentElement.style.setProperty("--aspect-num", String(cfg.num));
       document.documentElement.style.setProperty("--aspect-den", String(cfg.den));
 
@@ -479,22 +449,10 @@
 
     function requestFullscreen(){
       const el = document.documentElement;
-      if(!document.fullscreenElement){
-        if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        else if(el.msRequestFullscreen) el.msRequestFullscreen();
-      }
+      if(el.requestFullscreen) el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if(el.msRequestFullscreen) el.msRequestFullscreen();
     }
-
-    function updateControlVisibility(){
-      if(document.fullscreenElement){
-        controls.classList.add("hidden");
-      }else{
-        controls.classList.remove("hidden");
-      }
-    }
-
-    document.addEventListener("fullscreenchange", updateControlVisibility);
 
     btn43.addEventListener("click", async () => {
       await setFormat("4:3");
@@ -525,8 +483,8 @@
       const task = APP_CONFIG.tasks.find(t => t.id === taskId);
 
       return {
-        caption: task?.title || asset?.context?.custom?.caption || "Fotochallenge",
-        color: task?.color || "#dbe8f4"
+        caption: asset?.context?.custom?.caption || "Fotochallenge",
+        color: task?.color || "#f3f3f3"
       };
     }
 
@@ -543,7 +501,7 @@
     }
 
     function chooseInitialSlots(count){
-      const patterns = initialPatterns[count] || initialPatterns[4];
+      const patterns = initialPatterns[count] || initialPatterns[5];
       return pick(patterns).map(getSlotById);
     }
 
@@ -603,318 +561,75 @@
       return fallback[0] || null;
     }
 
-    async function buildGuideMap(){
-      const img = await preloadBackground(GUIDE_BG);
-      if(!img){
-        guideMap = null;
-        return;
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d", { willReadFrequently:true });
-      ctx.drawImage(img, 0, 0);
-
-      const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      function isGuideGreen(r,g,b){
-        return g > 120 && g > r + 30 && g > b + 30;
-      }
-
-      function scanBand(yMinRatio, yMaxRatio){
-        const yMin = Math.floor(h * yMinRatio);
-        const yMax = Math.floor(h * yMaxRatio);
-        const points = [];
-
-        for(let x = 0; x < w; x += 3){
-          let foundY = null;
-          for(let y = yMin; y < yMax; y++){
-            const idx = (y * w + x) * 4;
-            const r = data[idx];
-            const g = data[idx+1];
-            const b = data[idx+2];
-            if(isGuideGreen(r,g,b)){
-              foundY = y;
-              break;
-            }
-          }
-          if(foundY !== null){
-            points.push({ x: x / w, y: foundY / h });
-          }
-        }
-
-        return points;
-      }
-
-      function makeSampler(points, fallbackFn){
-        if(!points.length) return fallbackFn;
-
-        return function(xNorm){
-          let best = points[0];
-          let bestDist = Math.abs(points[0].x - xNorm);
-          for(let i = 1; i < points.length; i++){
-            const d = Math.abs(points[i].x - xNorm);
-            if(d < bestDist){
-              bestDist = d;
-              best = points[i];
-            }
-          }
-          return best.y;
-        };
-      }
-
-      guideMap = {
-        top: makeSampler(scanBand(0.00, 0.26), x => 0.076 + 0.19 * Math.pow(x - 0.5, 2)),
-        middle: makeSampler(scanBand(0.26, 0.58), x => 0.384 + 0.24 * Math.pow(x - 0.5, 2)),
-        bottom: makeSampler(scanBand(0.58, 0.90), x => 0.694 + 0.25 * Math.pow(x - 0.5, 2))
-      };
-    }
-
-    function getRopeY(row, axPercent){
-      const xNorm = axPercent / 100;
-      if(guideMap && guideMap[row]){
-        return guideMap[row](xNorm) * 100;
-      }
-
-      if(row === "top") return (0.076 + 0.19 * Math.pow(xNorm - 0.5, 2)) * 100;
-      if(row === "middle") return (0.384 + 0.24 * Math.pow(xNorm - 0.5, 2)) * 100;
-      return (0.694 + 0.25 * Math.pow(xNorm - 0.5, 2)) * 100;
-    }
-
-    function getOrientation(asset){
-      const ratio = Math.max(0.1, Number(asset.width || 1) / Number(asset.height || 1));
-      if(ratio > 1.2) return "landscape";
-      if(ratio < 0.85) return "portrait";
-      return "square";
-    }
-
-    function computeCaptionFontSize(captionText, frameWidthPx){
-      const len = captionText.length;
-      let size = Math.max(15, Math.min(28, frameWidthPx * 0.09));
-
-      if(len > 22) size *= 0.92;
-      if(len > 30) size *= 0.88;
-      if(len > 38) size *= 0.84;
-      if(frameWidthPx < 180) size *= 0.9;
-
-      return clamp(size, 14, 26);
-    }
-
     function computeCardSize(asset, slot, captionText){
-      const stageW = stage.clientWidth;
-      const stageH = stage.clientHeight;
       const ratio = Math.max(0.45, Math.min(2.8, Number(asset.width || 1) / Number(asset.height || 1)));
-      const orientation = getOrientation(asset);
 
-      let sidePadPx = Math.round(stageW * 0.0055);
-      let topPadPx = Math.round(stageH * 0.006);
-      let bottomPadPx = Math.round(stageH * 0.004);
+      const sidePad = 1.35;
+      const topPad = 1.15;
+      const bottomPad = 7.6;
 
-      let frameWPercent = Math.max(18, Math.min(slot.maxW, captionText.length * 0.36));
-      if(orientation === "portrait") frameWPercent = Math.max(frameWPercent, 14.5);
-      if(orientation === "landscape") frameWPercent = Math.max(frameWPercent, 18.5);
-      if(orientation === "square") frameWPercent = Math.max(frameWPercent, 16.5);
+      // Breite für max. 2 Textzeilen grob absichern
+      const captionNeed = Math.min(
+        slot.maxW,
+        Math.max(16.5, Math.min(24, captionText.length * 0.33))
+      );
 
-      let frameWPx = stageW * frameWPercent / 100;
-      frameWPx = clamp(frameWPx, stageW * 0.15, stageW * 0.24);
-
-      let innerW = frameWPx - sidePadPx * 2;
-      let maxMediaH = stageH * (slot.maxH / 100) - topPadPx - bottomPadPx - 56;
+      // Innenbreite des Medienbereichs
+      let frameW = captionNeed;
+      let innerW = Math.max(8, frameW - sidePad * 2);
+      let maxMediaH = Math.max(7, slot.maxH - topPad - bottomPad);
 
       let mediaH = Math.min(maxMediaH, innerW / ratio);
 
-      if(orientation === "portrait"){
-        mediaH = Math.min(mediaH, stageH * 0.31);
-        frameWPx = Math.max(frameWPx, mediaH * ratio + sidePadPx * 2);
-      }
-
-      if(orientation === "landscape"){
-        frameWPx = Math.max(frameWPx, stageW * 0.17);
-        innerW = frameWPx - sidePadPx * 2;
+      // Wenn das Bild sehr hoch ist, darf der Rahmen breiter werden
+      if(ratio < 0.9){
+        frameW = Math.min(slot.maxW, Math.max(frameW, 16.8));
+        innerW = Math.max(8, frameW - sidePad * 2);
         mediaH = Math.min(maxMediaH, innerW / ratio);
       }
 
-      if(orientation === "square"){
-        frameWPx = Math.max(frameWPx, stageW * 0.16);
-        innerW = frameWPx - sidePadPx * 2;
+      // Wenn das Bild sehr quer ist, etwas breiter zulassen
+      if(ratio > 1.65){
+        frameW = Math.min(slot.maxW, Math.max(frameW, 18.5));
+        innerW = Math.max(8, frameW - sidePad * 2);
         mediaH = Math.min(maxMediaH, innerW / ratio);
       }
 
-      const fontSize = computeCaptionFontSize(captionText, frameWPx);
-      const captionH = Math.max(46, Math.round(fontSize * 2.45));
-
-      const frameH = Math.round(mediaH + topPadPx + bottomPadPx + captionH);
-      const clipH = clamp(Math.round(stageH * 0.10), 76, 104);
+      const frameH = mediaH + topPad + bottomPad;
 
       return {
-        orientation,
-        sidePadPx,
-        topPadPx,
-        bottomPadPx,
+        sidePad,
+        topPad,
+        bottomPad,
         mediaW: innerW,
         mediaH,
-        frameWPx,
-        frameH,
-        captionH,
-        fontSize,
-        clipH
+        frameW,
+        frameH
       };
     }
 
-    function getCardBoxForSlot(slot, size, angleDeg){
-      const stageW = stage.clientWidth;
-      const stageH = stage.clientHeight;
-
-      const ropeXPx = stageW * slot.ax / 100;
-      const ropeYPx = stageH * getRopeY(slot.row, slot.ax) / 100;
-
-      const clipTop = -size.clipH * 0.73; // Klammer liegt am oberen Rand des Fotos
-      const clipAnchorY = -clipTop;       // genau diese Stelle trifft den Faden
-
-      const left = ropeXPx - size.frameWPx * (slot.clipX / 100);
-      const top = ropeYPx - clipAnchorY;
-
-      const rad = Math.abs(angleDeg) * Math.PI / 180;
-      const bbW = Math.abs(Math.cos(rad) * size.frameWPx) + Math.abs(Math.sin(rad) * size.frameH);
-      const bbH = Math.abs(Math.sin(rad) * size.frameWPx) + Math.abs(Math.cos(rad) * size.frameH);
-
-      const cx = left + size.frameWPx / 2;
-      const cy = top + size.frameH / 2;
-
-      return {
-        left,
-        top,
-        right:left + size.frameWPx,
-        bottom:top + size.frameH,
-        bbLeft: cx - bbW / 2,
-        bbTop: cy - bbH / 2,
-        bbRight: cx + bbW / 2,
-        bbBottom: cy + bbH / 2,
-        ropeXPx,
-        ropeYPx,
-        clipTop
-      };
-    }
-
-    function rectIntersectionArea(a, b){
-      const x = Math.max(0, Math.min(a.bbRight, b.bbRight) - Math.max(a.bbLeft, b.bbLeft));
-      const y = Math.max(0, Math.min(a.bbBottom, b.bbBottom) - Math.max(a.bbTop, b.bbTop));
-      return x * y;
-    }
-
-    function chooseSlotForAsset(asset, excludedSlotIds = [], reserved = []){
-      const orientation = getOrientation(asset);
+    function createCard(asset, slot){
       const style = getTaskStyle(asset);
-
-      const candidates = shuffle(
-        ropeSlots.filter(slot =>
-          !excludedSlotIds.includes(slot.id) &&
-          !currentCards.some(c => c.slot.id === slot.id) &&
-          !reserved.some(r => r.slot.id === slot.id)
-        )
-      );
-
-      let best = null;
-      let bestScore = -Infinity;
-
-      for(const slot of candidates){
-        const size = computeCardSize(asset, slot, style.caption);
-        let angle = rand(-6.5, 6.5);
-
-        if(slot.row === "top" && slot.ax < 22) angle = rand(-6.5, -1.2);
-        if(slot.row === "top" && slot.ax > 78) angle = rand(1.2, 6.5);
-        if(slot.row === "middle" && slot.ax < 22) angle = rand(-5.5, -1);
-        if(slot.row === "middle" && slot.ax > 78) angle = rand(1, 5.5);
-
-        const box = getCardBoxForSlot(slot, size, angle);
-
-        if(box.bbLeft < 8 || box.bbRight > stage.clientWidth - 8) continue;
-        if(box.bbTop < 6 || box.bbBottom > stage.clientHeight - 8) continue;
-
-        let overlapBad = false;
-        let overlapPenalty = 0;
-
-        const others = [
-          ...currentCards.map(c => c.box),
-          ...reserved.map(r => r.box)
-        ];
-
-        const ownArea = (box.bbRight - box.bbLeft) * (box.bbBottom - box.bbTop);
-
-        for(const other of others){
-          const inter = rectIntersectionArea(box, other);
-          if(inter <= 0) continue;
-
-          const smallerArea = Math.min(
-            ownArea,
-            (other.bbRight - other.bbLeft) * (other.bbBottom - other.bbTop)
-          );
-
-          const ratio = inter / smallerArea;
-          if(ratio > 0.10){
-            overlapBad = true;
-            break;
-          }
-          overlapPenalty += ratio * 100;
-        }
-
-        if(overlapBad) continue;
-
-        let score = 100 - overlapPenalty;
-
-        if(orientation === "portrait" && slot.row === "bottom") score -= 18;
-        if(orientation === "landscape" && slot.row === "middle") score += 10;
-        if(orientation === "square" && slot.row === "middle") score += 7;
-
-        // etwas fairer über die Reihen verteilen
-        const countSameRow = currentCards.filter(c => c.slot.row === slot.row).length + reserved.filter(r => r.slot.row === slot.row).length;
-        score -= countSameRow * 8;
-
-        // leichte Bevorzugung von bislang seltener genutzten Slots
-        const usedCount = currentCards.filter(c => c.slot.id === slot.id).length;
-        score -= usedCount * 30;
-
-        if(score > bestScore){
-          bestScore = score;
-          best = { slot, size, angle, box };
-        }
-      }
-
-      return best;
-    }
-
-    function createCard(asset, slotChoice, delayMs = 0){
-      const slot = slotChoice.slot;
-      const style = getTaskStyle(asset);
-      const size = slotChoice.size;
-      const box = slotChoice.box;
-      const photoRot = slotChoice.angle.toFixed(2) + "deg";
-      const clipRot = rand(-10, 10).toFixed(2) + "deg";
-      const stageW = stage.clientWidth;
+      const size = computeCardSize(asset, slot, style.caption);
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
-      wrapper.style.width = `${size.frameWPx}px`;
-      wrapper.style.left = `${box.left}px`;
-      wrapper.style.top = `${box.top}px`;
+      wrapper.style.width = `${size.frameW}%`;
+
+      const leftOffset = size.frameW * (slot.clipX / 100);
+      wrapper.style.left = `calc(${slot.ax}% - ${leftOffset}%)`;
+      wrapper.style.top = `${slot.ay}%`;
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.width = `${size.frameWPx}px`;
-      frame.style.height = `${size.frameH}px`;
-      frame.style.padding = `${size.topPadPx}px ${size.sidePadPx}px 0 ${size.sidePadPx}px`;
-      frame.style.setProperty("--swing-origin-x", `${slot.clipX}%`);
+      frame.style.padding = `${size.topPad}% ${size.sidePad}% ${size.bottomPad}% ${size.sidePad}%`;
 
       const media = document.createElement("div");
       media.className = "media";
       media.style.width = "100%";
-      media.style.height = `${Math.round(size.mediaH)}px`;
+      media.style.height = `${size.mediaH}%`;
       media.style.minHeight = "70px";
-      media.style.border = `6px solid ${style.color}`;
-      media.style.borderBottom = `0 solid ${style.color}`;
+      media.style.border = `8px solid ${style.color}`;
 
       const img = document.createElement("img");
       img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
@@ -923,14 +638,11 @@
       const caption = document.createElement("div");
       caption.className = "caption";
       caption.style.background = style.color;
-      caption.style.minHeight = `${size.captionH}px`;
-      caption.style.padding = `8px 10px`;
-      caption.style.fontSize = `${size.fontSize}px`;
-      caption.style.marginTop = `0`;
-
-      const captionText = document.createElement("div");
-      captionText.className = "caption-text";
-      captionText.textContent = style.caption;
+      caption.style.marginTop = "12px";
+      caption.style.minHeight = "48px";
+      caption.style.padding = "10px 12px";
+      caption.style.fontSize = "0.98rem";
+      caption.textContent = style.caption;
 
       const clip = document.createElement("img");
       clip.className = "clip";
@@ -938,107 +650,76 @@
       clip.onerror = function(){
         this.style.display = "none";
       };
-      clip.style.left = `${slot.clipX}%`;
-      clip.style.top = `${box.clipTop}px`;
-      clip.style.height = `${size.clipH}px`;
 
-      media.appendChild(img);
-      caption.appendChild(captionText);
-      frame.appendChild(media);
-      frame.appendChild(caption);
-      wrapper.appendChild(frame);
-      wrapper.appendChild(clip);
+      const photoRot = rand(-6.2, 6.2).toFixed(2) + "deg";
+      const clipRot = rand(-10, 10).toFixed(2) + "deg";
+
+      frame.style.transform = `rotate(${photoRot})`;
 
       wrapper.style.setProperty("--photo-rot", photoRot);
       wrapper.style.setProperty("--clip-rot", clipRot);
 
-      // nur von oben / diagonal oben
-      wrapper.style.setProperty("--photo-start-x", `${rand(-10, 10).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-start-y", `${rand(10, 24).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${rand(-8, 8).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-x", `${rand(-18, 18).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-y", `${rand(48, 82).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-11, 11).toFixed(2)}deg`);
 
-      const finalClipX = rand(-4, 4).toFixed(1) + "px";
-      const finalClipY = "0px";
-
-      wrapper.style.setProperty("--clip-final-x", finalClipX);
-      wrapper.style.setProperty("--clip-final-y", finalClipY);
-      wrapper.style.setProperty("--clip-start-x", `${rand(-18, 18).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-start-y", `${rand(-80, -48).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-start-rot", `${rand(-16, 16).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-start-x", `${rand(-12, 12).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-46, -24).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-rot", `${rand(-15, 15).toFixed(2)}deg`);
 
       wrapper.style.setProperty("--photo-end-x", `${rand(-22, 22).toFixed(0)}px`);
       wrapper.style.setProperty("--photo-end-rot", `${rand(-16, 16).toFixed(2)}deg`);
+
       wrapper.style.setProperty("--clip-end-x", `${rand(-18, 18).toFixed(0)}px`);
       wrapper.style.setProperty("--clip-end-y", `${rand(-22, -6).toFixed(0)}px`);
       wrapper.style.setProperty("--clip-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--sway-duration", `${rand(1.9, 2.2).toFixed(2)}s`);
-      wrapper.style.setProperty("--sway-r1", `${rand(2.0, 3.2).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r2", `${rand(1.35, 2.2).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r3", `${rand(0.85, 1.45).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r4", `${rand(0.45, 0.85).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r5", `${rand(0.18, 0.38).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r6", `${rand(0.06, 0.16).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-duration", `${rand(2.5, 3.5).toFixed(2)}s`);
+      wrapper.style.setProperty("--sway-r1", `${rand(1.3, 2.4).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(0.85, 1.7).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.50, 1.05).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r4", `${rand(0.24, 0.72).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r5", `${rand(0.12, 0.38).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r6", `${rand(0.05, 0.18).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--sway-x1", `${rand(-1.3, 1.3).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y1", `${rand(-0.5, 0.5).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x2", `${rand(-1.0, 1.0).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y2", `${rand(-0.35, 0.35).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x3", `${rand(-0.65, 0.65).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y3", `${rand(-0.2, 0.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x1", `${rand(-1.2, 1.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-1.0, 1.0).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x2", `${rand(-0.9, 0.9).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-0.8, 0.8).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x3", `${rand(-0.6, 0.6).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-0.5, 0.5).toFixed(2)}px`);
       wrapper.style.setProperty("--sway-x4", `${rand(-0.35, 0.35).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y4", `${rand(-0.12, 0.12).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x5", `${rand(-0.16, 0.16).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y5", `${rand(-0.06, 0.06).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y4", `${rand(-0.28, 0.28).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x5", `${rand(-0.18, 0.18).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y5", `${rand(-0.14, 0.14).toFixed(2)}px`);
       wrapper.style.setProperty("--sway-x6", `${rand(-0.08, 0.08).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y6", `${rand(-0.03, 0.03).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y6", `${rand(-0.06, 0.06).toFixed(2)}px`);
+
+      clip.style.left = `${slot.clipX}%`;
+      clip.style.transform = `translateX(-50%) rotate(${clipRot})`;
+
+      media.appendChild(img);
+      frame.appendChild(media);
+      frame.appendChild(caption);
+      wrapper.appendChild(frame);
+      wrapper.appendChild(clip);
+      stage.appendChild(wrapper);
 
       const cardObj = {
         asset,
         slot,
-        box,
-        size,
         el: wrapper,
         mountedAt: Date.now()
       };
 
-      const mount = () => {
-        stage.appendChild(wrapper);
-        currentCards.push(cardObj);
-        rememberShown(asset.public_id);
+      wrapper.addEventListener("animationend", () => {
+        wrapper.classList.remove("attaching");
+        wrapper.classList.add("swinging");
+        setTimeout(() => wrapper.classList.remove("swinging"), 3800);
+      }, { once:true });
 
-        let frameAttachEnded = false;
-        let clipAttachEnded = false;
-
-        const maybeStartSwing = () => {
-          if(frameAttachEnded && clipAttachEnded){
-            wrapper.classList.remove("attaching");
-            wrapper.classList.add("swinging");
-            setTimeout(() => wrapper.classList.remove("swinging"), 2400);
-          }
-        };
-
-        frame.addEventListener("animationend", (ev) => {
-          if(ev.animationName === "attachPhoto"){
-            frameAttachEnded = true;
-            maybeStartSwing();
-          }
-        });
-
-        clip.addEventListener("animationend", (ev) => {
-          if(ev.animationName === "attachClip"){
-            clipAttachEnded = true;
-            maybeStartSwing();
-          }
-        });
-      };
-
-      if(delayMs > 0){
-        setTimeout(mount, delayMs);
-      }else{
-        mount();
-      }
-
+      currentCards.push(cardObj);
+      rememberShown(asset.public_id);
       return cardObj;
     }
 
@@ -1052,7 +733,7 @@
           const idx = currentCards.indexOf(cardObj);
           if(idx >= 0) currentCards.splice(idx, 1);
           resolve(cardObj.slot);
-        }, 1250);
+        }, 1450);
       });
     }
 
@@ -1070,38 +751,15 @@
 
       emptyNote.style.display = "none";
 
-      const startCount = Math.min(MAX_VISIBLE, Math.max(3, allAssets.length >= 5 ? 4 : allAssets.length));
+      const startCount = Math.min(5, Math.max(3, allAssets.length >= 5 ? 5 : allAssets.length));
       const startSlots = chooseInitialSlots(startCount);
       const used = [];
-      const reserved = [];
-
-      let delay = 0;
 
       for(const slot of startSlots){
         const asset = pickAssetForSlot(slot, used);
         if(!asset) continue;
-
-        const chosen = chooseSlotForAsset(asset, [...used.map(()=>null)].filter(Boolean), reserved);
-        // feste Startmuster bevorzugen:
-        const forcedChoice = (() => {
-          const style = getTaskStyle(asset);
-          const size = computeCardSize(asset, slot, style.caption);
-          const angle = rand(-6.2, 6.2);
-          const box = getCardBoxForSlot(slot, size, angle);
-
-          if(box.bbLeft < 8 || box.bbRight > stage.clientWidth - 8) return null;
-          if(box.bbTop < 6 || box.bbBottom > stage.clientHeight - 8) return null;
-
-          return { slot, size, angle, box };
-        })();
-
-        const finalChoice = forcedChoice || chosen;
-        if(!finalChoice) continue;
-
-        reserved.push(finalChoice);
         used.push(asset.public_id);
-        createCard(asset, finalChoice, delay);
-        delay += 500;
+        createCard(asset, slot);
       }
     }
 
@@ -1111,12 +769,15 @@
         { remove:1, add:1 },
         { remove:1, add:2 },
         { remove:2, add:1 },
-        { remove:2, add:2 }
+        { remove:2, add:2 },
+        { remove:2, add:3 },
+        { remove:3, add:2 },
+        { remove:3, add:3 }
       ];
 
       const valid = plans.filter(plan => {
         const nextCount = currentCount - plan.remove + plan.add;
-        return nextCount >= MIN_VISIBLE && nextCount <= MAX_VISIBLE;
+        return nextCount >= 3 && nextCount <= 6;
       });
 
       return pick(valid);
@@ -1128,45 +789,35 @@
     }
 
     async function runCycle(){
-      if(!allAssets.length){
+      if(!allAssets.length || !currentCards.length){
         scheduleNextCycle(5000);
-        return;
-      }
-
-      if(currentCards.length < MIN_VISIBLE){
-        await rebuildWall();
         return;
       }
 
       const plan = chooseExchangePlan();
       const toRemove = oldestCards(plan.remove);
-      await Promise.all(toRemove.map(detachCard));
+      const removedSlots = await Promise.all(toRemove.map(detachCard));
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
+      const stillFree = availableSlots();
+      const preferredSlots = [
+        ...removedSlots,
+        ...stillFree.filter(s => !removedSlots.some(r => r.id === s.id))
+      ];
+
+      const slotsForNewCards = preferredSlots.slice(0, plan.add);
       const usedNewIds = [];
-      const reserved = [];
-      let delay = 0;
-      let added = 0;
-      const attempts = shuffle(allAssets);
 
-      for(const asset of attempts){
-        if(added >= plan.add) break;
-        if(currentCards.some(c => c.asset.public_id === asset.public_id)) continue;
-        if(usedNewIds.includes(asset.public_id)) continue;
-
-        const choice = chooseSlotForAsset(asset, [], reserved);
-        if(!choice) continue;
-
-        reserved.push(choice);
+      for(const slot of slotsForNewCards){
+        const asset = pickAssetForSlot(slot, usedNewIds);
+        if(!asset) continue;
         usedNewIds.push(asset.public_id);
-        createCard(asset, choice, delay);
-        delay += 500;
-        added++;
+        createCard(asset, slot);
       }
 
-      const delayMs = plan.remove === 1 ? 5000 : 10000;
-      scheduleNextCycle(delayMs);
+      const delay = plan.remove === 1 ? 5000 : plan.remove === 2 ? 10000 : 15000;
+      scheduleNextCycle(delay);
     }
 
     async function rebuildWall(){
@@ -1183,12 +834,10 @@
 
     async function boot(){
       await setFormat("16:9");
-      await buildGuideMap();
       await fetchAssets();
       await initialRender();
       setInterval(fetchAssets, 10000);
       scheduleNextCycle(8000);
-      updateControlVisibility();
     }
 
     boot();
