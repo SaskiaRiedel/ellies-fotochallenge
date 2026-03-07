@@ -7,11 +7,12 @@
   <script src="config.js"></script>
   <style>
     :root{
-      --bg: #ece7dc;
-      --shadow: 0 10px 24px rgba(0,0,0,.18);
+      --page-bg: #000;
+      --wall-bg: #ece7dc;
       --button-bg: rgba(255,255,255,.72);
-      --button-bg-hover: rgba(255,255,255,.9);
-      --button-text: #3b322b;
+      --button-bg-active: rgba(255,255,255,.92);
+      --button-text: #3f352d;
+      --card-shadow: 0 10px 24px rgba(0,0,0,.16);
     }
 
     *{ box-sizing:border-box; }
@@ -22,7 +23,7 @@
       width:100%;
       height:100%;
       overflow:hidden;
-      background:#000;
+      background:var(--page-bg);
       font-family: Arial, Helvetica, sans-serif;
     }
 
@@ -45,14 +46,14 @@
       inset:0;
       margin:auto;
       overflow:hidden;
-      background:var(--bg);
+      background:var(--wall-bg);
       transform-origin:center center;
     }
 
     #wall{
       position:absolute;
       inset:0;
-      background-color:var(--bg);
+      background-color:var(--wall-bg);
       background-image:url("assets/bg_16_9.png");
       background-repeat:no-repeat;
       background-position:center center;
@@ -64,80 +65,84 @@
       position:absolute;
       inset:0;
       overflow:hidden;
+      pointer-events:none;
     }
 
     .polaroid{
       position:absolute;
       transform-origin:50% 0%;
       will-change:transform, opacity;
-      filter:drop-shadow(0 10px 16px rgba(0,0,0,.18));
-      pointer-events:none;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.16));
+      opacity:1;
     }
 
     .polaroid.entering{
       opacity:0;
     }
 
-    .polaroid.leaving{
-      pointer-events:none;
-    }
-
     .card{
       position:relative;
-      background:#fff;
-      border-radius:2px;
+      width:100%;
+      height:100%;
       overflow:visible;
-      box-shadow:var(--shadow);
+      border-radius:2px;
+      box-shadow:var(--card-shadow);
     }
 
     .clip{
       position:absolute;
       left:50%;
       top:0;
-      transform-origin:center center;
+      transform-origin:center top;
+      z-index:8;
       pointer-events:none;
-      z-index:5;
-      image-rendering:auto;
+      user-select:none;
+      -webkit-user-drag:none;
+      width:auto;
+      height:auto;
+      display:block;
+    }
+
+    .inner{
+      position:absolute;
+      inset:0;
+      border-radius:2px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
 
     .photo-wrap{
       position:relative;
-      width:100%;
+      flex:0 0 auto;
       display:flex;
-      justify-content:center;
       align-items:center;
+      justify-content:center;
       overflow:hidden;
-      background:#fff;
     }
 
     .photo-wrap img{
       display:block;
-      max-width:100%;
-      max-height:100%;
       width:auto;
       height:auto;
+      max-width:100%;
+      max-height:100%;
       object-fit:contain;
       user-select:none;
       -webkit-user-drag:none;
     }
 
     .caption{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      flex:0 0 auto;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      line-clamp:2;
+      overflow:hidden;
+      text-overflow:ellipsis;
       text-align:center;
       font-weight:700;
       color:#111;
-      line-height:1.08;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:2;
-      line-clamp:2;
-      padding:.4em .55em .42em;
-      min-height:2.5em;
       word-break:break-word;
       hyphens:auto;
     }
@@ -146,10 +151,10 @@
       position:absolute;
       right:10px;
       bottom:10px;
+      z-index:999;
       display:grid;
-      grid-template-columns: repeat(2, auto);
-      gap:6px 6px;
-      z-index:1000;
+      grid-template-columns:repeat(2, auto);
+      gap:6px;
       transition:opacity .25s ease;
     }
 
@@ -159,55 +164,123 @@
     }
 
     .fmt-btn{
+      appearance:none;
       border:none;
       border-radius:999px;
       background:var(--button-bg);
       color:var(--button-text);
-      font-size:12px;
+      font-size:11px;
       font-weight:700;
-      padding:7px 12px;
+      line-height:1;
+      padding:7px 11px;
+      min-width:48px;
       cursor:pointer;
       backdrop-filter: blur(3px);
-      box-shadow:0 2px 8px rgba(0,0,0,.08);
+      box-shadow:0 2px 7px rgba(0,0,0,.08);
       transition:.18s ease;
-      min-width:52px;
     }
 
     .fmt-btn:hover{
-      background:var(--button-bg-hover);
-      transform:translateY(-1px);
+      background:rgba(255,255,255,.85);
     }
 
     .fmt-btn.active{
-      background:rgba(255,255,255,.95);
-      box-shadow:0 3px 10px rgba(0,0,0,.12);
+      background:var(--button-bg-active);
     }
 
     @keyframes cardIn {
-      0%   { opacity:0; transform:translate(var(--tx0), var(--ty0)) rotate(var(--r0)) scale(.92); }
-      18%  { opacity:.6; }
-      42%  { opacity:1; transform:translate(var(--tx1), var(--ty1)) rotate(var(--r1)) scale(1.01); }
-      67%  { transform:translate(var(--tx2), var(--ty2)) rotate(var(--r2)) scale(1); }
-      82%  { transform:translate(var(--tx3), var(--ty3)) rotate(var(--r3)) scale(1); }
-      100% { opacity:1; transform:translate(0px,0px) rotate(var(--rf)) scale(1); }
-    }
-
-    @keyframes cardOut {
-      0%   { opacity:1; transform:translate(0px,0px) rotate(var(--rf)); }
-      35%  { opacity:.9; transform:translate(var(--ox1), var(--oy1)) rotate(calc(var(--rf) + var(--or1))); }
-      100% { opacity:0; transform:translate(var(--ox2), var(--oy2)) rotate(calc(var(--rf) + var(--or2))) scale(.92); }
+      0% {
+        opacity:0;
+        transform:
+          translate(var(--in-x0), var(--in-y0))
+          rotate(var(--in-r0))
+          scale(.93);
+      }
+      18% {
+        opacity:.7;
+      }
+      45% {
+        opacity:1;
+        transform:
+          translate(var(--in-x1), var(--in-y1))
+          rotate(var(--in-r1))
+          scale(1.01);
+      }
+      70% {
+        transform:
+          translate(var(--in-x2), var(--in-y2))
+          rotate(var(--in-r2))
+          scale(1);
+      }
+      100% {
+        opacity:1;
+        transform:
+          translate(0,0)
+          rotate(var(--rest-r))
+          scale(1);
+      }
     }
 
     @keyframes clipIn {
-      0%   { opacity:0; transform:translate(var(--ctx0), var(--cty0)) rotate(var(--cr0)) scale(.85); }
-      25%  { opacity:.85; }
-      60%  { opacity:1; transform:translate(var(--ctx1), var(--cty1)) rotate(var(--cr1)) scale(1.04); }
-      100% { opacity:1; transform:translate(0,0) rotate(var(--crf)) scale(1); }
+      0% {
+        opacity:0;
+        transform:
+          translate(-50%, 0)
+          translate(var(--clip-x0), var(--clip-y0))
+          rotate(var(--clip-r0))
+          scale(.9);
+      }
+      55% {
+        opacity:1;
+        transform:
+          translate(-50%, 0)
+          translate(var(--clip-x1), var(--clip-y1))
+          rotate(var(--clip-r1))
+          scale(1.02);
+      }
+      100% {
+        opacity:1;
+        transform:
+          translate(-50%, 0)
+          translate(var(--clip-xf), var(--clip-yf))
+          rotate(var(--clip-rf))
+          scale(1);
+      }
+    }
+
+    @keyframes cardOut {
+      0% {
+        opacity:1;
+        transform:
+          translate(0,0)
+          rotate(var(--rest-r));
+      }
+      100% {
+        opacity:0;
+        transform:
+          translate(var(--out-x), var(--out-y))
+          rotate(calc(var(--rest-r) + var(--out-r)))
+          scale(.92);
+      }
     }
 
     @keyframes clipOut {
-      0%   { opacity:1; transform:translate(0,0) rotate(var(--crf)); }
-      100% { opacity:0; transform:translate(var(--cox), var(--coy)) rotate(calc(var(--crf) + var(--cor))) scale(.9); }
+      0% {
+        opacity:1;
+        transform:
+          translate(-50%, 0)
+          translate(var(--clip-xf), var(--clip-yf))
+          rotate(var(--clip-rf))
+          scale(1);
+      }
+      100% {
+        opacity:0;
+        transform:
+          translate(-50%, 0)
+          translate(var(--clip-ox), var(--clip-oy))
+          rotate(calc(var(--clip-rf) + var(--clip-or)))
+          scale(.92);
+      }
     }
   </style>
 </head>
@@ -228,10 +301,10 @@
 
   <script>
     (() => {
-      const cardsEl = document.getElementById("cards");
       const stageEl = document.getElementById("stage");
-      const controlsEl = document.getElementById("controls");
       const wallEl = document.getElementById("wall");
+      const cardsEl = document.getElementById("cards");
+      const controlsEl = document.getElementById("controls");
 
       const FORMATS = {
         "4:3":   { w:4,  h:3  },
@@ -239,8 +312,6 @@
         "16:10": { w:16, h:10 },
         "7:5":   { w:7,  h:5  }
       };
-
-      let currentFormat = "16:9";
 
       const CLIP_PATHS = [
         "assets/klammer1_uhd.png",
@@ -250,15 +321,17 @@
 
       const MIN_VISIBLE = 2;
       const MAX_VISIBLE = 5;
+
       const FETCH_INTERVAL = 15000;
 
-      let cycleCounter = 0;
+      let currentFormat = "16:9";
       let resources = [];
       let activeCards = [];
-      let scheduleTimer = null;
       let fetchTimer = null;
+      let cycleTimer = null;
+      let cycleIndex = 0;
 
-      const slotState = new Map();
+      const slotMemory = new Map();
 
       function clamp(v, min, max){
         return Math.max(min, Math.min(max, v));
@@ -281,21 +354,36 @@
         return a;
       }
 
-      function toDateNum(s){
-        const n = new Date(s).getTime();
-        return Number.isFinite(n) ? n : 0;
+      function toTime(v){
+        const t = new Date(v).getTime();
+        return Number.isFinite(t) ? t : 0;
+      }
+
+      function stageSize(){
+        return { w: stageEl.clientWidth, h: stageEl.clientHeight };
+      }
+
+      function resizeStage(){
+        const fmt = FORMATS[currentFormat];
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let w = vw;
+        let h = w * fmt.h / fmt.w;
+
+        if(h > vh){
+          h = vh;
+          w = h * fmt.w / fmt.h;
+        }
+
+        stageEl.style.width = `${Math.round(w)}px`;
+        stageEl.style.height = `${Math.round(h)}px`;
       }
 
       function enterFullscreen(){
         const el = document.documentElement;
         if(!document.fullscreenElement && el.requestFullscreen){
           el.requestFullscreen().catch(() => {});
-        }
-      }
-
-      function exitFullscreen(){
-        if(document.fullscreenElement && document.exitFullscreen){
-          document.exitFullscreen().catch(() => {});
         }
       }
 
@@ -315,72 +403,47 @@
           btn.classList.add("active");
           currentFormat = btn.dataset.format;
           resizeStage();
-          enterFullscreen();
           relayoutAll();
+          enterFullscreen();
         });
       });
-
-      function resizeStage(){
-        const fmt = FORMATS[currentFormat];
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-
-        let stageW = vw;
-        let stageH = vw * fmt.h / fmt.w;
-
-        if(stageH > vh){
-          stageH = vh;
-          stageW = vh * fmt.w / fmt.h;
-        }
-
-        stageEl.style.width = `${Math.round(stageW)}px`;
-        stageEl.style.height = `${Math.round(stageH)}px`;
-
-        wallEl.style.backgroundSize = "100% 100%";
-      }
 
       window.addEventListener("resize", () => {
         resizeStage();
         relayoutAll();
       });
 
-      function getStageSize(){
-        return {
-          w: stageEl.clientWidth,
-          h: stageEl.clientHeight
-        };
-      }
-
       function ropeY(row, xNorm){
         const x = xNorm;
+
         if(row === 1){
-          return (0.050 + 0.31 * Math.pow(x - 0.5, 2));
+          return 0.042 + 0.31 * Math.pow(x - 0.5, 2);
         }
         if(row === 2){
-          return (0.395 + 0.34 * Math.pow(x - 0.5, 2));
+          return 0.379 + 0.37 * Math.pow(x - 0.5, 2);
         }
-        return (0.737 + 0.37 * Math.pow(x - 0.5, 2));
+        return 0.725 + 0.39 * Math.pow(x - 0.5, 2);
       }
 
       function buildSlots(){
-        const xs = [0.13, 0.31, 0.50, 0.69, 0.87];
-        const rows = [1,2,3];
-        const slots = [];
+        // dichter und gezielter über die Stricke verteilt
+        const base = [
+          { row:1, x:0.12 }, { row:1, x:0.30 }, { row:1, x:0.50 }, { row:1, x:0.70 }, { row:1, x:0.88 },
+          { row:2, x:0.12 }, { row:2, x:0.31 }, { row:2, x:0.50 }, { row:2, x:0.69 }, { row:2, x:0.88 },
+          { row:3, x:0.13 }, { row:3, x:0.33 }, { row:3, x:0.52 }, { row:3, x:0.72 }, { row:3, x:0.88 }
+        ];
 
-        rows.forEach(row => {
-          xs.forEach((x, idx) => {
-            slots.push({
-              id: `r${row}_${idx}`,
-              row,
-              x,
-              y: ropeY(row, x),
-              lastUsed: slotState.get(`r${row}_${idx}`)?.lastUsed ?? -999,
-              recentHits: slotState.get(`r${row}_${idx}`)?.recentHits ?? 0
-            });
-          });
+        return base.map((s, i) => {
+          const id = `slot_${s.row}_${i}`;
+          const mem = slotMemory.get(id) || { lastUsed:-999, hits:0 };
+          return {
+            ...s,
+            id,
+            y: ropeY(s.row, s.x),
+            lastUsed: mem.lastUsed,
+            hits: mem.hits
+          };
         });
-
-        return slots;
       }
 
       function getOrientation(res){
@@ -390,122 +453,163 @@
         return "square";
       }
 
-      function getTaskColor(taskId){
-        const task = (APP_CONFIG.tasks || []).find(t => t.id === taskId);
-        return task?.color || "#d9e7f3";
-      }
-
-      function getTaskTitle(taskId, fallback){
-        const task = (APP_CONFIG.tasks || []).find(t => t.id === taskId);
-        return task?.title || fallback || "Fotochallenge";
+      function getTaskMeta(taskId, fallbackTitle){
+        const t = (APP_CONFIG.tasks || []).find(x => x.id === taskId);
+        return {
+          title: t?.title || fallbackTitle || "Fotochallenge",
+          color: t?.color || "#dbe8f4"
+        };
       }
 
       function normalizeResource(r){
         const custom = r.context?.custom || {};
+        const meta = getTaskMeta(custom.task_id, custom.task_title);
+
         return {
           assetId: r.asset_id,
           publicId: r.public_id,
-          createdAt: custom.created_at || r.created_at,
-          createdNum: toDateNum(custom.created_at || r.created_at),
           width: Number(r.width) || 1000,
           height: Number(r.height) || 1000,
+          createdAt: custom.created_at || r.created_at,
+          createdNum: toTime(custom.created_at || r.created_at),
           secureUrl: `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/${r.public_id}.${r.format || "jpg"}`,
           taskId: custom.task_id || "sammelordner",
-          title: getTaskTitle(custom.task_id, custom.task_title),
-          color: getTaskColor(custom.task_id),
+          title: meta.title,
+          color: meta.color,
           orientation: getOrientation(r),
-          isRecent: false,
-          usedCount: 0
+          usedCount: 0,
+          recentBoost: false
         };
       }
 
       async function fetchResources(){
         try{
           const url = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/${APP_CONFIG.eventTag}.json?_=${Date.now()}`;
-          const res = await fetch(url, { cache: "no-store" });
+          const res = await fetch(url, { cache:"no-store" });
           if(!res.ok) return;
+
           const data = await res.json();
-          const normalized = (data.resources || [])
+          const incoming = (data.resources || [])
             .filter(r => r.type === "upload")
             .map(normalizeResource)
             .sort((a,b) => b.createdNum - a.createdNum);
 
-          const newestCut = normalized.slice(0, 6).map(x => x.assetId);
-          normalized.forEach(r => r.isRecent = newestCut.includes(r.assetId));
+          const newestIds = new Set(incoming.slice(0, 6).map(x => x.assetId));
+          incoming.forEach(x => x.recentBoost = newestIds.has(x.assetId));
 
-          normalized.forEach(r => {
-            const old = resources.find(o => o.assetId === r.assetId);
-            if(old) r.usedCount = old.usedCount || 0;
+          incoming.forEach(x => {
+            const old = resources.find(r => r.assetId === x.assetId);
+            if(old) x.usedCount = old.usedCount || 0;
           });
 
-          resources = normalized;
-        }catch(e){
-          console.error("Fetch list failed:", e);
+          resources = incoming;
+        } catch(err){
+          console.error("Cloudinary list fetch failed:", err);
         }
       }
 
-      function getCardMetrics(res){
-        const { w: stageW, h: stageH } = getStageSize();
-        const orientation = res.orientation;
-        const ar = res.width / res.height;
+      function getCaptionFont(cardW, title){
+        let fs = clamp(cardW * 0.067, 14, 22);
+        if(title.length > 24) fs *= 0.94;
+        if(title.length > 34) fs *= 0.89;
+        if(title.length > 44) fs *= 0.84;
+        if(title.length > 58) fs *= 0.79;
+        return Math.round(fs);
+      }
 
-        const sidePad = Math.round(stageW * 0.0075);
-        const topPad  = Math.round(stageW * 0.0075);
-        const capPadY = Math.round(stageH * 0.006);
-        const capMinH = Math.round(stageH * 0.072);
+      function getCardMetrics(resource){
+        const { w: stageW, h: stageH } = stageSize();
+        const o = resource.orientation;
+        const ar = resource.width / resource.height;
 
-        let targetPhotoW, targetPhotoH, minCardW;
+        const outerBorder = Math.round(stageW * 0.0032);
+        const innerPadX = Math.round(stageW * 0.0065);
+        const innerPadTop = Math.round(stageH * 0.009);
 
-        if(orientation === "landscape"){
-          targetPhotoW = stageW * 0.215;
-          targetPhotoH = targetPhotoW / ar;
-          minCardW = stageW * 0.19;
-        } else if(orientation === "portrait"){
-          targetPhotoH = stageH * 0.255;
-          targetPhotoW = targetPhotoH * ar;
-          minCardW = stageW * 0.125;
-        } else {
-          targetPhotoW = stageW * 0.16;
-          targetPhotoH = targetPhotoW;
+        let photoW, photoH, minCardW;
+
+        if(o === "landscape"){
+          photoW = stageW * 0.205;
+          photoH = photoW / ar;
+          minCardW = stageW * 0.16;
+        } else if(o === "portrait"){
+          photoH = stageH * 0.255;
+          photoW = photoH * ar;
           minCardW = stageW * 0.145;
+        } else {
+          photoW = stageW * 0.185;
+          photoH = photoW;
+          minCardW = stageW * 0.16;
         }
 
-        const photoW = Math.round(targetPhotoW);
-        const photoH = Math.round(targetPhotoH);
+        // bei sehr schmalen Fotos Rahmen etwas breiter für lesbaren Text
+        const cardW = Math.round(Math.max(photoW + innerPadX * 2, minCardW));
+        const captionFont = getCaptionFont(cardW, resource.title);
+        const captionLineH = 1.08;
+        const captionPadY = Math.round(captionFont * 0.34);
+        const captionH = Math.round(captionFont * captionLineH * 2 + captionPadY * 2);
 
-        const cardW = Math.round(Math.max(photoW + sidePad * 2, minCardW));
-        const captionH = capMinH;
-        const cardH = Math.round(topPad + photoH + 6 + captionH + 8);
+        const cardH = Math.round(
+          outerBorder * 2 +
+          innerPadTop +
+          photoH +
+          4 +
+          captionH
+        );
 
-        const clipH = Math.round(stageH * 0.095); // nochmals größer
-        let clipW = Math.round(clipH * 0.42);
-        if(clipH > 0 && clipW < 10) clipW = 10;
-
+        const clipH = Math.round(stageH * 0.115); // nochmals größer
         return {
-          orientation,
-          photoW,
-          photoH,
+          photoW: Math.round(photoW),
+          photoH: Math.round(photoH),
           cardW,
           cardH,
+          outerBorder,
+          innerPadX,
+          innerPadTop,
           captionH,
-          sidePad,
-          topPad,
-          clipW,
+          captionFont,
           clipH
         };
       }
 
-      function computeCardTopLeft(slot, metrics, angleDeg){
-        const { w: stageW, h: stageH } = getStageSize();
+      function slotCompatible(slot, orientation){
+        if(orientation === "portrait" && slot.row === 3) return false;
+        return true;
+      }
 
-        const ropeX = slot.x * stageW;
-        const ropeYpx = slot.y * stageH;
+      function scoreSlot(slot, orientation){
+        let score = (cycleIndex - slot.lastUsed) * 10;
+        score -= slot.hits * 22;
+        score += rand(0, 4);
 
-        const cardX = ropeX - metrics.cardW / 2;
-        const cardTop = ropeYpx + Math.round(metrics.clipH * 0.15);
+        if(orientation === "portrait"){
+          if(slot.row === 1) score += 12;
+          if(slot.row === 2) score += 7;
+          if(slot.row === 3) score -= 200;
+        } else if(orientation === "landscape"){
+          if(slot.row === 2) score += 10;
+          if(slot.row === 1) score += 5;
+          if(slot.row === 3) score += 4;
+        } else {
+          if(slot.row === 2) score += 8;
+          if(slot.row === 1) score += 6;
+          if(slot.row === 3) score += 3;
+        }
+
+        return score;
+      }
+
+      function getTopLeftFromSlot(slot, metrics, angleDeg){
+        const { w, h } = stageSize();
+        const ropeX = slot.x * w;
+        const ropeYpx = slot.y * h;
+
+        // Klammeranker: Karte hängt am oberen Rand, nicht in der Luft
+        const clipOverlapIntoCard = metrics.clipH * 0.18;
+        const cardTop = ropeYpx - clipOverlapIntoCard + 2;
 
         return {
-          x: cardX,
+          x: ropeX - metrics.cardW / 2,
           y: cardTop
         };
       }
@@ -514,6 +618,7 @@
         const a = Math.abs(angleDeg) * Math.PI / 180;
         const bw = Math.abs(Math.cos(a) * w) + Math.abs(Math.sin(a) * h);
         const bh = Math.abs(Math.sin(a) * w) + Math.abs(Math.cos(a) * h);
+
         return {
           left: x - (bw - w) / 2,
           top: y - (bh - h) / 2,
@@ -522,7 +627,7 @@
         };
       }
 
-      function overlaps(a, b, pad = 18){
+      function overlaps(a, b, pad = 16){
         return !(
           a.right < b.left + pad ||
           a.left > b.right - pad ||
@@ -531,121 +636,80 @@
         );
       }
 
-      function slotCompatibility(slot, orientation){
-        if(orientation === "portrait"){
-          return slot.row !== 3;
-        }
-        return true;
-      }
-
-      function scoreSlot(slot, orientation){
-        const age = cycleCounter - slot.lastUsed;
-        let base = age * 10 - slot.recentHits * 25 + rand(0, 6);
-
-        if(orientation === "portrait"){
-          if(slot.row === 1) base += 12;
-          if(slot.row === 2) base += 8;
-          if(slot.row === 3) base -= 999;
-        } else if(orientation === "landscape"){
-          if(slot.row === 2) base += 10;
-          if(slot.row === 1) base += 5;
-          if(slot.row === 3) base += 4;
-        } else {
-          if(slot.row === 2) base += 8;
-          if(slot.row === 1) base += 6;
-          if(slot.row === 3) base += 5;
-        }
-
-        return base;
-      }
-
-      function pickBestPlacement(resource, occupiedPreview = []){
+      function choosePlacement(resource, previewPlacements = []){
         const slots = buildSlots()
-          .filter(slot => !activeCards.some(c => c.slotId === slot.id))
-          .filter(slot => !occupiedPreview.some(c => c.slotId === slot.id))
-          .filter(slot => slotCompatibility(slot, resource.orientation))
+          .filter(s => slotCompatible(s, resource.orientation))
+          .filter(s => !activeCards.some(c => c.slotId === s.id))
+          .filter(s => !previewPlacements.some(p => p.slotId === s.id))
           .sort((a,b) => scoreSlot(b, resource.orientation) - scoreSlot(a, resource.orientation));
 
-        const { w: stageW, h: stageH } = getStageSize();
+        const { w: stageW, h: stageH } = stageSize();
+        const metrics = getCardMetrics(resource);
 
-        let best = null;
+        const anglePool =
+          resource.orientation === "portrait"
+            ? [-8,-7,-6,-5,-4,4,5,6,7,8]
+            : resource.orientation === "square"
+              ? [-8,-7,-6,-5,5,6,7,8]
+              : [-7,-6,-5,-4,4,5,6,7];
 
         for(const slot of slots){
-          const metrics = getCardMetrics(resource);
+          const angles = shuffle(anglePool);
 
-          const anglePool =
-            resource.orientation === "portrait"
-              ? [-8,-6,-5,-4,4,5,6,8]
-              : resource.orientation === "square"
-                ? [-9,-7,-5,-4,4,5,7,9]
-                : [-8,-6,-4,-3,3,4,6,8];
-
-          const tryAngles = shuffle(anglePool);
-
-          for(const angle of tryAngles){
-            const pos = computeCardTopLeft(slot, metrics, angle);
+          for(const angle of angles){
+            const pos = getTopLeftFromSlot(slot, metrics, angle);
             const box = getBBox(pos.x, pos.y, metrics.cardW, metrics.cardH, angle);
 
-            const topSafe = 8;
-            const bottomSafe = 10;
-            const leftSafe = 10;
-            const rightSafe = 10;
+            if(box.left < 6 || box.right > stageW - 6) continue;
+            if(box.top < 4) continue;
+            if(box.bottom > stageH - 6) continue;
 
-            if(box.left < leftSafe || box.right > stageW - rightSafe) continue;
-            if(box.top < topSafe) continue;
-            if(box.bottom > stageH - bottomSafe) continue;
+            const conflict1 = activeCards.some(c => overlaps(box, c.bbox, 24));
+            if(conflict1) continue;
 
-            const conflictsActive = activeCards.some(c => overlaps(box, c.bbox, 24));
-            if(conflictsActive) continue;
+            const conflict2 = previewPlacements.some(p => overlaps(box, p.bbox, 24));
+            if(conflict2) continue;
 
-            const conflictsPreview = occupiedPreview.some(c => overlaps(box, c.bbox, 26));
-            if(conflictsPreview) continue;
-
-            best = {
+            return {
               slotId: slot.id,
               row: slot.row,
               xNorm: slot.x,
               yNorm: slot.y,
-              angle,
               x: pos.x,
               y: pos.y,
+              angle,
               metrics,
               bbox: box
             };
-            return best;
           }
         }
 
         return null;
       }
 
-      function makePolaroid(resource, placement){
-        const el = document.createElement("div");
-        el.className = "polaroid entering";
-        el.style.left = `${placement.x}px`;
-        el.style.top = `${placement.y}px`;
-        el.style.width = `${placement.metrics.cardW}px`;
-        el.style.height = `${placement.metrics.cardH}px`;
-        el.style.setProperty("--rf", `${placement.angle}deg`);
+      function createCard(resource, placement){
+        const wrap = document.createElement("div");
+        wrap.className = "polaroid entering";
+        wrap.style.left = `${placement.x}px`;
+        wrap.style.top = `${placement.y}px`;
+        wrap.style.width = `${placement.metrics.cardW}px`;
+        wrap.style.height = `${placement.metrics.cardH}px`;
+        wrap.style.setProperty("--rest-r", `${placement.angle}deg`);
 
         const card = document.createElement("div");
         card.className = "card";
-        card.style.width = `${placement.metrics.cardW}px`;
-        card.style.height = `${placement.metrics.cardH}px`;
-        card.style.padding = `${placement.metrics.topPad}px ${placement.metrics.sidePad}px 8px`;
+        card.style.background = resource.color;
+        card.style.border = `${placement.metrics.outerBorder}px solid rgba(255,255,255,.98)`;
 
-        const clip = document.createElement("img");
-        clip.className = "clip";
-        clip.src = pick(CLIP_PATHS);
-        clip.alt = "";
-        clip.style.width = `${Math.round(placement.metrics.clipW * 1.5)}px`;
-        clip.style.height = `${Math.round(placement.metrics.clipH * 1.5)}px`;
-        clip.style.marginLeft = `${-Math.round(placement.metrics.clipW * 1.5 / 2)}px`;
-        clip.style.top = `${-Math.round(placement.metrics.clipH * 0.68)}px`;
+        const inner = document.createElement("div");
+        inner.className = "inner";
+        inner.style.padding =
+          `${placement.metrics.innerPadTop}px ${placement.metrics.innerPadX}px 0`;
 
         const photoWrap = document.createElement("div");
         photoWrap.className = "photo-wrap";
         photoWrap.style.height = `${placement.metrics.photoH}px`;
+        photoWrap.style.marginBottom = `4px`;
 
         const img = document.createElement("img");
         img.src = resource.secureUrl;
@@ -657,80 +721,78 @@
         caption.className = "caption";
         caption.textContent = resource.title;
         caption.style.background = resource.color;
-        caption.style.fontSize = `${clamp(Math.round(getStageSize().w * 0.018), 13, 22)}px`;
         caption.style.minHeight = `${placement.metrics.captionH}px`;
+        caption.style.maxHeight = `${placement.metrics.captionH}px`;
+        caption.style.fontSize = `${placement.metrics.captionFont}px`;
+        caption.style.lineHeight = `1.08`;
+        caption.style.padding = `${Math.round(placement.metrics.captionFont * 0.32)}px ${Math.round(placement.metrics.captionFont * 0.34)}px`;
 
         photoWrap.appendChild(img);
-        card.appendChild(photoWrap);
-        card.appendChild(caption);
-        el.appendChild(card);
-        el.appendChild(clip);
+        inner.appendChild(photoWrap);
+        inner.appendChild(caption);
+        card.appendChild(inner);
 
-        return { el, clip, card, img, caption };
+        const clip = document.createElement("img");
+        clip.className = "clip";
+        clip.src = pick(CLIP_PATHS);
+        clip.alt = "";
+        clip.style.height = `${Math.round(placement.metrics.clipH)}px`;
+        clip.style.maxHeight = `${Math.round(placement.metrics.clipH)}px`;
+
+        // Klammer genauer am oberen Kartenrand
+        const clipX = rand(-placement.metrics.cardW * 0.09, placement.metrics.cardW * 0.09);
+        const clipY = -placement.metrics.clipH * 0.76;
+        clip.style.setProperty("--clip-xf", `${clipX}px`);
+        clip.style.setProperty("--clip-yf", `${clipY}px`);
+        clip.style.setProperty("--clip-rf", `${rand(-8,8)}deg`);
+        clip.style.transform = `translate(-50%, 0) translate(${clipX}px, ${clipY}px) rotate(${rand(-8,8)}deg)`;
+
+        wrap.appendChild(card);
+        wrap.appendChild(clip);
+
+        return { wrap, card, clip };
       }
 
-      function setEnterAnimation(node, delayMs = 0, finalAngle = 0){
-        const amp = rand(7, 15);
-        const driftX = rand(-16, 16);
-        const driftY = rand(16, 34);
-        const swayX1 = rand(-7, 7);
-        const swayY1 = rand(-4, 4);
-        const swayX2 = rand(-4, 4);
-        const swayY2 = rand(-2, 3);
+      function setEnterAnimation(dom, finalAngle, delayMs){
+        dom.wrap.style.setProperty("--in-x0", `${rand(-10, 10)}px`);
+        dom.wrap.style.setProperty("--in-y0", `${rand(26, 42)}px`);
+        dom.wrap.style.setProperty("--in-r0", `${finalAngle + rand(-18,18)}deg`);
+        dom.wrap.style.setProperty("--in-x1", `${rand(-8, 8)}px`);
+        dom.wrap.style.setProperty("--in-y1", `${rand(-4, 5)}px`);
+        dom.wrap.style.setProperty("--in-r1", `${finalAngle - rand(4,8)}deg`);
+        dom.wrap.style.setProperty("--in-x2", `${rand(-4, 4)}px`);
+        dom.wrap.style.setProperty("--in-y2", `${rand(-2, 3)}px`);
+        dom.wrap.style.setProperty("--in-r2", `${finalAngle + rand(1,4)}deg`);
 
-        node.el.style.setProperty("--tx0", `${driftX}px`);
-        node.el.style.setProperty("--ty0", `${driftY}px`);
-        node.el.style.setProperty("--r0", `${finalAngle + rand(-20,20)}deg`);
-        node.el.style.setProperty("--tx1", `${swayX1}px`);
-        node.el.style.setProperty("--ty1", `${swayY1}px`);
-        node.el.style.setProperty("--r1", `${finalAngle - amp * 0.65}deg`);
-        node.el.style.setProperty("--tx2", `${swayX2}px`);
-        node.el.style.setProperty("--ty2", `${swayY2}px`);
-        node.el.style.setProperty("--r2", `${finalAngle + amp * 0.28}deg`);
-        node.el.style.setProperty("--tx3", `${rand(-2,2)}px`);
-        node.el.style.setProperty("--ty3", `${rand(-1,2)}px`);
-        node.el.style.setProperty("--r3", `${finalAngle - amp * 0.12}deg`);
+        dom.clip.style.setProperty("--clip-x0", `${rand(-6,6)}px`);
+        dom.clip.style.setProperty("--clip-y0", `${rand(-16,-8)}px`);
+        dom.clip.style.setProperty("--clip-r0", `${rand(-18,18)}deg`);
+        dom.clip.style.setProperty("--clip-x1", `${rand(-2,2)}px`);
+        dom.clip.style.setProperty("--clip-y1", `${rand(-1,2)}px`);
+        dom.clip.style.setProperty("--clip-r1", `${rand(-7,7)}deg`);
 
-        node.clip.style.setProperty("--ctx0", `${rand(-10,10)}px`);
-        node.clip.style.setProperty("--cty0", `${rand(-20,-10)}px`);
-        node.clip.style.setProperty("--cr0", `${rand(-35,35)}deg`);
-        node.clip.style.setProperty("--ctx1", `${rand(-3,3)}px`);
-        node.clip.style.setProperty("--cty1", `${rand(-2,2)}px`);
-        node.clip.style.setProperty("--cr1", `${rand(-8,8)}deg`);
-        node.clip.style.setProperty("--crf", `${rand(-6,6)}deg`);
-
-        node.el.style.animation = `cardIn 2.1s cubic-bezier(.18,.84,.2,1) ${delayMs}ms forwards`;
-        node.clip.style.animation = `clipIn 1.2s ease-out ${delayMs}ms forwards`;
+        dom.wrap.style.animation = `cardIn 2.15s cubic-bezier(.18,.82,.18,1) ${delayMs}ms forwards`;
+        dom.clip.style.animation = `clipIn 1.45s ease-out ${delayMs}ms forwards`;
       }
 
-      function setLeaveAnimation(cardState){
-        const el = cardState.dom.el;
-        const clip = cardState.dom.clip;
-        const rf = cardState.angle;
+      function setLeaveAnimation(state){
+        state.dom.wrap.style.setProperty("--out-x", `${rand(-35,35)}px`);
+        state.dom.wrap.style.setProperty("--out-y", `${rand(58,96)}px`);
+        state.dom.wrap.style.setProperty("--out-r", `${rand(-10,10)}deg`);
 
-        el.style.setProperty("--rf", `${rf}deg`);
-        el.style.setProperty("--ox1", `${rand(-10,10)}px`);
-        el.style.setProperty("--oy1", `${rand(-10,-2)}px`);
-        el.style.setProperty("--or1", `${rand(-4,4)}deg`);
-        el.style.setProperty("--ox2", `${rand(-40,40)}px`);
-        el.style.setProperty("--oy2", `${rand(55,95)}px`);
-        el.style.setProperty("--or2", `${rand(-10,10)}deg`);
+        state.dom.clip.style.setProperty("--clip-ox", `${rand(-18,18)}px`);
+        state.dom.clip.style.setProperty("--clip-oy", `${rand(-22,-6)}px`);
+        state.dom.clip.style.setProperty("--clip-or", `${rand(-16,16)}deg`);
 
-        clip.style.setProperty("--crf", `${rand(-6,6)}deg`);
-        clip.style.setProperty("--cox", `${rand(-16,16)}px`);
-        clip.style.setProperty("--coy", `${rand(-25,-6)}px`);
-        clip.style.setProperty("--cor", `${rand(-18,18)}deg`);
-
-        el.classList.remove("entering");
-        el.classList.add("leaving");
-
-        el.style.animation = `cardOut 1.15s ease-in forwards`;
-        clip.style.animation = `clipOut .65s ease-in forwards`;
+        state.dom.wrap.style.animation = `cardOut 1.2s ease-in forwards`;
+        state.dom.clip.style.animation = `clipOut .75s ease-in forwards`;
       }
 
-      function addCard(resource, placement, delayMs = 0){
-        const dom = makePolaroid(resource, placement);
-        cardsEl.appendChild(dom.el);
+      function addCard(resource, placement, delayMs){
+        const dom = createCard(resource, placement);
+        cardsEl.appendChild(dom.wrap);
+
+        setEnterAnimation(dom, placement.angle, delayMs);
 
         const cardState = {
           id: resource.assetId,
@@ -738,28 +800,29 @@
           slotId: placement.slotId,
           row: placement.row,
           angle: placement.angle,
-          bbox: placement.bbox,
           x: placement.x,
           y: placement.y,
+          bbox: placement.bbox,
           dom,
-          bornCycle: cycleCounter,
-          bornAt: Date.now()
+          bornAt: Date.now(),
+          bornCycle: cycleIndex
         };
-
-        setEnterAnimation(dom, delayMs, placement.angle);
-
-        setTimeout(() => {
-          dom.el.classList.remove("entering");
-        }, delayMs + 2200);
 
         activeCards.push(cardState);
 
-        slotState.set(placement.slotId, {
-          lastUsed: cycleCounter,
-          recentHits: clamp((slotState.get(placement.slotId)?.recentHits || 0) + 1, 0, 5)
+        slotMemory.set(placement.slotId, {
+          lastUsed: cycleIndex,
+          hits: clamp((slotMemory.get(placement.slotId)?.hits || 0) + 1, 0, 5)
         });
 
-        resources = resources.map(r => r.assetId === resource.assetId ? { ...r, usedCount:(r.usedCount || 0) + 1 } : r);
+        resources = resources.map(r => r.assetId === resource.assetId
+          ? { ...r, usedCount:(r.usedCount || 0) + 1 }
+          : r
+        );
+
+        setTimeout(() => {
+          dom.wrap.classList.remove("entering");
+        }, delayMs + 2300);
       }
 
       function removeCards(cardsToRemove){
@@ -769,180 +832,157 @@
             return;
           }
 
-          cardsToRemove.forEach(c => setLeaveAnimation(c));
+          cardsToRemove.forEach(setLeaveAnimation);
 
           setTimeout(() => {
             cardsToRemove.forEach(c => {
-              c.dom.el.remove();
+              c.dom.wrap.remove();
               activeCards = activeCards.filter(x => x.id !== c.id);
             });
             resolve();
-          }, 1200);
+          }, 1250);
         });
       }
 
-      function getResourcePool(){
-        if(!resources.length) return [];
+      function availableResources(){
         const activeIds = new Set(activeCards.map(c => c.id));
         const pool = resources.filter(r => !activeIds.has(r.assetId));
         return pool.length ? pool : resources;
       }
 
-      function chooseResources(count){
-        const pool = getResourcePool();
+      function chooseResources(n){
+        const pool = availableResources();
         if(!pool.length) return [];
 
-        const weighted = pool
+        return pool
           .map(r => {
             let score = rand(0, 4);
-            score += r.isRecent ? 25 : 0;
-            score += Math.max(0, 10 - (r.usedCount || 0) * 2);
-            score += Math.max(0, (Date.now() - r.createdNum) < 120000 ? 12 : 0);
+            if(r.recentBoost) score += 18;
+            score += Math.max(0, 8 - (r.usedCount || 0) * 2);
+            score += (Date.now() - r.createdNum < 180000) ? 8 : 0;
             return { r, score };
           })
-          .sort((a,b) => b.score - a.score);
-
-        const chosen = [];
-        for(const item of weighted){
-          if(chosen.length >= count) break;
-          if(!chosen.find(x => x.assetId === item.r.assetId)){
-            chosen.push(item.r);
-          }
-        }
-        return chosen;
+          .sort((a,b) => b.score - a.score)
+          .slice(0, n)
+          .map(x => x.r);
       }
 
       function chooseRemoveCount(currentCount){
         const possible = [1,2,3].filter(n => currentCount - n >= MIN_VISIBLE);
         if(!possible.length) return 0;
-        const weighted = possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]);
-        return pick(weighted);
+        return pick(possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]));
       }
 
-      function chooseAddCount(afterRemoveCount){
-        const room = MAX_VISIBLE - afterRemoveCount;
-        const possible = [1,2,3].filter(n => n <= room && afterRemoveCount + n >= MIN_VISIBLE);
-        if(!possible.length) return Math.max(0, MIN_VISIBLE - afterRemoveCount);
-        const weighted = possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]);
-        return pick(weighted);
+      function chooseAddCount(afterRemove){
+        const possible = [1,2,3].filter(n => afterRemove + n <= MAX_VISIBLE);
+        if(!possible.length) return 0;
+        return pick(possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]));
       }
 
-      function chooseCardsToRemove(n){
-        if(n <= 0) return [];
-        const sorted = [...activeCards]
-          .sort((a,b) => a.bornAt - b.bornAt || a.bornCycle - b.bornCycle);
-        return sorted.slice(0, n);
+      function chooseRemovalCards(n){
+        return [...activeCards]
+          .sort((a,b) => a.bornAt - b.bornAt || a.bornCycle - b.bornCycle)
+          .slice(0, n);
       }
 
-      function decaySlotHits(){
-        const keys = [...slotState.keys()];
-        keys.forEach(k => {
-          const s = slotState.get(k);
-          if(!s) return;
-          slotState.set(k, {
-            lastUsed: s.lastUsed,
-            recentHits: Math.max(0, (s.recentHits || 0) - 1)
+      function decaySlotMemory(){
+        for(const [k, v] of slotMemory.entries()){
+          slotMemory.set(k, {
+            lastUsed: v.lastUsed,
+            hits: Math.max(0, (v.hits || 0) - 1)
           });
-        });
+        }
       }
 
       function relayoutAll(){
-        const previous = [...activeCards];
-        activeCards = [];
+        const oldCards = [...activeCards];
         cardsEl.innerHTML = "";
+        activeCards = [];
 
-        const occupiedPreview = [];
-
-        previous.forEach((oldCard, idx) => {
-          const placement = pickBestPlacement(oldCard.resource, occupiedPreview);
+        const preview = [];
+        oldCards.forEach((old, idx) => {
+          const placement = choosePlacement(old.resource, preview);
           if(!placement) return;
-          occupiedPreview.push(placement);
-          addCard(oldCard.resource, placement, idx * 60);
+          preview.push(placement);
+          addCard(old.resource, placement, idx * 120);
         });
       }
 
-      async function ensureInitialCards(){
-        if(activeCards.length || !resources.length) return;
+      async function initialFill(){
+        if(!resources.length) return;
+        const wanted = clamp(Math.min(4, resources.length), MIN_VISIBLE, MAX_VISIBLE);
+        const chosen = chooseResources(wanted);
+        const preview = [];
 
-        const initialCount = clamp(Math.min(4, resources.length), MIN_VISIBLE, MAX_VISIBLE);
-        const chosen = chooseResources(initialCount);
-        const occupiedPreview = [];
-
-        chosen.forEach((res, idx) => {
-          const placement = pickBestPlacement(res, occupiedPreview);
+        chosen.forEach((res, i) => {
+          const placement = choosePlacement(res, preview);
           if(!placement) return;
-          occupiedPreview.push(placement);
-          addCard(res, placement, idx * 500);
+          preview.push(placement);
+          addCard(res, placement, i * 500);
         });
 
         scheduleNext(9000);
       }
 
       function scheduleNext(ms){
-        clearTimeout(scheduleTimer);
-        scheduleTimer = setTimeout(runCycle, ms);
+        clearTimeout(cycleTimer);
+        cycleTimer = setTimeout(runCycle, ms);
       }
 
       async function runCycle(){
-        cycleCounter++;
-        decaySlotHits();
+        cycleIndex++;
+        decaySlotMemory();
 
         if(!resources.length){
-          scheduleNext(6000);
+          scheduleNext(5000);
           return;
         }
 
-        const currentCount = activeCards.length;
-        if(currentCount < MIN_VISIBLE){
-          const need = MIN_VISIBLE - currentCount;
-          const chosen = chooseResources(need);
-          const occupiedPreview = [];
-
-          chosen.forEach((res, idx) => {
-            const placement = pickBestPlacement(res, occupiedPreview);
+        if(activeCards.length < MIN_VISIBLE){
+          const need = MIN_VISIBLE - activeCards.length;
+          const preview = [];
+          chooseResources(need).forEach((res, i) => {
+            const placement = choosePlacement(res, preview);
             if(!placement) return;
-            occupiedPreview.push(placement);
-            addCard(res, placement, idx * 500);
+            preview.push(placement);
+            addCard(res, placement, i * 500);
           });
-
           scheduleNext(7000);
           return;
         }
 
-        const removeCount = chooseRemoveCount(currentCount);
-        const toRemove = chooseCardsToRemove(removeCount);
+        const removeCount = chooseRemoveCount(activeCards.length);
+        const toRemove = chooseRemovalCards(removeCount);
+        const afterRemove = activeCards.length - toRemove.length;
+        const addCount = chooseAddCount(afterRemove);
 
-        const afterRemove = currentCount - toRemove.length;
-        const addCount = clamp(chooseAddCount(afterRemove), 0, MAX_VISIBLE - afterRemove);
-        const selectedResources = chooseResources(addCount);
+        const chosen = chooseResources(addCount);
+        const preview = [];
+        const planned = [];
 
-        const occupiedPreview = [];
-        const plannedPlacements = [];
-
-        for(const res of selectedResources){
-          const placement = pickBestPlacement(res, occupiedPreview);
-          if(placement){
-            occupiedPreview.push(placement);
-            plannedPlacements.push({ res, placement });
-          }
-        }
-
-        await removeCards(toRemove);
-
-        await new Promise(r => setTimeout(r, 700));
-
-        plannedPlacements.forEach((item, idx) => {
-          addCard(item.res, item.placement, idx * 500);
+        chosen.forEach(res => {
+          const placement = choosePlacement(res, preview);
+          if(!placement) return;
+          preview.push(placement);
+          planned.push({ res, placement });
         });
 
-        const shownNow = activeCards.length + plannedPlacements.length;
-        const delayBase = plannedPlacements.length >= 3 ? 15000 : plannedPlacements.length === 2 ? 10000 : 5000;
-        const jitter = rand(400, 1200);
+        await removeCards(toRemove);
+        await new Promise(r => setTimeout(r, 700));
 
-        scheduleNext(delayBase + jitter);
+        planned.forEach((p, i) => {
+          addCard(p.res, p.placement, i * 500);
+        });
+
+        const delay =
+          planned.length >= 3 ? 15000 :
+          planned.length === 2 ? 10000 :
+          5000;
+
+        scheduleNext(delay + rand(300, 1200));
       }
 
-      function startFetching(){
+      function startFetchLoop(){
         clearInterval(fetchTimer);
         fetchTimer = setInterval(fetchResources, FETCH_INTERVAL);
       }
@@ -950,8 +990,8 @@
       async function init(){
         resizeStage();
         await fetchResources();
-        await ensureInitialCards();
-        startFetching();
+        await initialFill();
+        startFetchLoop();
         updateControlsVisibility();
       }
 
