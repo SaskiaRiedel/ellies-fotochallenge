@@ -7,293 +7,279 @@
   <script src="config.js"></script>
 
   <style>
-    :root {
-      --wall-bg: #e9e4db;
-      --shadow: 0 14px 32px rgba(0, 0, 0, 0.23);
-      --frame-bg: #ffffff;
-      --caption-text: #111;
-      --caption-height: 54px;
-      --aspect-num: 16;
-      --aspect-den: 9;
+    :root{
+      --wall-bg:#e9e4db;
+      --shadow:0 14px 32px rgba(0,0,0,.22);
+      --caption-text:#111;
+      --aspect-num:16;
+      --aspect-den:9;
+      --card-side-pad:14px;
+      --card-top-pad:14px;
+      --card-bottom-pad:18px;
+      --caption-h:68px;
     }
 
-    * {
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#111;
+      font-family:Arial, Helvetica, sans-serif;
     }
 
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--wall-bg);
+    body{
+      position:relative;
     }
 
-    body {
-      position: relative;
+    .viewport{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:#111;
+      overflow:hidden;
     }
 
-    .viewport {
-      position: fixed;
-      inset: 0;
-      background: #111;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
+    .stage-shell{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:#111;
     }
 
-    .stage-shell {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      background: #111;
+    .stage{
+      position:relative;
+      width:min(100vw, calc(100vh * (var(--aspect-num) / var(--aspect-den))));
+      height:min(100vh, calc(100vw * (var(--aspect-den) / var(--aspect-num))));
+      overflow:hidden;
+      background:var(--wall-bg);
     }
 
-    .stage {
-      position: relative;
-      width: min(100vw, calc(100vh * (var(--aspect-num) / var(--aspect-den))));
-      height: min(100vh, calc(100vw * (var(--aspect-den) / var(--aspect-num))));
-      overflow: hidden;
-      background: var(--wall-bg);
+    .bg-layer{
+      position:absolute;
+      inset:0;
+      z-index:1;
+      background-color:var(--wall-bg);
+      background-repeat:no-repeat;
+      background-position:center center;
+      background-size:100% 100%;
     }
 
-    .wall-bg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      display: block;
-      z-index: 1;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
+    .empty-note{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:rgba(0,0,0,.45);
+      font-size:clamp(1.1rem,2vw,1.6rem);
+      text-align:center;
+      padding:24px;
+      z-index:20;
+      pointer-events:none;
     }
 
-    .empty-note {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: rgba(0,0,0,0.45);
-      font-size: clamp(1.1rem, 2vw, 1.6rem);
-      text-align: center;
-      padding: 24px;
-      z-index: 20;
-      pointer-events: none;
+    .controls{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      z-index:200;
+      display:flex;
+      gap:10px;
     }
 
-    .controls {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 200;
-      display: flex;
-      gap: 10px;
+    .control-btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      background:rgba(255,255,255,.72);
+      color:#4b4b4b;
+      cursor:pointer;
+      font-size:.95rem;
+      font-weight:700;
+      backdrop-filter:blur(6px);
+      box-shadow:0 6px 18px rgba(0,0,0,.14);
+      min-width:68px;
     }
 
-    .control-btn {
-      border: none;
-      border-radius: 999px;
-      padding: 10px 16px;
-      background: rgba(255,255,255,0.65);
-      color: #4b4b4b;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 700;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.14);
-      min-width: 68px;
+    .control-btn.active{
+      background:rgba(255,255,255,.95);
+      color:#222;
     }
 
-    .control-btn.active {
-      background: rgba(255,255,255,0.92);
-      color: #222;
+    .photo-card{
+      position:absolute;
+      z-index:30;
+      pointer-events:none;
     }
 
-    .photo-card {
-      position: absolute;
-      z-index: 30;
-      pointer-events: none;
+    .photo-frame{
+      position:relative;
+      width:100%;
+      height:100%;
+      background:#fff;
+      box-shadow:var(--shadow);
+      border-radius:2px;
+      transform-origin:top center;
+      overflow:visible;
     }
 
-    .photo-frame {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: var(--frame-bg);
-      border-radius: 2px;
-      box-shadow: var(--shadow);
-      overflow: visible;
-      padding: 10px 10px calc(var(--caption-height) + 10px) 10px;
-      transform-origin: top center;
+    .media{
+      position:absolute;
+      left:var(--card-side-pad);
+      right:var(--card-side-pad);
+      top:var(--card-top-pad);
+      overflow:hidden;
+      background:#fff;
+      border-radius:1px;
     }
 
-    .media {
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 8px solid #fff;
-      border-bottom: 0;
+    .media img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:fill;
+      background:#fff;
     }
 
-    .media img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      background: #fff;
+    .caption{
+      position:absolute;
+      left:var(--card-side-pad);
+      right:var(--card-side-pad);
+      bottom:var(--card-bottom-pad);
+      height:var(--caption-h);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:8px 12px;
+      font-size:1rem;
+      line-height:1.12;
+      font-weight:700;
+      color:var(--caption-text);
+      overflow:hidden;
     }
 
-    .caption {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      height: var(--caption-height);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 8px 10px;
-      font-size: 0.92rem;
-      line-height: 1.14;
-      font-weight: 700;
-      color: var(--caption-text);
-      overflow: hidden;
+    .clip{
+      position:absolute;
+      top:-28px;
+      height:42px;
+      width:auto;
+      z-index:5;
+      transform-origin:center top;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));
     }
 
-    .clip {
-      position: absolute;
-      top: -26px;
-      height: 46px;
-      width: auto;
-      z-index: 5;
-      transform-origin: center top;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+    .photo-card.attaching .photo-frame{
+      animation:attachPhoto 1.55s ease forwards;
     }
 
-    .photo-card.attaching .photo-frame {
-      animation: attachPhoto 1.55s ease forwards;
+    .photo-card.attaching .clip{
+      animation:attachClip 1.25s ease forwards;
     }
 
-    .photo-card.attaching .clip {
-      animation: attachClip 1.25s ease forwards;
+    .photo-card.swinging .photo-frame{
+      animation:swayPhoto var(--sway-duration,1.7s) ease-in-out 1;
     }
 
-    .photo-card.swinging .photo-frame {
-      animation: swayPhoto var(--sway-duration, 1.8s) ease-in-out 1;
+    .photo-card.detaching .photo-frame{
+      animation:detachPhoto 1.45s ease forwards;
     }
 
-    .photo-card.detaching .photo-frame {
-      animation: detachPhoto 1.45s ease forwards;
+    .photo-card.detaching .clip{
+      animation:detachClip 1.05s ease forwards;
     }
 
-    .photo-card.detaching .clip {
-      animation: detachClip 1.05s ease forwards;
-    }
-
-    @keyframes attachPhoto {
-      0% {
-        opacity: 0;
+    @keyframes attachPhoto{
+      0%{
+        opacity:0;
         transform:
           translate(var(--photo-start-x), var(--photo-start-y))
           rotate(var(--photo-start-rot))
-          scale(0.94);
+          scale(.94);
       }
-      100% {
-        opacity: 1;
-        transform: rotate(var(--photo-rot)) translateY(0) scale(1);
+      100%{
+        opacity:1;
+        transform:rotate(var(--photo-rot)) translateY(0) scale(1);
       }
     }
 
-    @keyframes attachClip {
-      0% {
-        opacity: 0;
+    @keyframes attachClip{
+      0%{
+        opacity:0;
         transform:
           translate(var(--clip-start-x), var(--clip-start-y))
           rotate(var(--clip-start-rot))
-          scale(0.9);
+          scale(.9);
       }
-      100% {
-        opacity: 1;
-        transform: rotate(var(--clip-rot)) scale(1);
-      }
-    }
-
-    @keyframes swayPhoto {
-      0% {
-        transform: rotate(var(--photo-rot)) translateY(0);
-      }
-      20% {
-        transform: rotate(calc(var(--photo-rot) + var(--sway-r1))) translateY(var(--sway-y1));
-      }
-      45% {
-        transform: rotate(calc(var(--photo-rot) - var(--sway-r2))) translateY(var(--sway-y2));
-      }
-      70% {
-        transform: rotate(calc(var(--photo-rot) + var(--sway-r3))) translateY(var(--sway-y3));
-      }
-      100% {
-        transform: rotate(var(--photo-rot)) translateY(0);
+      100%{
+        opacity:1;
+        transform:rotate(var(--clip-rot)) scale(1);
       }
     }
 
-    @keyframes detachPhoto {
-      0% {
-        opacity: 1;
-        transform: rotate(var(--photo-rot)) translateY(0) scale(1);
+    @keyframes swayPhoto{
+      0%{
+        transform:rotate(var(--photo-rot)) translateY(0);
       }
-      100% {
-        opacity: 0;
+      22%{
+        transform:rotate(calc(var(--photo-rot) + var(--sway-r1))) translateY(var(--sway-y1));
+      }
+      48%{
+        transform:rotate(calc(var(--photo-rot) - var(--sway-r2))) translateY(var(--sway-y2));
+      }
+      72%{
+        transform:rotate(calc(var(--photo-rot) + var(--sway-r3))) translateY(var(--sway-y3));
+      }
+      100%{
+        transform:rotate(var(--photo-rot)) translateY(0);
+      }
+    }
+
+    @keyframes detachPhoto{
+      0%{
+        opacity:1;
+        transform:rotate(var(--photo-rot)) translateY(0) scale(1);
+      }
+      100%{
+        opacity:0;
         transform:
           translate(var(--photo-end-x), 180px)
           rotate(calc(var(--photo-rot) + var(--photo-end-rot)))
-          scale(0.94);
+          scale(.94);
       }
     }
 
-    @keyframes detachClip {
-      0% {
-        opacity: 1;
-        transform: rotate(var(--clip-rot)) scale(1);
+    @keyframes detachClip{
+      0%{
+        opacity:1;
+        transform:rotate(var(--clip-rot)) scale(1);
       }
-      100% {
-        opacity: 0;
+      100%{
+        opacity:0;
         transform:
           translate(var(--clip-end-x), var(--clip-end-y))
           rotate(calc(var(--clip-rot) + var(--clip-end-rot)))
-          scale(0.92);
+          scale(.92);
       }
     }
 
-    @media (max-width: 1400px) {
-      .caption {
-        font-size: 0.86rem;
-      }
-      .clip {
-        height: 42px;
-      }
+    @media (max-width: 1400px){
+      .caption{font-size:.9rem}
+      .clip{height:38px}
     }
 
-    @media (max-width: 1100px) {
-      .caption {
-        font-size: 0.8rem;
-      }
-      .clip {
-        height: 38px;
-      }
+    @media (max-width: 1100px){
+      .caption{font-size:.82rem}
+      .clip{height:34px}
     }
   </style>
 </head>
@@ -301,10 +287,8 @@
   <div class="viewport">
     <div class="stage-shell">
       <div class="stage" id="stage">
-        <img id="wallBg" class="wall-bg" src="./assets/fotowand_bg_uhd_16x9.png" alt="" />
-        <div class="empty-note" id="emptyNote">
-          Noch keine Bilder in der Fotowand gefunden.
-        </div>
+        <div id="bgLayer" class="bg-layer"></div>
+        <div id="emptyNote" class="empty-note">Noch keine Bilder in der Fotowand gefunden.</div>
       </div>
     </div>
   </div>
@@ -316,20 +300,26 @@
 
   <script>
     const stage = document.getElementById("stage");
-    const wallBg = document.getElementById("wallBg");
+    const bgLayer = document.getElementById("bgLayer");
     const emptyNote = document.getElementById("emptyNote");
     const btn43 = document.getElementById("btn43");
     const btn169 = document.getElementById("btn169");
 
+    const CACHE_BUSTER = "v=20260307b";
+
+    function assetUrl(filename){
+      return new URL(`assets/${filename}?${CACHE_BUSTER}`, window.location.href).href;
+    }
+
     const CLIP_IMAGES = [
-      "./assets/klammer1_uhd.png",
-      "./assets/klammer2_uhd.png",
-      "./assets/klammer3_uhd.png"
+      assetUrl("klammer1_uhd.png"),
+      assetUrl("klammer2_uhd.png"),
+      assetUrl("klammer3_uhd.png")
     ];
 
     const BG_IMAGES = {
-      "16:9": "./assets/fotowand_bg_uhd_16x9.png",
-      "4:3": "./assets/fotowand_uhd_4x3.png"
+      "16:9": assetUrl("fotowand_bg_uhd_16x9.png"),
+      "4:3": assetUrl("fotowand_uhd_4x3.png")
     };
 
     const allAssets = [];
@@ -341,69 +331,69 @@
     let currentFormat = "16:9";
     let nextTimer = null;
 
-    // konkrete Ankerpunkte auf den Seilen
+    // dichter, größer und gleichmäßiger verteilt
     const slotSets = {
       "16:9": [
-        { id: "A", x: 16.0, y: 11.2, maxW: 26, maxH: 28 },
-        { id: "B", x: 36.0, y: 11.0, maxW: 22, maxH: 32 },
-        { id: "C", x: 57.0, y: 11.2, maxW: 24, maxH: 28 },
-        { id: "D", x: 77.0, y: 11.4, maxW: 22, maxH: 28 },
+        { id:"A", x:17, y:10, maxW:29, maxH:30 },
+        { id:"B", x:40, y:10, maxW:24, maxH:31 },
+        { id:"C", x:64, y:10, maxW:24, maxH:30 },
+        { id:"D", x:86, y:11, maxW:22, maxH:29 },
 
-        { id: "E", x: 16.0, y: 42.0, maxW: 24, maxH: 27 },
-        { id: "F", x: 38.0, y: 40.3, maxW: 22, maxH: 30 },
-        { id: "G", x: 60.0, y: 40.4, maxW: 22, maxH: 30 },
-        { id: "H", x: 79.0, y: 40.8, maxW: 20, maxH: 31 },
+        { id:"E", x:16, y:39, maxW:26, maxH:28 },
+        { id:"F", x:39, y:39, maxW:24, maxH:30 },
+        { id:"G", x:62, y:39, maxW:24, maxH:30 },
+        { id:"H", x:84, y:40, maxW:22, maxH:30 },
 
-        { id: "I", x: 16.0, y: 71.8, maxW: 24, maxH: 27 },
-        { id: "J", x: 40.0, y: 70.3, maxW: 22, maxH: 30 },
-        { id: "K", x: 64.0, y: 70.6, maxW: 22, maxH: 30 },
-        { id: "L", x: 83.0, y: 71.6, maxW: 20, maxH: 28 }
+        { id:"I", x:18, y:69, maxW:26, maxH:28 },
+        { id:"J", x:42, y:68, maxW:24, maxH:30 },
+        { id:"K", x:66, y:69, maxW:24, maxH:30 },
+        { id:"L", x:86, y:70, maxW:22, maxH:29 }
       ],
       "4:3": [
-        { id: "A", x: 16.0, y: 11.0, maxW: 25, maxH: 29 },
-        { id: "B", x: 35.0, y: 10.9, maxW: 22, maxH: 32 },
-        { id: "C", x: 57.0, y: 11.1, maxW: 24, maxH: 28 },
-        { id: "D", x: 78.0, y: 11.3, maxW: 22, maxH: 28 },
+        { id:"A", x:16, y:10, maxW:27, maxH:29 },
+        { id:"B", x:38, y:10, maxW:24, maxH:31 },
+        { id:"C", x:62, y:10, maxW:24, maxH:30 },
+        { id:"D", x:84, y:11, maxW:22, maxH:29 },
 
-        { id: "E", x: 16.0, y: 41.8, maxW: 24, maxH: 27 },
-        { id: "F", x: 38.0, y: 40.1, maxW: 22, maxH: 30 },
-        { id: "G", x: 60.0, y: 40.3, maxW: 22, maxH: 30 },
-        { id: "H", x: 79.0, y: 40.6, maxW: 20, maxH: 31 },
+        { id:"E", x:16, y:39, maxW:26, maxH:28 },
+        { id:"F", x:39, y:39, maxW:24, maxH:30 },
+        { id:"G", x:62, y:39, maxW:24, maxH:30 },
+        { id:"H", x:84, y:40, maxW:22, maxH:30 },
 
-        { id: "I", x: 16.0, y: 71.6, maxW: 24, maxH: 27 },
-        { id: "J", x: 40.0, y: 70.2, maxW: 22, maxH: 30 },
-        { id: "K", x: 64.0, y: 70.4, maxW: 22, maxH: 30 },
-        { id: "L", x: 83.0, y: 71.3, maxW: 20, maxH: 28 }
+        { id:"I", x:18, y:69, maxW:26, maxH:28 },
+        { id:"J", x:42, y:68, maxW:24, maxH:30 },
+        { id:"K", x:66, y:69, maxW:24, maxH:30 },
+        { id:"L", x:86, y:70, maxW:22, maxH:29 }
       ]
     };
 
     const initialPatterns = {
       3: [
-        ["B", "G", "L"],
-        ["A", "F", "K"],
-        ["C", "H", "J"]
+        ["B","F","J"],
+        ["C","G","K"],
+        ["A","G","L"]
       ],
       4: [
-        ["A", "D", "F", "K"],
-        ["B", "E", "H", "L"],
-        ["C", "F", "I", "K"]
+        ["A","D","F","K"],
+        ["B","E","H","L"],
+        ["A","C","G","K"]
       ],
       5: [
-        ["A", "C", "F", "H", "K"],
-        ["B", "D", "E", "G", "L"],
-        ["A", "D", "F", "J", "L"]
+        ["A","C","F","H","K"],
+        ["B","D","F","I","L"],
+        ["A","D","G","J","L"]
       ],
       6: [
-        ["A", "C", "E", "G", "I", "K"],
-        ["B", "D", "F", "H", "J", "L"],
-        ["A", "D", "F", "G", "I", "L"]
+        ["A","C","E","G","J","L"],
+        ["B","D","F","H","I","K"],
+        ["A","D","F","G","J","L"]
       ]
     };
 
-    function setFormat(format) {
+    function setFormat(format){
       currentFormat = format;
 
-      if (format === "4:3") {
+      if(format === "4:3"){
         document.documentElement.style.setProperty("--aspect-num", "4");
         document.documentElement.style.setProperty("--aspect-den", "3");
       } else {
@@ -411,17 +401,17 @@
         document.documentElement.style.setProperty("--aspect-den", "9");
       }
 
-      wallBg.src = BG_IMAGES[format];
+      bgLayer.style.backgroundImage = `url("${BG_IMAGES[format]}")`;
 
       btn43.classList.toggle("active", format === "4:3");
       btn169.classList.toggle("active", format === "16:9");
     }
 
-    function requestFullscreen() {
+    function requestFullscreen(){
       const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      if(el.requestFullscreen) el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if(el.msRequestFullscreen) el.msRequestFullscreen();
     }
 
     btn43.addEventListener("click", async () => {
@@ -438,28 +428,28 @@
 
     setFormat("16:9");
 
-    function rand(min, max) {
+    function rand(min, max){
       return Math.random() * (max - min) + min;
     }
 
-    function pick(arr) {
+    function pick(arr){
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    function shuffle(arr) {
+    function shuffle(arr){
       const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
+      for(let i = copy.length - 1; i > 0; i--){
         const j = Math.floor(Math.random() * (i + 1));
         [copy[i], copy[j]] = [copy[j], copy[i]];
       }
       return copy;
     }
 
-    function sortByUploadOrder(list) {
+    function sortByUploadOrder(list){
       return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
     }
 
-    function getTaskStyle(asset) {
+    function getTaskStyle(asset){
       const taskId = asset?.context?.custom?.task_id || "";
       const task = APP_CONFIG.tasks.find(t => t.id === taskId);
 
@@ -469,32 +459,32 @@
       };
     }
 
-    function rememberShown(publicId) {
+    function rememberShown(publicId){
       recentlyShown.push(publicId);
-      while (recentlyShown.length > MAX_RECENT_TRACK) {
+      while(recentlyShown.length > MAX_RECENT_TRACK){
         recentlyShown.shift();
       }
     }
 
-    function getSlotById(id) {
+    function getSlotById(id){
       return slotSets[currentFormat].find(s => s.id === id);
     }
 
-    function availableSlots() {
+    function availableSlots(){
       const usedIds = new Set(currentCards.map(c => c.slot.id));
       return slotSets[currentFormat].filter(s => !usedIds.has(s.id));
     }
 
-    function chooseInitialSlots(count) {
+    function chooseInitialSlots(count){
       const patterns = initialPatterns[count] || initialPatterns[5];
       const ids = pick(patterns);
       return ids.map(getSlotById);
     }
 
-    function fetchAssets() {
+    function fetchAssets(){
       return fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/fotochallenge.json`)
         .then(response => {
-          if (!response.ok) {
+          if(!response.ok){
             throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
           }
           return response.json();
@@ -504,17 +494,17 @@
 
           const onlyImages = resources.filter(asset => {
             const format = (asset.format || "").toLowerCase();
-            return ["jpg", "jpeg", "png", "webp", "heic"].includes(format);
+            return ["jpg","jpeg","png","webp","heic"].includes(format);
           });
 
           sortByUploadOrder(onlyImages).forEach(asset => {
-            if (!assetIds.has(asset.public_id)) {
+            if(!assetIds.has(asset.public_id)){
               assetIds.add(asset.public_id);
               allAssets.push(asset);
             }
           });
 
-          if (allAssets.length > 0) {
+          if(allAssets.length > 0){
             emptyNote.style.display = "none";
           }
         })
@@ -523,18 +513,18 @@
         });
     }
 
-    function getRecentAssets(limit = 12) {
+    function getRecentAssets(limit = 12){
       return [...allAssets]
         .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
         .slice(0, limit);
     }
 
-    function pickAssetForSlot(slot, extraExcluded = []) {
+    function pickAssetForSlot(slot, extraExcluded = []){
       const shownIds = new Set(currentCards.map(c => c.asset.public_id));
       const excluded = new Set([...shownIds, ...extraExcluded]);
 
       const recents = getRecentAssets(12).filter(a => !excluded.has(a.public_id));
-      if (recents.length) return recents[0];
+      if(recents.length) return recents[0];
 
       const older = shuffle(
         allAssets.filter(a =>
@@ -542,7 +532,7 @@
           !recentlyShown.includes(a.public_id)
         )
       );
-      if (older.length) return older[0];
+      if(older.length) return older[0];
 
       const fallback = shuffle(
         allAssets.filter(a => !excluded.has(a.public_id))
@@ -550,38 +540,45 @@
       return fallback[0] || null;
     }
 
-    function computeCardSize(asset, slot) {
-      const ratio = Math.max(0.45, Math.min(2.2, Number(asset.width || 1) / Number(asset.height || 1)));
+    function computeCardSize(asset, slot){
+      const ratio = Math.max(0.45, Math.min(2.4, Number(asset.width || 1) / Number(asset.height || 1)));
 
-      const border = 2.2;
-      const caption = 7.2;
+      const sidePad = 1.7;
+      const topPad = 1.7;
+      const bottomPad = 8.7;
 
-      let mediaW, mediaH;
+      let mediaW;
+      let mediaH;
 
-      // Rahmen folgt dem Bildformat
-      if (ratio >= 1) {
+      // Foto bestimmt die Rahmenform
+      if(ratio >= 1){
         mediaW = slot.maxW;
         mediaH = mediaW / ratio;
-        if (mediaH > slot.maxH - caption) {
-          mediaH = slot.maxH - caption;
+        if(mediaH > slot.maxH - bottomPad){
+          mediaH = slot.maxH - bottomPad;
           mediaW = mediaH * ratio;
         }
       } else {
-        mediaH = slot.maxH - caption;
+        mediaH = slot.maxH - bottomPad;
         mediaW = mediaH * ratio;
-        if (mediaW > slot.maxW) {
+        if(mediaW > slot.maxW){
           mediaW = slot.maxW;
           mediaH = mediaW / ratio;
         }
       }
 
-      const frameW = mediaW + border;
-      const frameH = mediaH + caption;
+      const frameW = mediaW + sidePad * 2;
+      const frameH = mediaH + topPad + bottomPad;
 
-      return { frameW, frameH };
+      return {
+        mediaW,
+        mediaH,
+        frameW,
+        frameH
+      };
     }
 
-    function createCard(asset, slot) {
+    function createCard(asset, slot){
       const style = getTaskStyle(asset);
       const size = computeCardSize(asset, slot);
 
@@ -589,8 +586,6 @@
       wrapper.className = "photo-card attaching";
       wrapper.style.width = `${size.frameW}%`;
       wrapper.style.height = `${size.frameH}%`;
-
-      // statt translateX(-50%) statisch platzieren -> kein Verrutschen beim Schwingen
       wrapper.style.left = `calc(${slot.x}% - ${size.frameW / 2}%)`;
       wrapper.style.top = `${slot.y}%`;
 
@@ -599,10 +594,15 @@
 
       const media = document.createElement("div");
       media.className = "media";
-      media.style.borderColor = style.color;
+      media.style.left = "14px";
+      media.style.right = "14px";
+      media.style.top = "14px";
+      media.style.height = `calc(100% - 14px - 18px - 68px)`;
+      media.style.border = `8px solid ${style.color}`;
+      media.style.borderBottom = "0";
 
       const img = document.createElement("img");
-      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
       img.alt = style.caption;
 
       const caption = document.createElement("div");
@@ -613,13 +613,13 @@
       const clip = document.createElement("img");
       clip.className = "clip";
       clip.src = pick(CLIP_IMAGES);
-      clip.onerror = function () {
+      clip.onerror = function(){
         this.style.display = "none";
       };
 
-      const photoRot = rand(-6, 6).toFixed(2) + "deg";
-      const clipRot = rand(-10, 10).toFixed(2) + "deg";
-      const clipLeft = rand(47, 53).toFixed(1) + "%";
+      const photoRot = rand(-5.5, 5.5).toFixed(2) + "deg";
+      const clipRot = rand(-9, 9).toFixed(2) + "deg";
+      const clipLeft = rand(46, 54).toFixed(1) + "%";
 
       wrapper.style.setProperty("--photo-rot", photoRot);
       wrapper.style.setProperty("--clip-rot", clipRot);
@@ -639,14 +639,13 @@
       wrapper.style.setProperty("--clip-end-y", `${rand(-22, -6).toFixed(0)}px`);
       wrapper.style.setProperty("--clip-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
 
-      // zufälligeres Schwingen
       wrapper.style.setProperty("--sway-duration", `${rand(1.1, 2.2).toFixed(2)}s`);
-      wrapper.style.setProperty("--sway-r1", `${rand(0.2, 2.8).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r2", `${rand(0.1, 2.2).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r3", `${rand(0.1, 1.6).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-y1", `${rand(-1.5, 1.5).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y2", `${rand(-2.0, 2.0).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y3", `${rand(-1.2, 1.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-r1", `${rand(0.15, 2.2).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(0.1, 1.9).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.1, 1.4).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-1.4, 1.4).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-1.8, 1.8).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-1.0, 1.0).toFixed(2)}px`);
 
       clip.style.left = clipLeft;
 
@@ -655,7 +654,6 @@
       frame.appendChild(caption);
       wrapper.appendChild(frame);
       wrapper.appendChild(clip);
-
       stage.appendChild(wrapper);
 
       const cardObj = {
@@ -669,7 +667,7 @@
         wrapper.classList.remove("attaching");
         wrapper.classList.add("swinging");
         setTimeout(() => wrapper.classList.remove("swinging"), 2300);
-      }, { once: true });
+      }, { once:true });
 
       currentCards.push(cardObj);
       rememberShown(asset.public_id);
@@ -677,7 +675,7 @@
       return cardObj;
     }
 
-    function detachCard(cardObj) {
+    function detachCard(cardObj){
       return new Promise(resolve => {
         cardObj.el.classList.remove("attaching", "swinging");
         cardObj.el.classList.add("detaching");
@@ -685,20 +683,20 @@
         setTimeout(() => {
           cardObj.el.remove();
           const idx = currentCards.indexOf(cardObj);
-          if (idx >= 0) currentCards.splice(idx, 1);
+          if(idx >= 0) currentCards.splice(idx, 1);
           resolve(cardObj.slot);
         }, 1450);
       });
     }
 
-    function oldestCards(count) {
+    function oldestCards(count){
       return [...currentCards]
         .sort((a, b) => a.mountedAt - b.mountedAt)
         .slice(0, count);
     }
 
-    async function initialRender() {
-      if (!allAssets.length) {
+    async function initialRender(){
+      if(!allAssets.length){
         emptyNote.style.display = "grid";
         return;
       }
@@ -709,25 +707,25 @@
       const startSlots = chooseInitialSlots(startCount);
       const used = [];
 
-      for (const slot of startSlots) {
+      for(const slot of startSlots){
         const asset = pickAssetForSlot(slot, used);
-        if (!asset) continue;
+        if(!asset) continue;
         used.push(asset.public_id);
         createCard(asset, slot);
       }
     }
 
-    function chooseExchangePlan() {
+    function chooseExchangePlan(){
       const currentCount = currentCards.length;
 
       const plans = [
-        { remove: 1, add: 1 },
-        { remove: 1, add: 2 },
-        { remove: 2, add: 1 },
-        { remove: 2, add: 2 },
-        { remove: 2, add: 3 },
-        { remove: 3, add: 2 },
-        { remove: 3, add: 3 }
+        { remove:1, add:1 },
+        { remove:1, add:2 },
+        { remove:2, add:1 },
+        { remove:2, add:2 },
+        { remove:2, add:3 },
+        { remove:3, add:2 },
+        { remove:3, add:3 }
       ];
 
       const valid = plans.filter(plan => {
@@ -738,13 +736,13 @@
       return pick(valid);
     }
 
-    function scheduleNextCycle(delayMs) {
+    function scheduleNextCycle(delayMs){
       clearTimeout(nextTimer);
       nextTimer = setTimeout(runCycle, delayMs);
     }
 
-    async function runCycle() {
-      if (!allAssets.length || !currentCards.length) {
+    async function runCycle(){
+      if(!allAssets.length || !currentCards.length){
         scheduleNextCycle(5000);
         return;
       }
@@ -760,9 +758,9 @@
       const slotsForNewCards = preferredSlots.slice(0, plan.add);
       const usedNewIds = [];
 
-      for (const slot of slotsForNewCards) {
+      for(const slot of slotsForNewCards){
         const asset = pickAssetForSlot(slot, usedNewIds);
-        if (!asset) continue;
+        if(!asset) continue;
         usedNewIds.push(asset.public_id);
         createCard(asset, slot);
       }
@@ -771,10 +769,10 @@
       scheduleNextCycle(delay);
     }
 
-    async function rebuildWall() {
+    async function rebuildWall(){
       clearTimeout(nextTimer);
 
-      while (currentCards.length) {
+      while(currentCards.length){
         const card = currentCards.pop();
         card.el.remove();
       }
@@ -783,10 +781,9 @@
       scheduleNextCycle(8000);
     }
 
-    async function boot() {
+    async function boot(){
       await fetchAssets();
       await initialRender();
-
       setInterval(fetchAssets, 10000);
       scheduleNextCycle(8000);
     }
