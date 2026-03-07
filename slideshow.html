@@ -13,10 +13,6 @@
       --caption-text:#111;
       --aspect-num:16;
       --aspect-den:9;
-      --card-side-pad:14px;
-      --card-top-pad:14px;
-      --card-bottom-pad:18px;
-      --caption-h:68px;
     }
 
     *{box-sizing:border-box}
@@ -120,22 +116,18 @@
 
     .photo-frame{
       position:relative;
-      width:100%;
-      height:100%;
       background:#fff;
       box-shadow:var(--shadow);
       border-radius:2px;
       transform-origin:top center;
       overflow:visible;
+      padding:14px 14px 18px 14px;
     }
 
     .media{
-      position:absolute;
-      left:var(--card-side-pad);
-      right:var(--card-side-pad);
-      top:var(--card-top-pad);
-      overflow:hidden;
+      width:100%;
       background:#fff;
+      overflow:hidden;
       border-radius:1px;
     }
 
@@ -143,16 +135,13 @@
       display:block;
       width:100%;
       height:100%;
-      object-fit:fill;
+      object-fit:contain;
       background:#fff;
     }
 
     .caption{
-      position:absolute;
-      left:var(--card-side-pad);
-      right:var(--card-side-pad);
-      bottom:var(--card-bottom-pad);
-      height:var(--caption-h);
+      margin-top:12px;
+      height:68px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -167,7 +156,7 @@
 
     .clip{
       position:absolute;
-      top:-28px;
+      top:-30px;
       height:42px;
       width:auto;
       z-index:5;
@@ -272,12 +261,12 @@
       }
     }
 
-    @media (max-width: 1400px){
+    @media (max-width:1400px){
       .caption{font-size:.9rem}
       .clip{height:38px}
     }
 
-    @media (max-width: 1100px){
+    @media (max-width:1100px){
       .caption{font-size:.82rem}
       .clip{height:34px}
     }
@@ -305,10 +294,11 @@
     const btn43 = document.getElementById("btn43");
     const btn169 = document.getElementById("btn169");
 
-    const CACHE_BUSTER = "v=20260307b";
+    const REPO_BASE = "/ellies-fotochallenge/";
+    const CACHE_BUSTER = "v=20260307c";
 
     function assetUrl(filename){
-      return new URL(`assets/${filename}?${CACHE_BUSTER}`, window.location.href).href;
+      return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
     }
 
     const CLIP_IMAGES = [
@@ -331,39 +321,38 @@
     let currentFormat = "16:9";
     let nextTimer = null;
 
-    // dichter, größer und gleichmäßiger verteilt
     const slotSets = {
       "16:9": [
-        { id:"A", x:17, y:10, maxW:29, maxH:30 },
-        { id:"B", x:40, y:10, maxW:24, maxH:31 },
-        { id:"C", x:64, y:10, maxW:24, maxH:30 },
-        { id:"D", x:86, y:11, maxW:22, maxH:29 },
+        { id:"A", x:16, y:9,  maxW:32, maxH:30 },
+        { id:"B", x:40, y:9,  maxW:28, maxH:31 },
+        { id:"C", x:64, y:9,  maxW:28, maxH:30 },
+        { id:"D", x:86, y:10, maxW:24, maxH:29 },
 
-        { id:"E", x:16, y:39, maxW:26, maxH:28 },
-        { id:"F", x:39, y:39, maxW:24, maxH:30 },
-        { id:"G", x:62, y:39, maxW:24, maxH:30 },
-        { id:"H", x:84, y:40, maxW:22, maxH:30 },
+        { id:"E", x:16, y:37, maxW:30, maxH:29 },
+        { id:"F", x:40, y:37, maxW:28, maxH:31 },
+        { id:"G", x:64, y:37, maxW:28, maxH:31 },
+        { id:"H", x:86, y:38, maxW:24, maxH:30 },
 
-        { id:"I", x:18, y:69, maxW:26, maxH:28 },
-        { id:"J", x:42, y:68, maxW:24, maxH:30 },
-        { id:"K", x:66, y:69, maxW:24, maxH:30 },
-        { id:"L", x:86, y:70, maxW:22, maxH:29 }
+        { id:"I", x:16, y:66, maxW:30, maxH:29 },
+        { id:"J", x:40, y:66, maxW:28, maxH:31 },
+        { id:"K", x:64, y:66, maxW:28, maxH:31 },
+        { id:"L", x:86, y:67, maxW:24, maxH:29 }
       ],
       "4:3": [
-        { id:"A", x:16, y:10, maxW:27, maxH:29 },
-        { id:"B", x:38, y:10, maxW:24, maxH:31 },
-        { id:"C", x:62, y:10, maxW:24, maxH:30 },
-        { id:"D", x:84, y:11, maxW:22, maxH:29 },
+        { id:"A", x:16, y:9,  maxW:31, maxH:30 },
+        { id:"B", x:40, y:9,  maxW:28, maxH:31 },
+        { id:"C", x:64, y:9,  maxW:28, maxH:30 },
+        { id:"D", x:86, y:10, maxW:24, maxH:29 },
 
-        { id:"E", x:16, y:39, maxW:26, maxH:28 },
-        { id:"F", x:39, y:39, maxW:24, maxH:30 },
-        { id:"G", x:62, y:39, maxW:24, maxH:30 },
-        { id:"H", x:84, y:40, maxW:22, maxH:30 },
+        { id:"E", x:16, y:37, maxW:30, maxH:29 },
+        { id:"F", x:40, y:37, maxW:28, maxH:31 },
+        { id:"G", x:64, y:37, maxW:28, maxH:31 },
+        { id:"H", x:86, y:38, maxW:24, maxH:30 },
 
-        { id:"I", x:18, y:69, maxW:26, maxH:28 },
-        { id:"J", x:42, y:68, maxW:24, maxH:30 },
-        { id:"K", x:66, y:69, maxW:24, maxH:30 },
-        { id:"L", x:86, y:70, maxW:22, maxH:29 }
+        { id:"I", x:16, y:66, maxW:30, maxH:29 },
+        { id:"J", x:40, y:66, maxW:28, maxH:31 },
+        { id:"K", x:64, y:66, maxW:28, maxH:31 },
+        { id:"L", x:86, y:67, maxW:24, maxH:29 }
       ]
     };
 
@@ -491,7 +480,6 @@
         })
         .then(data => {
           const resources = Array.isArray(data.resources) ? data.resources : [];
-
           const onlyImages = resources.filter(asset => {
             const format = (asset.format || "").toLowerCase();
             return ["jpg","jpeg","png","webp","heic"].includes(format);
@@ -508,9 +496,7 @@
             emptyNote.style.display = "none";
           }
         })
-        .catch(error => {
-          console.error(error);
-        });
+        .catch(error => console.error(error));
     }
 
     function getRecentAssets(limit = 12){
@@ -543,14 +529,13 @@
     function computeCardSize(asset, slot){
       const ratio = Math.max(0.45, Math.min(2.4, Number(asset.width || 1) / Number(asset.height || 1)));
 
-      const sidePad = 1.7;
-      const topPad = 1.7;
-      const bottomPad = 8.7;
+      const sidePad = 2.1;
+      const topPad = 2.1;
+      const bottomPad = 10.0;
 
       let mediaW;
       let mediaH;
 
-      // Foto bestimmt die Rahmenform
       if(ratio >= 1){
         mediaW = slot.maxW;
         mediaH = mediaW / ratio;
@@ -570,12 +555,7 @@
       const frameW = mediaW + sidePad * 2;
       const frameH = mediaH + topPad + bottomPad;
 
-      return {
-        mediaW,
-        mediaH,
-        frameW,
-        frameH
-      };
+      return { mediaW, mediaH, frameW, frameH };
     }
 
     function createCard(asset, slot){
@@ -585,7 +565,6 @@
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
       wrapper.style.width = `${size.frameW}%`;
-      wrapper.style.height = `${size.frameH}%`;
       wrapper.style.left = `calc(${slot.x}% - ${size.frameW / 2}%)`;
       wrapper.style.top = `${slot.y}%`;
 
@@ -594,12 +573,8 @@
 
       const media = document.createElement("div");
       media.className = "media";
-      media.style.left = "14px";
-      media.style.right = "14px";
-      media.style.top = "14px";
-      media.style.height = `calc(100% - 14px - 18px - 68px)`;
+      media.style.aspectRatio = `${Math.max(1, asset.width || 1)} / ${Math.max(1, asset.height || 1)}`;
       media.style.border = `8px solid ${style.color}`;
-      media.style.borderBottom = "0";
 
       const img = document.createElement("img");
       img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
@@ -617,7 +592,7 @@
         this.style.display = "none";
       };
 
-      const photoRot = rand(-5.5, 5.5).toFixed(2) + "deg";
+      const photoRot = rand(-5.2, 5.2).toFixed(2) + "deg";
       const clipRot = rand(-9, 9).toFixed(2) + "deg";
       const clipLeft = rand(46, 54).toFixed(1) + "%";
 
@@ -671,7 +646,6 @@
 
       currentCards.push(cardObj);
       rememberShown(asset.public_id);
-
       return cardObj;
     }
 
@@ -717,7 +691,6 @@
 
     function chooseExchangePlan(){
       const currentCount = currentCards.length;
-
       const plans = [
         { remove:1, add:1 },
         { remove:1, add:2 },
