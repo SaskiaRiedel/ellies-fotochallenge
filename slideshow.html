@@ -13,7 +13,8 @@
       --frame-bg: #ffffff;
       --caption-text: #111;
       --caption-height: 54px;
-      --aspect: 16/9;
+      --aspect-num: 16;
+      --aspect-den: 9;
     }
 
     * {
@@ -54,41 +55,23 @@
 
     .stage {
       position: relative;
-      width: min(100vw, calc(100vh * var(--aspect)));
-      height: min(100vh, calc(100vw / var(--aspect)));
+      width: min(100vw, calc(100vh * (var(--aspect-num) / var(--aspect-den))));
+      height: min(100vh, calc(100vw * (var(--aspect-den) / var(--aspect-num))));
       overflow: hidden;
-      background-color: var(--wall-bg);
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: 100% 100%;
+      background: var(--wall-bg);
     }
 
-    .controls {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 200;
-      display: flex;
-      gap: 10px;
-    }
-
-    .control-btn {
-      border: none;
-      border-radius: 999px;
-      padding: 10px 16px;
-      background: rgba(255,255,255,0.6);
-      color: #555;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 700;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-      min-width: 68px;
-    }
-
-    .control-btn.active {
-      background: rgba(255,255,255,0.9);
-      color: #222;
+    .wall-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+      z-index: 1;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
     }
 
     .empty-note {
@@ -104,11 +87,38 @@
       pointer-events: none;
     }
 
+    .controls {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 200;
+      display: flex;
+      gap: 10px;
+    }
+
+    .control-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.65);
+      color: #4b4b4b;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+      min-width: 68px;
+    }
+
+    .control-btn.active {
+      background: rgba(255,255,255,0.92);
+      color: #222;
+    }
+
     .photo-card {
       position: absolute;
       z-index: 30;
       pointer-events: none;
-      transform-origin: top center;
     }
 
     .photo-frame {
@@ -120,6 +130,7 @@
       box-shadow: var(--shadow);
       overflow: visible;
       padding: 10px 10px calc(var(--caption-height) + 10px) 10px;
+      transform-origin: top center;
     }
 
     .media {
@@ -162,9 +173,9 @@
 
     .clip {
       position: absolute;
-      top: -24px;
-      width: 18px;
-      height: auto;
+      top: -26px;
+      height: 46px;
+      width: auto;
       z-index: 5;
       transform-origin: center top;
       user-select: none;
@@ -181,8 +192,8 @@
       animation: attachClip 1.25s ease forwards;
     }
 
-    .photo-card.swinging {
-      animation: swayPhoto 1.8s ease-in-out 1;
+    .photo-card.swinging .photo-frame {
+      animation: swayPhoto var(--sway-duration, 1.8s) ease-in-out 1;
     }
 
     .photo-card.detaching .photo-frame {
@@ -203,7 +214,7 @@
       }
       100% {
         opacity: 1;
-        transform: rotate(var(--photo-rot)) scale(1);
+        transform: rotate(var(--photo-rot)) translateY(0) scale(1);
       }
     }
 
@@ -222,18 +233,27 @@
     }
 
     @keyframes swayPhoto {
-      0%   { transform: rotate(var(--photo-rot)); }
-      20%  { transform: rotate(calc(var(--photo-rot) + 2.8deg)); }
-      40%  { transform: rotate(calc(var(--photo-rot) - 2.1deg)); }
-      60%  { transform: rotate(calc(var(--photo-rot) + 1.5deg)); }
-      80%  { transform: rotate(calc(var(--photo-rot) - 0.8deg)); }
-      100% { transform: rotate(var(--photo-rot)); }
+      0% {
+        transform: rotate(var(--photo-rot)) translateY(0);
+      }
+      20% {
+        transform: rotate(calc(var(--photo-rot) + var(--sway-r1))) translateY(var(--sway-y1));
+      }
+      45% {
+        transform: rotate(calc(var(--photo-rot) - var(--sway-r2))) translateY(var(--sway-y2));
+      }
+      70% {
+        transform: rotate(calc(var(--photo-rot) + var(--sway-r3))) translateY(var(--sway-y3));
+      }
+      100% {
+        transform: rotate(var(--photo-rot)) translateY(0);
+      }
     }
 
     @keyframes detachPhoto {
       0% {
         opacity: 1;
-        transform: rotate(var(--photo-rot)) scale(1);
+        transform: rotate(var(--photo-rot)) translateY(0) scale(1);
       }
       100% {
         opacity: 0;
@@ -263,7 +283,7 @@
         font-size: 0.86rem;
       }
       .clip {
-        width: 16px;
+        height: 42px;
       }
     }
 
@@ -272,7 +292,7 @@
         font-size: 0.8rem;
       }
       .clip {
-        width: 15px;
+        height: 38px;
       }
     }
   </style>
@@ -281,6 +301,7 @@
   <div class="viewport">
     <div class="stage-shell">
       <div class="stage" id="stage">
+        <img id="wallBg" class="wall-bg" src="./assets/fotowand_bg_uhd_16x9.png" alt="" />
         <div class="empty-note" id="emptyNote">
           Noch keine Bilder in der Fotowand gefunden.
         </div>
@@ -295,19 +316,20 @@
 
   <script>
     const stage = document.getElementById("stage");
+    const wallBg = document.getElementById("wallBg");
     const emptyNote = document.getElementById("emptyNote");
     const btn43 = document.getElementById("btn43");
     const btn169 = document.getElementById("btn169");
 
     const CLIP_IMAGES = [
-      "./assets/klammer1_hd.png",
-      "./assets/klammer2_hd.png",
-      "./assets/klammer3_hd.png"
+      "./assets/klammer1_uhd.png",
+      "./assets/klammer2_uhd.png",
+      "./assets/klammer3_uhd.png"
     ];
 
     const BG_IMAGES = {
-      "16:9": "./assets/fotowand_bg_4k_16x9.png",
-      "4:3": "./assets/fotowand_bg_4k_4x3.png"
+      "16:9": "./assets/fotowand_bg_uhd_16x9.png",
+      "4:3": "./assets/fotowand_uhd_4x3.png"
     };
 
     const allAssets = [];
@@ -319,62 +341,77 @@
     let currentFormat = "16:9";
     let nextTimer = null;
 
+    // konkrete Ankerpunkte auf den Seilen
     const slotSets = {
       "16:9": [
-        { id: "A", x: 16.0, y: 11.0, maxW: 22, maxH: 27 },
-        { id: "B", x: 39.0, y: 10.2, maxW: 18, maxH: 31 },
-        { id: "C", x: 66.0, y: 11.4, maxW: 20, maxH: 24 },
+        { id: "A", x: 16.0, y: 11.2, maxW: 26, maxH: 28 },
+        { id: "B", x: 36.0, y: 11.0, maxW: 22, maxH: 32 },
+        { id: "C", x: 57.0, y: 11.2, maxW: 24, maxH: 28 },
+        { id: "D", x: 77.0, y: 11.4, maxW: 22, maxH: 28 },
 
-        { id: "D", x: 14.0, y: 41.0, maxW: 20, maxH: 24 },
-        { id: "E", x: 42.0, y: 39.4, maxW: 18, maxH: 28 },
-        { id: "F", x: 69.0, y: 39.3, maxW: 16, maxH: 31 },
+        { id: "E", x: 16.0, y: 42.0, maxW: 24, maxH: 27 },
+        { id: "F", x: 38.0, y: 40.3, maxW: 22, maxH: 30 },
+        { id: "G", x: 60.0, y: 40.4, maxW: 22, maxH: 30 },
+        { id: "H", x: 79.0, y: 40.8, maxW: 20, maxH: 31 },
 
-        { id: "G", x: 14.0, y: 71.2, maxW: 20, maxH: 24 },
-        { id: "H", x: 44.0, y: 69.8, maxW: 16, maxH: 31 },
-        { id: "I", x: 69.0, y: 71.4, maxW: 20, maxH: 24 }
+        { id: "I", x: 16.0, y: 71.8, maxW: 24, maxH: 27 },
+        { id: "J", x: 40.0, y: 70.3, maxW: 22, maxH: 30 },
+        { id: "K", x: 64.0, y: 70.6, maxW: 22, maxH: 30 },
+        { id: "L", x: 83.0, y: 71.6, maxW: 20, maxH: 28 }
       ],
       "4:3": [
-        { id: "A", x: 16.0, y: 11.0, maxW: 22, maxH: 27 },
-        { id: "B", x: 39.0, y: 10.0, maxW: 18, maxH: 31 },
-        { id: "C", x: 66.0, y: 11.4, maxW: 20, maxH: 24 },
+        { id: "A", x: 16.0, y: 11.0, maxW: 25, maxH: 29 },
+        { id: "B", x: 35.0, y: 10.9, maxW: 22, maxH: 32 },
+        { id: "C", x: 57.0, y: 11.1, maxW: 24, maxH: 28 },
+        { id: "D", x: 78.0, y: 11.3, maxW: 22, maxH: 28 },
 
-        { id: "D", x: 14.0, y: 41.0, maxW: 20, maxH: 24 },
-        { id: "E", x: 42.0, y: 39.4, maxW: 18, maxH: 28 },
-        { id: "F", x: 69.0, y: 39.3, maxW: 16, maxH: 31 },
+        { id: "E", x: 16.0, y: 41.8, maxW: 24, maxH: 27 },
+        { id: "F", x: 38.0, y: 40.1, maxW: 22, maxH: 30 },
+        { id: "G", x: 60.0, y: 40.3, maxW: 22, maxH: 30 },
+        { id: "H", x: 79.0, y: 40.6, maxW: 20, maxH: 31 },
 
-        { id: "G", x: 14.0, y: 71.2, maxW: 20, maxH: 24 },
-        { id: "H", x: 44.0, y: 69.8, maxW: 16, maxH: 31 },
-        { id: "I", x: 69.0, y: 71.4, maxW: 20, maxH: 24 }
+        { id: "I", x: 16.0, y: 71.6, maxW: 24, maxH: 27 },
+        { id: "J", x: 40.0, y: 70.2, maxW: 22, maxH: 30 },
+        { id: "K", x: 64.0, y: 70.4, maxW: 22, maxH: 30 },
+        { id: "L", x: 83.0, y: 71.3, maxW: 20, maxH: 28 }
       ]
     };
 
     const initialPatterns = {
       3: [
-        ["A", "E", "I"],
-        ["B", "D", "I"],
-        ["A", "F", "G"]
+        ["B", "G", "L"],
+        ["A", "F", "K"],
+        ["C", "H", "J"]
       ],
       4: [
-        ["A", "C", "E", "H"],
-        ["B", "D", "F", "I"],
-        ["A", "E", "G", "I"]
+        ["A", "D", "F", "K"],
+        ["B", "E", "H", "L"],
+        ["C", "F", "I", "K"]
       ],
       5: [
-        ["A", "C", "E", "G", "I"],
-        ["B", "D", "E", "F", "I"],
-        ["A", "B", "E", "F", "G"]
+        ["A", "C", "F", "H", "K"],
+        ["B", "D", "E", "G", "L"],
+        ["A", "D", "F", "J", "L"]
       ],
       6: [
-        ["A", "B", "C", "D", "E", "I"],
-        ["A", "C", "D", "E", "F", "G"],
-        ["B", "C", "D", "E", "H", "I"]
+        ["A", "C", "E", "G", "I", "K"],
+        ["B", "D", "F", "H", "J", "L"],
+        ["A", "D", "F", "G", "I", "L"]
       ]
     };
 
     function setFormat(format) {
       currentFormat = format;
-      document.documentElement.style.setProperty("--aspect", format === "4:3" ? (4 / 3) : (16 / 9));
-      stage.style.backgroundImage = `url("${BG_IMAGES[format]}")`;
+
+      if (format === "4:3") {
+        document.documentElement.style.setProperty("--aspect-num", "4");
+        document.documentElement.style.setProperty("--aspect-den", "3");
+      } else {
+        document.documentElement.style.setProperty("--aspect-num", "16");
+        document.documentElement.style.setProperty("--aspect-den", "9");
+      }
+
+      wallBg.src = BG_IMAGES[format];
 
       btn43.classList.toggle("active", format === "4:3");
       btn169.classList.toggle("active", format === "16:9");
@@ -420,16 +457,6 @@
 
     function sortByUploadOrder(list) {
       return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
-    }
-
-    function classifyAsset(asset) {
-      const w = Number(asset.width || 0);
-      const h = Number(asset.height || 0);
-      if (!w || !h) return "square";
-      const ratio = w / h;
-      if (ratio > 1.18) return "landscape";
-      if (ratio < 0.84) return "portrait";
-      return "square";
     }
 
     function getTaskStyle(asset) {
@@ -524,32 +551,32 @@
     }
 
     function computeCardSize(asset, slot) {
-      const ratio = Math.max(0.55, Math.min(1.8, Number(asset.width || 1) / Number(asset.height || 1)));
+      const ratio = Math.max(0.45, Math.min(2.2, Number(asset.width || 1) / Number(asset.height || 1)));
+
+      const border = 2.2;
+      const caption = 7.2;
 
       let mediaW, mediaH;
 
-      if (ratio > 1.18) {
+      // Rahmen folgt dem Bildformat
+      if (ratio >= 1) {
         mediaW = slot.maxW;
         mediaH = mediaW / ratio;
-        if (mediaH > slot.maxH - 6) {
-          mediaH = slot.maxH - 6;
+        if (mediaH > slot.maxH - caption) {
+          mediaH = slot.maxH - caption;
           mediaW = mediaH * ratio;
         }
-      } else if (ratio < 0.84) {
-        mediaH = slot.maxH - 6;
+      } else {
+        mediaH = slot.maxH - caption;
         mediaW = mediaH * ratio;
         if (mediaW > slot.maxW) {
           mediaW = slot.maxW;
           mediaH = mediaW / ratio;
         }
-      } else {
-        const base = Math.min(slot.maxW, slot.maxH - 6);
-        mediaW = base;
-        mediaH = base;
       }
 
-      const frameW = mediaW + 2.8;
-      const frameH = mediaH + 7.2;
+      const frameW = mediaW + border;
+      const frameH = mediaH + caption;
 
       return { frameW, frameH };
     }
@@ -562,9 +589,10 @@
       wrapper.className = "photo-card attaching";
       wrapper.style.width = `${size.frameW}%`;
       wrapper.style.height = `${size.frameH}%`;
-      wrapper.style.left = `${slot.x}%`;
+
+      // statt translateX(-50%) statisch platzieren -> kein Verrutschen beim Schwingen
+      wrapper.style.left = `calc(${slot.x}% - ${size.frameW / 2}%)`;
       wrapper.style.top = `${slot.y}%`;
-      wrapper.style.transform = "translateX(-50%)";
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
@@ -574,7 +602,7 @@
       media.style.borderColor = style.color;
 
       const img = document.createElement("img");
-      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_2200,h_2200,q_auto,f_auto/${asset.public_id}`;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
       img.alt = style.caption;
 
       const caption = document.createElement("div");
@@ -589,27 +617,36 @@
         this.style.display = "none";
       };
 
-      const photoRot = rand(-7, 7).toFixed(2) + "deg";
-      const clipRot = rand(-9, 9).toFixed(2) + "deg";
-      const clipLeft = rand(46, 54).toFixed(1) + "%";
+      const photoRot = rand(-6, 6).toFixed(2) + "deg";
+      const clipRot = rand(-10, 10).toFixed(2) + "deg";
+      const clipLeft = rand(47, 53).toFixed(1) + "%";
 
       wrapper.style.setProperty("--photo-rot", photoRot);
       wrapper.style.setProperty("--clip-rot", clipRot);
 
-      wrapper.style.setProperty("--photo-start-x", `${rand(-22, 22).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-start-y", `${rand(55, 90).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${rand(-10, 10).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-x", `${rand(-18, 18).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-y", `${rand(48, 82).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-9, 9).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-start-x", `${rand(-16, 16).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-start-y", `${rand(-52, -28).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-start-rot", `${rand(-18, 18).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-start-x", `${rand(-12, 12).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-46, -24).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-rot", `${rand(-15, 15).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--photo-end-x", `${rand(-28, 28).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-end-x", `${rand(-22, 22).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-16, 16).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-end-x", `${rand(-24, 24).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-end-y", `${rand(-24, -8).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-end-rot", `${rand(-22, 22).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-end-x", `${rand(-18, 18).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-22, -6).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
+
+      // zufälligeres Schwingen
+      wrapper.style.setProperty("--sway-duration", `${rand(1.1, 2.2).toFixed(2)}s`);
+      wrapper.style.setProperty("--sway-r1", `${rand(0.2, 2.8).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(0.1, 2.2).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.1, 1.6).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-1.5, 1.5).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-2.0, 2.0).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-1.2, 1.2).toFixed(2)}px`);
 
       clip.style.left = clipLeft;
 
@@ -631,7 +668,7 @@
       wrapper.addEventListener("animationend", () => {
         wrapper.classList.remove("attaching");
         wrapper.classList.add("swinging");
-        setTimeout(() => wrapper.classList.remove("swinging"), 1800);
+        setTimeout(() => wrapper.classList.remove("swinging"), 2300);
       }, { once: true });
 
       currentCards.push(cardObj);
