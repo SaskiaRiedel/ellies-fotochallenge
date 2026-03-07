@@ -8,12 +8,9 @@
 
   <style>
     :root{
-      --wall-bg:#ebe5db;
-      --page-bg:#0f0f10;
-      --shadow:0 12px 28px rgba(0,0,0,.18);
-      --btn-bg:rgba(255,255,255,.62);
-      --btn-bg-active:rgba(255,255,255,.9);
-      --btn-color:#34302c;
+      --wall-bg:#e9e4db;
+      --shadow:0 14px 32px rgba(0,0,0,.20);
+      --caption-text:#111;
       --aspect-num:16;
       --aspect-den:9;
     }
@@ -25,7 +22,7 @@
       width:100%;
       height:100%;
       overflow:hidden;
-      background:var(--page-bg);
+      background:#111;
       font-family:Arial, Helvetica, sans-serif;
     }
 
@@ -38,7 +35,7 @@
       inset:0;
       display:grid;
       place-items:center;
-      background:var(--page-bg);
+      background:#111;
       overflow:hidden;
     }
 
@@ -49,7 +46,7 @@
       display:grid;
       place-items:center;
       overflow:hidden;
-      background:var(--page-bg);
+      background:#111;
     }
 
     .stage{
@@ -76,8 +73,8 @@
       inset:0;
       display:grid;
       place-items:center;
-      color:rgba(0,0,0,.42);
-      font-size:clamp(1.05rem,1.8vw,1.45rem);
+      color:rgba(0,0,0,.45);
+      font-size:clamp(1.1rem,2vw,1.6rem);
       text-align:center;
       padding:24px;
       z-index:20;
@@ -86,12 +83,13 @@
 
     .controls{
       position:fixed;
-      right:10px;
-      bottom:10px;
-      z-index:300;
+      right:14px;
+      bottom:14px;
+      z-index:200;
       display:grid;
       grid-template-columns:repeat(2, auto);
-      gap:5px;
+      gap:6px;
+      opacity:.78;
       transition:opacity .25s ease;
     }
 
@@ -104,21 +102,19 @@
       border:none;
       border-radius:999px;
       padding:6px 10px;
-      background:var(--btn-bg);
-      color:var(--btn-color);
+      background:rgba(255,255,255,.72);
+      color:#4b4b4b;
       cursor:pointer;
       font-size:.78rem;
       font-weight:700;
-      backdrop-filter:blur(4px);
-      box-shadow:0 4px 14px rgba(0,0,0,.12);
-      min-width:52px;
-      opacity:.82;
+      backdrop-filter:blur(5px);
+      box-shadow:0 4px 14px rgba(0,0,0,.14);
+      min-width:56px;
     }
 
     .control-btn.active{
-      background:var(--btn-bg-active);
-      color:#171717;
-      opacity:1;
+      background:rgba(255,255,255,.95);
+      color:#222;
     }
 
     .photo-card{
@@ -131,97 +127,84 @@
     .photo-frame{
       position:relative;
       background:#fff;
-      border-radius:2px;
-      transform-origin:50% 0%;
       box-shadow:var(--shadow);
+      border-radius:2px;
+      transform-origin:var(--swing-origin-x, 50%) 0%;
       overflow:visible;
       will-change:transform, opacity;
     }
 
-    .frame-inner{
-      position:absolute;
-      inset:0;
-      display:flex;
-      flex-direction:column;
+    .media{
+      width:100%;
+      background:#fff;
       overflow:hidden;
-    }
-
-    .media-wrap{
-      position:relative;
-      flex:0 0 auto;
+      border-radius:1px;
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
     }
 
-    .media-wrap img{
+    .media img{
       display:block;
-      max-width:100%;
-      max-height:100%;
-      width:auto;
-      height:auto;
+      width:100%;
+      height:100%;
       object-fit:contain;
-      user-select:none;
-      -webkit-user-drag:none;
+      background:#fff;
     }
 
     .caption{
-      flex:0 0 auto;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
       font-weight:700;
-      color:#111;
-      line-height:1.08;
-      overflow:hidden;
+      color:var(--caption-text);
+      line-height:1.1;
       word-break:break-word;
       hyphens:auto;
+      overflow:hidden;
     }
 
     .caption-text{
       display:-webkit-box;
-      -webkit-line-clamp:2;
       -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
       overflow:hidden;
-      max-width:100%;
       text-overflow:ellipsis;
+      width:100%;
     }
 
     .clip{
       position:absolute;
-      top:0;
-      left:50%;
+      z-index:5;
       transform-origin:center top;
-      z-index:6;
-      pointer-events:none;
       user-select:none;
       -webkit-user-drag:none;
+      pointer-events:none;
       filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));
       will-change:transform, opacity;
-      height:auto;
       width:auto;
+      height:92px;
     }
 
     .photo-card.attaching .photo-frame{
-      animation:attachPhoto 1.2s cubic-bezier(.2,.88,.25,1) forwards;
+      animation:attachPhoto 1.45s cubic-bezier(.2,.86,.22,1) forwards;
     }
 
     .photo-card.attaching .clip{
-      animation:attachClip 1.2s cubic-bezier(.2,.88,.25,1) forwards;
+      animation:attachClip 1.45s cubic-bezier(.2,.86,.22,1) forwards;
     }
 
     .photo-card.swinging .photo-frame{
-      animation:swayPhotoDamped var(--sway-duration,2s) ease-out forwards;
+      animation:swayPhotoDamped var(--sway-duration,2s) ease-out 1 forwards;
     }
 
     .photo-card.detaching .photo-frame{
-      animation:detachPhoto 1.08s ease-in forwards;
+      animation:detachPhoto 1.25s ease forwards;
     }
 
     .photo-card.detaching .clip{
-      animation:detachClip .9s ease-in forwards;
+      animation:detachClip .95s ease forwards;
     }
 
     @keyframes attachPhoto{
@@ -230,13 +213,13 @@
         transform:
           translate(var(--photo-start-x), var(--photo-start-y))
           rotate(var(--photo-start-rot))
-          scale(.96);
+          scale(.95);
       }
       100%{
         opacity:1;
         transform:
           translate(0,0)
-          rotate(var(--photo-rest-rot))
+          rotate(var(--photo-rot))
           scale(1);
       }
     }
@@ -255,48 +238,48 @@
         transform:
           translate(-50%, 0)
           translate(var(--clip-final-x), var(--clip-final-y))
-          rotate(var(--clip-rest-rot))
+          rotate(var(--clip-rot))
           scale(1);
       }
     }
 
     @keyframes swayPhotoDamped{
       0%{
-        transform:translate(0,0) rotate(var(--photo-rest-rot));
+        transform:translate(0,0) rotate(var(--photo-rot));
       }
-      10%{
-        transform:translate(var(--sx1), var(--sy1)) rotate(calc(var(--photo-rest-rot) + var(--sr1)));
+      12%{
+        transform:translate(var(--sway-x1), var(--sway-y1)) rotate(calc(var(--photo-rot) + var(--sway-r1)));
       }
-      22%{
-        transform:translate(var(--sx2), var(--sy2)) rotate(calc(var(--photo-rest-rot) - var(--sr2)));
+      24%{
+        transform:translate(var(--sway-x2), var(--sway-y2)) rotate(calc(var(--photo-rot) - var(--sway-r2)));
       }
-      35%{
-        transform:translate(var(--sx3), var(--sy3)) rotate(calc(var(--photo-rest-rot) + var(--sr3)));
+      38%{
+        transform:translate(var(--sway-x3), var(--sway-y3)) rotate(calc(var(--photo-rot) + var(--sway-r3)));
       }
-      50%{
-        transform:translate(var(--sx4), var(--sy4)) rotate(calc(var(--photo-rest-rot) - var(--sr4)));
+      55%{
+        transform:translate(var(--sway-x4), var(--sway-y4)) rotate(calc(var(--photo-rot) - var(--sway-r4)));
       }
-      66%{
-        transform:translate(var(--sx5), var(--sy5)) rotate(calc(var(--photo-rest-rot) + var(--sr5)));
+      72%{
+        transform:translate(var(--sway-x5), var(--sway-y5)) rotate(calc(var(--photo-rot) + var(--sway-r5)));
       }
-      82%{
-        transform:translate(var(--sx6), var(--sy6)) rotate(calc(var(--photo-rest-rot) - var(--sr6)));
+      88%{
+        transform:translate(var(--sway-x6), var(--sway-y6)) rotate(calc(var(--photo-rot) - var(--sway-r6)));
       }
       100%{
-        transform:translate(0,0) rotate(var(--photo-rest-rot));
+        transform:translate(0,0) rotate(var(--photo-rot));
       }
     }
 
     @keyframes detachPhoto{
       0%{
         opacity:1;
-        transform:translate(0,0) rotate(var(--photo-rest-rot)) scale(1);
+        transform:translate(0,0) rotate(var(--photo-rot)) scale(1);
       }
       100%{
         opacity:0;
         transform:
-          translate(var(--photo-end-x), 150px)
-          rotate(calc(var(--photo-rest-rot) + var(--photo-end-rot)))
+          translate(var(--photo-end-x), 180px)
+          rotate(calc(var(--photo-rot) + var(--photo-end-rot)))
           scale(.94);
       }
     }
@@ -307,7 +290,7 @@
         transform:
           translate(-50%, 0)
           translate(var(--clip-final-x), var(--clip-final-y))
-          rotate(var(--clip-rest-rot))
+          rotate(var(--clip-rot))
           scale(1);
       }
       100%{
@@ -315,9 +298,17 @@
         transform:
           translate(-50%, 0)
           translate(var(--clip-end-x), var(--clip-end-y))
-          rotate(calc(var(--clip-rest-rot) + var(--clip-end-rot)))
+          rotate(calc(var(--clip-rot) + var(--clip-end-rot)))
           scale(.92);
       }
+    }
+
+    @media (max-width:1400px){
+      .clip{ height:84px; }
+    }
+
+    @media (max-width:1100px){
+      .clip{ height:76px; }
     }
   </style>
 </head>
@@ -350,27 +341,20 @@
     const btn75 = document.getElementById("btn75");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260307_fix_faden2";
+    const CACHE_BUSTER = "v=20260307_basefix";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
     }
 
-    const BG_IMAGE = assetUrl("bg_16_9.png");
-    const GUIDE_IMAGE = assetUrl("bg_16_9_Fadenposition.png");
+    const SINGLE_BG = assetUrl("bg_16_9.png");
+    const GUIDE_BG  = assetUrl("bg_16_9_Fadenposition.png");
 
     const CLIP_IMAGES = [
       assetUrl("klammer1_uhd.png"),
       assetUrl("klammer2_uhd.png"),
       assetUrl("klammer3_uhd.png")
     ];
-
-    const aspectMap = {
-      "4:3":   { num:4,  den:3  },
-      "16:9":  { num:16, den:9  },
-      "16:10": { num:16, den:10 },
-      "7:5":   { num:7,  den:5  }
-    };
 
     const allAssets = [];
     const assetIds = new Set();
@@ -383,14 +367,74 @@
 
     let currentFormat = "16:9";
     let nextTimer = null;
-    let fetchTimer = null;
-    let guideReady = false;
-    let ropeModel = null;
-    let cycleCounter = 0;
+    let guideMap = null;
 
-    function rand(min,max){ return Math.random()*(max-min)+min; }
-    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-    function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+    const aspectMap = {
+      "4:3":   { num:4, den:3 },
+      "16:9":  { num:16, den:9 },
+      "16:10": { num:16, den:10 },
+      "7:5":   { num:7, den:5 }
+    };
+
+    // Gute Basis aus deinem funktionierenden Code:
+    // nur ergänzt um row + dynamisches ay über Hilfsbild
+    const ropeSlots = [
+      // oberes Seil
+      { id:"t1", row:"top",    ax:14, maxW:24, maxH:25, clipX:28 },
+      { id:"t2", row:"top",    ax:34, maxW:23, maxH:24, clipX:45 },
+      { id:"t3", row:"top",    ax:54, maxW:23, maxH:24, clipX:55 },
+      { id:"t4", row:"top",    ax:74, maxW:23, maxH:24, clipX:60 },
+      { id:"t5", row:"top",    ax:88, maxW:22, maxH:24, clipX:72 },
+
+      // mittleres Seil
+      { id:"m1", row:"middle", ax:12, maxW:23, maxH:24, clipX:28 },
+      { id:"m2", row:"middle", ax:30, maxW:22, maxH:24, clipX:42 },
+      { id:"m3", row:"middle", ax:49, maxW:22, maxH:24, clipX:50 },
+      { id:"m4", row:"middle", ax:68, maxW:22, maxH:24, clipX:58 },
+      { id:"m5", row:"middle", ax:86, maxW:22, maxH:24, clipX:72 },
+
+      // unteres Seil
+      { id:"b1", row:"bottom", ax:12, maxW:22, maxH:23, clipX:28 },
+      { id:"b2", row:"bottom", ax:31, maxW:22, maxH:23, clipX:43 },
+      { id:"b3", row:"bottom", ax:50, maxW:22, maxH:23, clipX:50 },
+      { id:"b4", row:"bottom", ax:69, maxW:22, maxH:23, clipX:57 },
+      { id:"b5", row:"bottom", ax:87, maxW:22, maxH:23, clipX:72 }
+    ];
+
+    const initialPatterns = {
+      2: [
+        ["t2","m4"],
+        ["m2","b4"],
+        ["t4","b2"]
+      ],
+      3: [
+        ["t1","m3","b5"],
+        ["t2","m4","b2"],
+        ["t4","m2","b4"]
+      ],
+      4: [
+        ["t1","t4","m3","b3"],
+        ["t2","m1","m5","b4"],
+        ["t1","m3","b2","b5"]
+      ],
+      5: [
+        ["t1","t4","m3","b2","b5"],
+        ["t2","m1","m4","b2","b4"],
+        ["t1","t5","m3","b1","b4"]
+      ]
+    };
+
+    function getSlotById(id){
+      return ropeSlots.find(s => s.id === id);
+    }
+
+    function rand(min, max){
+      return Math.random() * (max - min) + min;
+    }
+
+    function pick(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
     function shuffle(arr){
       const copy = [...arr];
@@ -401,24 +445,15 @@
       return copy;
     }
 
-    function requestFullscreen(){
-      const el = document.documentElement;
-      if(!document.fullscreenElement){
-        if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-      }
+    function clamp(v,min,max){
+      return Math.max(min, Math.min(max, v));
     }
 
-    function updateControlsVisibility(){
-      if(document.fullscreenElement){
-        controls.classList.add("hidden");
-      }else{
-        controls.classList.remove("hidden");
-      }
+    function sortByUploadOrder(list){
+      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
     }
 
-    document.addEventListener("fullscreenchange", updateControlsVisibility);
-
-    async function preloadImage(url){
+    function preloadBackground(url){
       return new Promise(resolve => {
         const img = new Image();
         img.onload = () => resolve(img);
@@ -433,8 +468,8 @@
       document.documentElement.style.setProperty("--aspect-num", String(cfg.num));
       document.documentElement.style.setProperty("--aspect-den", String(cfg.den));
 
-      const bg = await preloadImage(BG_IMAGE);
-      bgLayer.style.backgroundImage = bg ? `url("${BG_IMAGE}")` : "none";
+      const ok = await preloadBackground(SINGLE_BG);
+      bgLayer.style.backgroundImage = ok ? `url("${SINGLE_BG}")` : "none";
 
       btn43.classList.toggle("active", format === "4:3");
       btn169.classList.toggle("active", format === "16:9");
@@ -442,35 +477,82 @@
       btn75.classList.toggle("active", format === "7:5");
     }
 
+    function requestFullscreen(){
+      const el = document.documentElement;
+      if(!document.fullscreenElement){
+        if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if(el.msRequestFullscreen) el.msRequestFullscreen();
+      }
+    }
+
+    function updateControlVisibility(){
+      if(document.fullscreenElement){
+        controls.classList.add("hidden");
+      }else{
+        controls.classList.remove("hidden");
+      }
+    }
+
+    document.addEventListener("fullscreenchange", updateControlVisibility);
+
     btn43.addEventListener("click", async () => {
       await setFormat("4:3");
       requestFullscreen();
-      rebuildWall();
+      await rebuildWall();
     });
+
     btn169.addEventListener("click", async () => {
       await setFormat("16:9");
       requestFullscreen();
-      rebuildWall();
+      await rebuildWall();
     });
+
     btn1610.addEventListener("click", async () => {
       await setFormat("16:10");
       requestFullscreen();
-      rebuildWall();
+      await rebuildWall();
     });
+
     btn75.addEventListener("click", async () => {
       await setFormat("7:5");
       requestFullscreen();
-      rebuildWall();
+      await rebuildWall();
     });
 
-    function sortByUploadOrder(list){
-      return list.sort((a,b) => Number(a.version || 0) - Number(b.version || 0));
+    function getTaskStyle(asset){
+      const taskId = asset?.context?.custom?.task_id || "";
+      const task = APP_CONFIG.tasks.find(t => t.id === taskId);
+
+      return {
+        caption: task?.title || asset?.context?.custom?.caption || "Fotochallenge",
+        color: task?.color || "#dbe8f4"
+      };
+    }
+
+    function rememberShown(publicId){
+      recentlyShown.push(publicId);
+      while(recentlyShown.length > MAX_RECENT_TRACK){
+        recentlyShown.shift();
+      }
+    }
+
+    function availableSlots(){
+      const usedIds = new Set(currentCards.map(c => c.slot.id));
+      return ropeSlots.filter(s => !usedIds.has(s.id));
+    }
+
+    function chooseInitialSlots(count){
+      const patterns = initialPatterns[count] || initialPatterns[4];
+      return pick(patterns).map(getSlotById);
     }
 
     function fetchAssets(){
       return fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/fotochallenge.json`)
         .then(response => {
-          if(!response.ok) throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
+          if(!response.ok){
+            throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
+          }
           return response.json();
         })
         .then(data => {
@@ -487,83 +569,74 @@
             }
           });
 
-          emptyNote.style.display = allAssets.length ? "none" : "grid";
+          if(allAssets.length > 0){
+            emptyNote.style.display = "none";
+          }
         })
         .catch(error => console.error(error));
     }
 
-    function getRecentAssets(limit = 14){
+    function getRecentAssets(limit = 12){
       return [...allAssets]
-        .sort((a,b) => Number(b.version || 0) - Number(a.version || 0))
+        .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
         .slice(0, limit);
     }
 
-    function rememberShown(publicId){
-      recentlyShown.push(publicId);
-      while(recentlyShown.length > MAX_RECENT_TRACK){
-        recentlyShown.shift();
-      }
+    function pickAssetForSlot(slot, extraExcluded = []){
+      const shownIds = new Set(currentCards.map(c => c.asset.public_id));
+      const excluded = new Set([...shownIds, ...extraExcluded]);
+
+      const recents = getRecentAssets(12).filter(a => !excluded.has(a.public_id));
+      if(recents.length) return recents[0];
+
+      const older = shuffle(
+        allAssets.filter(a =>
+          !excluded.has(a.public_id) &&
+          !recentlyShown.includes(a.public_id)
+        )
+      );
+      if(older.length) return older[0];
+
+      const fallback = shuffle(
+        allAssets.filter(a => !excluded.has(a.public_id))
+      );
+      return fallback[0] || null;
     }
 
-    function getTaskStyle(asset){
-      const taskId = asset?.context?.custom?.task_id || "";
-      const task = (APP_CONFIG.tasks || []).find(t => t.id === taskId);
-
-      return {
-        caption: task?.title || asset?.context?.custom?.caption || "Fotochallenge",
-        color: task?.color || "#dbe8f4"
-      };
-    }
-
-    function getOrientation(asset){
-      const ratio = Math.max(0.1, Number(asset.width || 1) / Number(asset.height || 1));
-      if(ratio > 1.18) return "landscape";
-      if(ratio < 0.86) return "portrait";
-      return "square";
-    }
-
-    async function buildGuideModel(){
-      const guideImg = await preloadImage(GUIDE_IMAGE);
-      if(!guideImg){
-        guideReady = false;
+    async function buildGuideMap(){
+      const img = await preloadBackground(GUIDE_BG);
+      if(!img){
+        guideMap = null;
         return;
       }
 
       const canvas = document.createElement("canvas");
-      canvas.width = guideImg.naturalWidth;
-      canvas.height = guideImg.naturalHeight;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
       const ctx = canvas.getContext("2d", { willReadFrequently:true });
-      ctx.drawImage(guideImg, 0, 0);
+      ctx.drawImage(img, 0, 0);
 
+      const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
       const w = canvas.width;
       const h = canvas.height;
-      const imgData = ctx.getImageData(0, 0, w, h).data;
 
-      function isGreen(idx){
-        const r = imgData[idx];
-        const g = imgData[idx + 1];
-        const b = imgData[idx + 2];
-        return g > 120 && g > r + 35 && g > b + 35;
+      function isGuideGreen(r,g,b){
+        return g > 120 && g > r + 30 && g > b + 30;
       }
 
-      const rows = [
-        { name:"top",    yMin:0.00, yMax:0.26 },
-        { name:"middle", yMin:0.26, yMax:0.57 },
-        { name:"bottom", yMin:0.57, yMax:0.90 }
-      ];
-
-      const result = {};
-
-      rows.forEach(row => {
+      function scanBand(yMinRatio, yMaxRatio){
+        const yMin = Math.floor(h * yMinRatio);
+        const yMax = Math.floor(h * yMaxRatio);
         const points = [];
-        const y1 = Math.floor(h * row.yMin);
-        const y2 = Math.floor(h * row.yMax);
 
-        for(let x = 0; x < w; x += 4){
+        for(let x = 0; x < w; x += 3){
           let foundY = null;
-          for(let y = y1; y < y2; y++){
+          for(let y = yMin; y < yMax; y++){
             const idx = (y * w + x) * 4;
-            if(isGreen(idx)){
+            const r = data[idx];
+            const g = data[idx+1];
+            const b = data[idx+2];
+            if(isGuideGreen(r,g,b)){
               foundY = y;
               break;
             }
@@ -573,422 +646,399 @@
           }
         }
 
-        if(!points.length) return;
+        return points;
+      }
 
-        result[row.name] = function(xNorm){
-          let nearest = points[0];
-          let best = Math.abs(points[0].x - xNorm);
+      function makeSampler(points, fallbackFn){
+        if(!points.length) return fallbackFn;
 
+        return function(xNorm){
+          let best = points[0];
+          let bestDist = Math.abs(points[0].x - xNorm);
           for(let i = 1; i < points.length; i++){
             const d = Math.abs(points[i].x - xNorm);
-            if(d < best){
-              best = d;
-              nearest = points[i];
+            if(d < bestDist){
+              bestDist = d;
+              best = points[i];
             }
           }
-          return nearest.y;
+          return best.y;
         };
-      });
-
-      ropeModel = result;
-      guideReady = !!(result.top && result.middle && result.bottom);
-    }
-
-    function ropeY(rowName, xNorm){
-      if(guideReady && ropeModel?.[rowName]){
-        return ropeModel[rowName](xNorm);
       }
 
-      if(rowName === "top"){
-        return 0.075 + 0.26 * Math.pow(xNorm - 0.5, 2);
-      }
-      if(rowName === "middle"){
-        return 0.385 + 0.30 * Math.pow(xNorm - 0.5, 2);
-      }
-      return 0.695 + 0.31 * Math.pow(xNorm - 0.5, 2);
-    }
-
-    function buildAnchors(){
-      return [
-        { id:"t1", row:"top",    x:0.12 },
-        { id:"t2", row:"top",    x:0.30 },
-        { id:"t3", row:"top",    x:0.49 },
-        { id:"t4", row:"top",    x:0.69 },
-        { id:"t5", row:"top",    x:0.86 },
-
-        { id:"m1", row:"middle", x:0.13 },
-        { id:"m2", row:"middle", x:0.31 },
-        { id:"m3", row:"middle", x:0.49 },
-        { id:"m4", row:"middle", x:0.68 },
-        { id:"m5", row:"middle", x:0.85 },
-
-        { id:"b1", row:"bottom", x:0.13 },
-        { id:"b2", row:"bottom", x:0.31 },
-        { id:"b3", row:"bottom", x:0.49 },
-        { id:"b4", row:"bottom", x:0.68 },
-        { id:"b5", row:"bottom", x:0.85 }
-      ].map(a => ({
-        ...a,
-        y: ropeY(a.row, a.x)
-      }));
-    }
-
-    function availableResources(extraExcluded = []){
-      const currentIds = new Set(currentCards.map(c => c.asset.public_id));
-      const excluded = new Set([...currentIds, ...extraExcluded]);
-
-      const recents = getRecentAssets().filter(a => !excluded.has(a.public_id));
-      const older = shuffle(
-        allAssets.filter(a => !excluded.has(a.public_id) && !recentlyShown.includes(a.public_id))
-      );
-      const fallback = shuffle(
-        allAssets.filter(a => !excluded.has(a.public_id))
-      );
-
-      return [...recents, ...older, ...fallback].filter((a, i, arr) =>
-        arr.findIndex(b => b.public_id === a.public_id) === i
-      );
-    }
-
-    function estimateTextWidth(text, fontPx){
-      return text.length * fontPx * 0.55;
-    }
-
-    function getStageSize(){
-      return {
-        w: stage.clientWidth,
-        h: stage.clientHeight
+      guideMap = {
+        top: makeSampler(scanBand(0.00, 0.26), x => 0.076 + 0.19 * Math.pow(x - 0.5, 2)),
+        middle: makeSampler(scanBand(0.26, 0.58), x => 0.384 + 0.24 * Math.pow(x - 0.5, 2)),
+        bottom: makeSampler(scanBand(0.58, 0.90), x => 0.694 + 0.25 * Math.pow(x - 0.5, 2))
       };
     }
 
-    function computeCardSize(asset, captionText){
-      const { w:stageW, h:stageH } = getStageSize();
-      const orientation = getOrientation(asset);
-      const ratio = Math.max(0.25, Math.min(3.5, Number(asset.width || 1) / Number(asset.height || 1)));
+    function getRopeY(row, axPercent){
+      const xNorm = axPercent / 100;
+      if(guideMap && guideMap[row]){
+        return guideMap[row](xNorm) * 100;
+      }
 
-      let photoW, photoH, minCardW, maxCardW, maxCardH;
+      if(row === "top") return (0.076 + 0.19 * Math.pow(xNorm - 0.5, 2)) * 100;
+      if(row === "middle") return (0.384 + 0.24 * Math.pow(xNorm - 0.5, 2)) * 100;
+      return (0.694 + 0.25 * Math.pow(xNorm - 0.5, 2)) * 100;
+    }
+
+    function getOrientation(asset){
+      const ratio = Math.max(0.1, Number(asset.width || 1) / Number(asset.height || 1));
+      if(ratio > 1.2) return "landscape";
+      if(ratio < 0.85) return "portrait";
+      return "square";
+    }
+
+    function computeCaptionFontSize(captionText, frameWidthPx){
+      const len = captionText.length;
+      let size = Math.max(15, Math.min(28, frameWidthPx * 0.09));
+
+      if(len > 22) size *= 0.92;
+      if(len > 30) size *= 0.88;
+      if(len > 38) size *= 0.84;
+      if(frameWidthPx < 180) size *= 0.9;
+
+      return clamp(size, 14, 26);
+    }
+
+    function computeCardSize(asset, slot, captionText){
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      const ratio = Math.max(0.45, Math.min(2.8, Number(asset.width || 1) / Number(asset.height || 1)));
+      const orientation = getOrientation(asset);
+
+      let sidePadPx = Math.round(stageW * 0.0055);
+      let topPadPx = Math.round(stageH * 0.006);
+      let bottomPadPx = Math.round(stageH * 0.004);
+
+      let frameWPercent = Math.max(18, Math.min(slot.maxW, captionText.length * 0.36));
+      if(orientation === "portrait") frameWPercent = Math.max(frameWPercent, 14.5);
+      if(orientation === "landscape") frameWPercent = Math.max(frameWPercent, 18.5);
+      if(orientation === "square") frameWPercent = Math.max(frameWPercent, 16.5);
+
+      let frameWPx = stageW * frameWPercent / 100;
+      frameWPx = clamp(frameWPx, stageW * 0.15, stageW * 0.24);
+
+      let innerW = frameWPx - sidePadPx * 2;
+      let maxMediaH = stageH * (slot.maxH / 100) - topPadPx - bottomPadPx - 56;
+
+      let mediaH = Math.min(maxMediaH, innerW / ratio);
+
+      if(orientation === "portrait"){
+        mediaH = Math.min(mediaH, stageH * 0.31);
+        frameWPx = Math.max(frameWPx, mediaH * ratio + sidePadPx * 2);
+      }
 
       if(orientation === "landscape"){
-        photoW = stageW * 0.19;
-        photoH = photoW / ratio;
-        minCardW = stageW * 0.14;
-        maxCardW = stageW * 0.23;
-        maxCardH = stageH * 0.24;
-      }else if(orientation === "portrait"){
-        photoH = stageH * 0.23;
-        photoW = photoH * ratio;
-        minCardW = stageW * 0.11;
-        maxCardW = stageW * 0.18;
-        maxCardH = stageH * 0.34;
-      }else{
-        photoW = stageW * 0.155;
-        photoH = photoW;
-        minCardW = stageW * 0.12;
-        maxCardW = stageW * 0.19;
-        maxCardH = stageH * 0.27;
+        frameWPx = Math.max(frameWPx, stageW * 0.17);
+        innerW = frameWPx - sidePadPx * 2;
+        mediaH = Math.min(maxMediaH, innerW / ratio);
       }
 
-      const whiteBorder = Math.round(stageW * 0.0032);
-      const innerPadX = Math.round(stageW * 0.0034);
-      const innerPadTop = Math.round(stageH * 0.0035);
-
-      let cardW = Math.max(minCardW, photoW + innerPadX * 2);
-      let fontPx = clamp(cardW * 0.048, 14, 22);
-      let neededW = estimateTextWidth(captionText, fontPx) / 2 + stageW * 0.018;
-
-      cardW = clamp(Math.max(cardW, neededW), minCardW, maxCardW);
-      fontPx = clamp(cardW * 0.048, 14, 22);
-
-      const captionH = Math.round(fontPx * 2.35);
-      let cardH = Math.round(whiteBorder * 2 + innerPadTop + photoH + captionH);
-
-      if(cardH > maxCardH){
-        const scale = maxCardH / cardH;
-        photoW *= scale;
-        photoH *= scale;
-        cardW = clamp(cardW * scale, minCardW * 0.95, maxCardW);
-        fontPx = clamp(cardW * 0.046, 13, 20);
-        cardH = Math.round(whiteBorder * 2 + innerPadTop + photoH + Math.round(fontPx * 2.3));
+      if(orientation === "square"){
+        frameWPx = Math.max(frameWPx, stageW * 0.16);
+        innerW = frameWPx - sidePadPx * 2;
+        mediaH = Math.min(maxMediaH, innerW / ratio);
       }
 
-      const clipH = Math.round(stageH * 0.11 * 1.5);
+      const fontSize = computeCaptionFontSize(captionText, frameWPx);
+      const captionH = Math.max(46, Math.round(fontSize * 2.45));
+
+      const frameH = Math.round(mediaH + topPadPx + bottomPadPx + captionH);
+      const clipH = clamp(Math.round(stageH * 0.10), 76, 104);
 
       return {
         orientation,
-        whiteBorder,
-        innerPadX,
-        innerPadTop,
-        photoW: Math.round(photoW),
-        photoH: Math.round(photoH),
-        cardW: Math.round(cardW),
-        cardH: Math.round(cardH),
-        captionH: Math.round(fontPx * 2.3),
-        fontPx: Math.round(fontPx),
+        sidePadPx,
+        topPadPx,
+        bottomPadPx,
+        mediaW: innerW,
+        mediaH,
+        frameWPx,
+        frameH,
+        captionH,
+        fontSize,
         clipH
       };
     }
 
-    function anchorPreference(anchor, orientation){
-      if(orientation === "portrait"){
-        if(anchor.row === "bottom") return -100;
-        if(anchor.row === "middle") return 5;
-        return 10;
-      }
-      if(orientation === "landscape"){
-        if(anchor.row === "middle") return 10;
-        if(anchor.row === "top") return 7;
-        return 4;
-      }
-      if(anchor.row === "middle") return 9;
-      if(anchor.row === "top") return 7;
-      return 5;
-    }
+    function getCardBoxForSlot(slot, size, angleDeg){
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
 
-    function getTopLeft(anchor, metrics){
-      const { w, h } = getStageSize();
-      const ropePxX = anchor.x * w;
-      const ropePxY = anchor.y * h;
+      const ropeXPx = stageW * slot.ax / 100;
+      const ropeYPx = stageH * getRopeY(slot.row, slot.ax) / 100;
 
-      const clipAnchorY = metrics.clipH * 0.72;
-      const cardTop = ropePxY - clipAnchorY;
+      const clipTop = -size.clipH * 0.73; // Klammer liegt am oberen Rand des Fotos
+      const clipAnchorY = -clipTop;       // genau diese Stelle trifft den Faden
+
+      const left = ropeXPx - size.frameWPx * (slot.clipX / 100);
+      const top = ropeYPx - clipAnchorY;
+
+      const rad = Math.abs(angleDeg) * Math.PI / 180;
+      const bbW = Math.abs(Math.cos(rad) * size.frameWPx) + Math.abs(Math.sin(rad) * size.frameH);
+      const bbH = Math.abs(Math.sin(rad) * size.frameWPx) + Math.abs(Math.cos(rad) * size.frameH);
+
+      const cx = left + size.frameWPx / 2;
+      const cy = top + size.frameH / 2;
 
       return {
-        x: ropePxX - metrics.cardW / 2,
-        y: cardTop
+        left,
+        top,
+        right:left + size.frameWPx,
+        bottom:top + size.frameH,
+        bbLeft: cx - bbW / 2,
+        bbTop: cy - bbH / 2,
+        bbRight: cx + bbW / 2,
+        bbBottom: cy + bbH / 2,
+        ropeXPx,
+        ropeYPx,
+        clipTop
       };
     }
 
-    function getBBox(x, y, w, h, angleDeg){
-      const a = Math.abs(angleDeg) * Math.PI / 180;
-      const bw = Math.abs(Math.cos(a) * w) + Math.abs(Math.sin(a) * h);
-      const bh = Math.abs(Math.sin(a) * w) + Math.abs(Math.cos(a) * h);
-
-      return {
-        left: x - (bw - w) / 2,
-        top: y - (bh - h) / 2,
-        right: x + w + (bw - w) / 2,
-        bottom: y + h + (bh - h) / 2
-      };
-    }
-
-    function rectIntersection(a, b){
-      const x = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
-      const y = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    function rectIntersectionArea(a, b){
+      const x = Math.max(0, Math.min(a.bbRight, b.bbRight) - Math.max(a.bbLeft, b.bbLeft));
+      const y = Math.max(0, Math.min(a.bbBottom, b.bbBottom) - Math.max(a.bbTop, b.bbTop));
       return x * y;
     }
 
-    function choosePlacement(asset, reserved = []){
-      const anchors = shuffle(buildAnchors())
-        .filter(a => !currentCards.some(c => c.anchorId === a.id))
-        .filter(a => !reserved.some(r => r.anchorId === a.id));
-
+    function chooseSlotForAsset(asset, excludedSlotIds = [], reserved = []){
+      const orientation = getOrientation(asset);
       const style = getTaskStyle(asset);
-      const metrics = computeCardSize(asset, style.caption);
-      const { w:stageW, h:stageH } = getStageSize();
-      const orientation = metrics.orientation;
+
+      const candidates = shuffle(
+        ropeSlots.filter(slot =>
+          !excludedSlotIds.includes(slot.id) &&
+          !currentCards.some(c => c.slot.id === slot.id) &&
+          !reserved.some(r => r.slot.id === slot.id)
+        )
+      );
 
       let best = null;
       let bestScore = -Infinity;
 
-      for(const anchor of anchors){
-        const angleBase =
-          orientation === "portrait" ? rand(-7, 7) :
-          orientation === "landscape" ? rand(-6, 6) :
-          rand(-7, 7);
+      for(const slot of candidates){
+        const size = computeCardSize(asset, slot, style.caption);
+        let angle = rand(-6.5, 6.5);
 
-        const pos = getTopLeft(anchor, metrics);
-        const bbox = getBBox(pos.x, pos.y, metrics.cardW, metrics.cardH, angleBase);
+        if(slot.row === "top" && slot.ax < 22) angle = rand(-6.5, -1.2);
+        if(slot.row === "top" && slot.ax > 78) angle = rand(1.2, 6.5);
+        if(slot.row === "middle" && slot.ax < 22) angle = rand(-5.5, -1);
+        if(slot.row === "middle" && slot.ax > 78) angle = rand(1, 5.5);
 
-        if(bbox.left < 6 || bbox.right > stageW - 6) continue;
-        if(bbox.top < 6) continue;
-        if(bbox.bottom > stageH - 8) continue;
+        const box = getCardBoxForSlot(slot, size, angle);
 
-        const area = (bbox.right - bbox.left) * (bbox.bottom - bbox.top);
+        if(box.bbLeft < 8 || box.bbRight > stage.clientWidth - 8) continue;
+        if(box.bbTop < 6 || box.bbBottom > stage.clientHeight - 8) continue;
 
+        let overlapBad = false;
         let overlapPenalty = 0;
-        let collision = false;
 
         const others = [
-          ...currentCards.map(c => ({ bbox:c.bbox, area:c.area, orientation:c.orientation })),
-          ...reserved.map(r => ({ bbox:r.bbox, area:r.area, orientation:r.orientation }))
+          ...currentCards.map(c => c.box),
+          ...reserved.map(r => r.box)
         ];
 
-        for(const o of others){
-          const inter = rectIntersection(bbox, o.bbox);
-          const share = inter / Math.min(area, o.area);
+        const ownArea = (box.bbRight - box.bbLeft) * (box.bbBottom - box.bbTop);
 
-          if(share > 0.10){
-            collision = true;
+        for(const other of others){
+          const inter = rectIntersectionArea(box, other);
+          if(inter <= 0) continue;
+
+          const smallerArea = Math.min(
+            ownArea,
+            (other.bbRight - other.bbLeft) * (other.bbBottom - other.bbTop)
+          );
+
+          const ratio = inter / smallerArea;
+          if(ratio > 0.10){
+            overlapBad = true;
             break;
           }
-
-          overlapPenalty += share * 140;
-
-          if(orientation === "landscape" && o.orientation === "landscape"){
-            const sameRow = Math.abs(anchor.y - ((o.anchor?.y) || anchor.y)) < 0.06;
-            if(sameRow) overlapPenalty += 4;
-          }
-
-          if(orientation === "portrait" && o.orientation === "portrait"){
-            overlapPenalty += 2;
-          }
+          overlapPenalty += ratio * 100;
         }
 
-        if(collision) continue;
+        if(overlapBad) continue;
 
-        const score =
-          100
-          + anchorPreference(anchor, orientation) * 10
-          - overlapPenalty
-          + rand(0, 8);
+        let score = 100 - overlapPenalty;
+
+        if(orientation === "portrait" && slot.row === "bottom") score -= 18;
+        if(orientation === "landscape" && slot.row === "middle") score += 10;
+        if(orientation === "square" && slot.row === "middle") score += 7;
+
+        // etwas fairer über die Reihen verteilen
+        const countSameRow = currentCards.filter(c => c.slot.row === slot.row).length + reserved.filter(r => r.slot.row === slot.row).length;
+        score -= countSameRow * 8;
+
+        // leichte Bevorzugung von bislang seltener genutzten Slots
+        const usedCount = currentCards.filter(c => c.slot.id === slot.id).length;
+        score -= usedCount * 30;
 
         if(score > bestScore){
           bestScore = score;
-          best = {
-            anchorId: anchor.id,
-            anchor,
-            x: pos.x,
-            y: pos.y,
-            angle: angleBase,
-            bbox,
-            area,
-            metrics,
-            orientation
-          };
+          best = { slot, size, angle, box };
         }
       }
 
       return best;
     }
 
-    function createCard(asset, placement){
+    function createCard(asset, slotChoice, delayMs = 0){
+      const slot = slotChoice.slot;
       const style = getTaskStyle(asset);
-      const m = placement.metrics;
+      const size = slotChoice.size;
+      const box = slotChoice.box;
+      const photoRot = slotChoice.angle.toFixed(2) + "deg";
+      const clipRot = rand(-10, 10).toFixed(2) + "deg";
+      const stageW = stage.clientWidth;
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
-      wrapper.style.left = `${placement.x}px`;
-      wrapper.style.top = `${placement.y}px`;
-      wrapper.style.width = `${m.cardW}px`;
-      wrapper.style.height = `${m.cardH}px`;
+      wrapper.style.width = `${size.frameWPx}px`;
+      wrapper.style.left = `${box.left}px`;
+      wrapper.style.top = `${box.top}px`;
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.width = `${m.cardW}px`;
-      frame.style.height = `${m.cardH}px`;
-      frame.style.border = `${m.whiteBorder}px solid rgba(255,255,255,.98)`;
-      frame.style.setProperty("--photo-rest-rot", `${placement.angle}deg`);
+      frame.style.width = `${size.frameWPx}px`;
+      frame.style.height = `${size.frameH}px`;
+      frame.style.padding = `${size.topPadPx}px ${size.sidePadPx}px 0 ${size.sidePadPx}px`;
+      frame.style.setProperty("--swing-origin-x", `${slot.clipX}%`);
 
-      const inner = document.createElement("div");
-      inner.className = "frame-inner";
-      inner.style.background = style.color;
-      inner.style.padding = `${m.innerPadTop}px ${m.innerPadX}px 0`;
-
-      const mediaWrap = document.createElement("div");
-      mediaWrap.className = "media-wrap";
-      mediaWrap.style.height = `${m.photoH}px`;
+      const media = document.createElement("div");
+      media.className = "media";
+      media.style.width = "100%";
+      media.style.height = `${Math.round(size.mediaH)}px`;
+      media.style.minHeight = "70px";
+      media.style.border = `6px solid ${style.color}`;
+      media.style.borderBottom = `0 solid ${style.color}`;
 
       const img = document.createElement("img");
       img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
       img.alt = style.caption;
-      img.style.width = `${m.photoW}px`;
-      img.style.height = `${m.photoH}px`;
 
       const caption = document.createElement("div");
       caption.className = "caption";
       caption.style.background = style.color;
-      caption.style.minHeight = `${m.captionH}px`;
-      caption.style.maxHeight = `${m.captionH}px`;
-      caption.style.fontSize = `${m.fontPx}px`;
+      caption.style.minHeight = `${size.captionH}px`;
+      caption.style.padding = `8px 10px`;
+      caption.style.fontSize = `${size.fontSize}px`;
+      caption.style.marginTop = `0`;
 
       const captionText = document.createElement("div");
       captionText.className = "caption-text";
       captionText.textContent = style.caption;
 
-      mediaWrap.appendChild(img);
-      caption.appendChild(captionText);
-      inner.appendChild(mediaWrap);
-      inner.appendChild(caption);
-      frame.appendChild(inner);
-
       const clip = document.createElement("img");
       clip.className = "clip";
       clip.src = pick(CLIP_IMAGES);
-      clip.alt = "";
-      clip.style.height = `${m.clipH}px`;
+      clip.onerror = function(){
+        this.style.display = "none";
+      };
+      clip.style.left = `${slot.clipX}%`;
+      clip.style.top = `${box.clipTop}px`;
+      clip.style.height = `${size.clipH}px`;
 
-      const clipX = rand(-m.cardW * 0.06, m.cardW * 0.06);
-      const clipY = -m.clipH * 0.82;
-      const clipRot = rand(-8, 8);
-
-      clip.style.setProperty("--clip-final-x", `${clipX}px`);
-      clip.style.setProperty("--clip-final-y", `${clipY}px`);
-      clip.style.setProperty("--clip-rest-rot", `${clipRot}deg`);
-
-      wrapper.style.setProperty("--photo-rest-rot", `${placement.angle}deg`);
-      wrapper.style.setProperty("--photo-start-x", `${rand(-8, 8).toFixed(1)}px`);
-      wrapper.style.setProperty("--photo-start-y", `${rand(18, 34).toFixed(1)}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${(placement.angle + rand(-2.4,2.4)).toFixed(2)}deg`);
-
-      wrapper.style.setProperty("--clip-start-x", `${(clipX + rand(-22, 22)).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-start-y", `${(-m.clipH * rand(1.65, 2.15)).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-start-rot", `${(clipRot + rand(-10,10)).toFixed(2)}deg`);
-
-      wrapper.style.setProperty("--photo-end-x", `${rand(-18,18).toFixed(1)}px`);
-      wrapper.style.setProperty("--photo-end-rot", `${rand(-12,12).toFixed(2)}deg`);
-      wrapper.style.setProperty("--clip-end-x", `${rand(-16,16).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-end-y", `${(-m.clipH * rand(0.6, 1.05)).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-end-rot", `${rand(-12,12).toFixed(2)}deg`);
-
-      const swayBase = rand(1.8, 2.25);
-      wrapper.style.setProperty("--sway-duration", `${swayBase.toFixed(2)}s`);
-      wrapper.style.setProperty("--sr1", `${rand(2.1,3.1).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sr2", `${rand(1.45,2.15).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sr3", `${rand(0.85,1.45).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sr4", `${rand(0.45,0.85).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sr5", `${rand(0.20,0.42).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sr6", `${rand(0.08,0.20).toFixed(2)}deg`);
-
-      wrapper.style.setProperty("--sx1", `${rand(-1.8,1.8).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy1", `${rand(-0.9,0.9).toFixed(2)}px`);
-      wrapper.style.setProperty("--sx2", `${rand(-1.4,1.4).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy2", `${rand(-0.6,0.6).toFixed(2)}px`);
-      wrapper.style.setProperty("--sx3", `${rand(-1.0,1.0).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy3", `${rand(-0.4,0.4).toFixed(2)}px`);
-      wrapper.style.setProperty("--sx4", `${rand(-0.55,0.55).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy4", `${rand(-0.25,0.25).toFixed(2)}px`);
-      wrapper.style.setProperty("--sx5", `${rand(-0.25,0.25).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy5", `${rand(-0.12,0.12).toFixed(2)}px`);
-      wrapper.style.setProperty("--sx6", `${rand(-0.12,0.12).toFixed(2)}px`);
-      wrapper.style.setProperty("--sy6", `${rand(-0.06,0.06).toFixed(2)}px`);
-
+      media.appendChild(img);
+      caption.appendChild(captionText);
+      frame.appendChild(media);
+      frame.appendChild(caption);
       wrapper.appendChild(frame);
       wrapper.appendChild(clip);
-      stage.appendChild(wrapper);
+
+      wrapper.style.setProperty("--photo-rot", photoRot);
+      wrapper.style.setProperty("--clip-rot", clipRot);
+
+      // nur von oben / diagonal oben
+      wrapper.style.setProperty("--photo-start-x", `${rand(-10, 10).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-y", `${rand(10, 24).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-8, 8).toFixed(2)}deg`);
+
+      const finalClipX = rand(-4, 4).toFixed(1) + "px";
+      const finalClipY = "0px";
+
+      wrapper.style.setProperty("--clip-final-x", finalClipX);
+      wrapper.style.setProperty("--clip-final-y", finalClipY);
+      wrapper.style.setProperty("--clip-start-x", `${rand(-18, 18).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-80, -48).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-rot", `${rand(-16, 16).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--photo-end-x", `${rand(-22, 22).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-16, 16).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-end-x", `${rand(-18, 18).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-22, -6).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--sway-duration", `${rand(1.9, 2.2).toFixed(2)}s`);
+      wrapper.style.setProperty("--sway-r1", `${rand(2.0, 3.2).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(1.35, 2.2).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.85, 1.45).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r4", `${rand(0.45, 0.85).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r5", `${rand(0.18, 0.38).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r6", `${rand(0.06, 0.16).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--sway-x1", `${rand(-1.3, 1.3).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-0.5, 0.5).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x2", `${rand(-1.0, 1.0).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-0.35, 0.35).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x3", `${rand(-0.65, 0.65).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-0.2, 0.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x4", `${rand(-0.35, 0.35).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y4", `${rand(-0.12, 0.12).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x5", `${rand(-0.16, 0.16).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y5", `${rand(-0.06, 0.06).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x6", `${rand(-0.08, 0.08).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y6", `${rand(-0.03, 0.03).toFixed(2)}px`);
 
       const cardObj = {
         asset,
-        anchorId: placement.anchorId,
-        anchor: placement.anchor,
-        bbox: placement.bbox,
-        area: placement.area,
-        orientation: placement.orientation,
+        slot,
+        box,
+        size,
         el: wrapper,
-        frame,
-        clip,
         mountedAt: Date.now()
       };
 
-      wrapper.addEventListener("animationend", (ev) => {
-        if(ev.animationName === "attachPhoto"){
-          wrapper.classList.remove("attaching");
-          wrapper.classList.add("swinging");
-          setTimeout(() => wrapper.classList.remove("swinging"), Math.round(swayBase * 1000) + 180);
-        }
-      });
+      const mount = () => {
+        stage.appendChild(wrapper);
+        currentCards.push(cardObj);
+        rememberShown(asset.public_id);
 
-      currentCards.push(cardObj);
-      rememberShown(asset.public_id);
+        let frameAttachEnded = false;
+        let clipAttachEnded = false;
+
+        const maybeStartSwing = () => {
+          if(frameAttachEnded && clipAttachEnded){
+            wrapper.classList.remove("attaching");
+            wrapper.classList.add("swinging");
+            setTimeout(() => wrapper.classList.remove("swinging"), 2400);
+          }
+        };
+
+        frame.addEventListener("animationend", (ev) => {
+          if(ev.animationName === "attachPhoto"){
+            frameAttachEnded = true;
+            maybeStartSwing();
+          }
+        });
+
+        clip.addEventListener("animationend", (ev) => {
+          if(ev.animationName === "attachClip"){
+            clipAttachEnded = true;
+            maybeStartSwing();
+          }
+        });
+      };
+
+      if(delayMs > 0){
+        setTimeout(mount, delayMs);
+      }else{
+        mount();
+      }
+
       return cardObj;
     }
 
@@ -1001,39 +1051,15 @@
           cardObj.el.remove();
           const idx = currentCards.indexOf(cardObj);
           if(idx >= 0) currentCards.splice(idx, 1);
-          resolve(cardObj.anchor);
-        }, 1100);
+          resolve(cardObj.slot);
+        }, 1250);
       });
-    }
-
-    function chooseInitialCount(){
-      if(allAssets.length >= 5) return 4;
-      if(allAssets.length === 4) return 4;
-      if(allAssets.length === 3) return 3;
-      return Math.max(2, allAssets.length);
     }
 
     function oldestCards(count){
       return [...currentCards]
-        .sort((a,b) => a.mountedAt - b.mountedAt)
+        .sort((a, b) => a.mountedAt - b.mountedAt)
         .slice(0, count);
-    }
-
-    function chooseExchangePlan(){
-      const cur = currentCards.length;
-      const plans = [
-        { remove:1, add:1 },
-        { remove:1, add:2 },
-        { remove:2, add:1 },
-        { remove:2, add:2 }
-      ];
-
-      const valid = plans.filter(p => {
-        const next = cur - p.remove + p.add;
-        return next >= MIN_VISIBLE && next <= MAX_VISIBLE;
-      });
-
-      return pick(valid);
     }
 
     async function initialRender(){
@@ -1044,19 +1070,56 @@
 
       emptyNote.style.display = "none";
 
-      const count = chooseInitialCount();
-      const pool = availableResources();
+      const startCount = Math.min(MAX_VISIBLE, Math.max(3, allAssets.length >= 5 ? 4 : allAssets.length));
+      const startSlots = chooseInitialSlots(startCount);
+      const used = [];
       const reserved = [];
-      const chosenIds = [];
 
-      for(let i = 0; i < pool.length && reserved.length < count; i++){
-        const asset = pool[i];
-        const placement = choosePlacement(asset, reserved);
-        if(!placement) continue;
-        reserved.push(placement);
-        chosenIds.push(asset.public_id);
-        createCard(asset, placement);
+      let delay = 0;
+
+      for(const slot of startSlots){
+        const asset = pickAssetForSlot(slot, used);
+        if(!asset) continue;
+
+        const chosen = chooseSlotForAsset(asset, [...used.map(()=>null)].filter(Boolean), reserved);
+        // feste Startmuster bevorzugen:
+        const forcedChoice = (() => {
+          const style = getTaskStyle(asset);
+          const size = computeCardSize(asset, slot, style.caption);
+          const angle = rand(-6.2, 6.2);
+          const box = getCardBoxForSlot(slot, size, angle);
+
+          if(box.bbLeft < 8 || box.bbRight > stage.clientWidth - 8) return null;
+          if(box.bbTop < 6 || box.bbBottom > stage.clientHeight - 8) return null;
+
+          return { slot, size, angle, box };
+        })();
+
+        const finalChoice = forcedChoice || chosen;
+        if(!finalChoice) continue;
+
+        reserved.push(finalChoice);
+        used.push(asset.public_id);
+        createCard(asset, finalChoice, delay);
+        delay += 500;
       }
+    }
+
+    function chooseExchangePlan(){
+      const currentCount = currentCards.length;
+      const plans = [
+        { remove:1, add:1 },
+        { remove:1, add:2 },
+        { remove:2, add:1 },
+        { remove:2, add:2 }
+      ];
+
+      const valid = plans.filter(plan => {
+        const nextCount = currentCount - plan.remove + plan.add;
+        return nextCount >= MIN_VISIBLE && nextCount <= MAX_VISIBLE;
+      });
+
+      return pick(valid);
     }
 
     function scheduleNextCycle(delayMs){
@@ -1065,29 +1128,13 @@
     }
 
     async function runCycle(){
-      cycleCounter++;
-
       if(!allAssets.length){
         scheduleNextCycle(5000);
         return;
       }
 
       if(currentCards.length < MIN_VISIBLE){
-        const pool = availableResources();
-        const need = MIN_VISIBLE - currentCards.length;
-        const reserved = [];
-        let added = 0;
-
-        for(let i = 0; i < pool.length && added < need; i++){
-          const asset = pool[i];
-          const placement = choosePlacement(asset, reserved);
-          if(!placement) continue;
-          reserved.push(placement);
-          setTimeout(() => createCard(asset, placement), added * 500);
-          added++;
-        }
-
-        scheduleNextCycle(8000);
+        await rebuildWall();
         return;
       }
 
@@ -1095,47 +1142,56 @@
       const toRemove = oldestCards(plan.remove);
       await Promise.all(toRemove.map(detachCard));
 
-      await new Promise(resolve => setTimeout(resolve, 1400));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const pool = availableResources();
+      const usedNewIds = [];
       const reserved = [];
+      let delay = 0;
       let added = 0;
+      const attempts = shuffle(allAssets);
 
-      for(let i = 0; i < pool.length && added < plan.add; i++){
-        const asset = pool[i];
-        const placement = choosePlacement(asset, reserved);
-        if(!placement) continue;
-        reserved.push(placement);
+      for(const asset of attempts){
+        if(added >= plan.add) break;
+        if(currentCards.some(c => c.asset.public_id === asset.public_id)) continue;
+        if(usedNewIds.includes(asset.public_id)) continue;
 
-        setTimeout(() => createCard(asset, placement), added * 500);
+        const choice = chooseSlotForAsset(asset, [], reserved);
+        if(!choice) continue;
+
+        reserved.push(choice);
+        usedNewIds.push(asset.public_id);
+        createCard(asset, choice, delay);
+        delay += 500;
         added++;
       }
 
-      const delay = plan.add === 2 ? 10000 : 5000;
-      scheduleNextCycle(delay);
+      const delayMs = plan.remove === 1 ? 5000 : 10000;
+      scheduleNextCycle(delayMs);
     }
 
     async function rebuildWall(){
       clearTimeout(nextTimer);
+
       while(currentCards.length){
-        currentCards.pop().el.remove();
+        const card = currentCards.pop();
+        card.el.remove();
       }
+
       await initialRender();
       scheduleNextCycle(8000);
     }
 
     async function boot(){
       await setFormat("16:9");
-      await buildGuideModel();
+      await buildGuideMap();
       await fetchAssets();
       await initialRender();
-      fetchTimer = setInterval(fetchAssets, 10000);
+      setInterval(fetchAssets, 10000);
       scheduleNextCycle(8000);
-      updateControlsVisibility();
+      updateControlVisibility();
     }
 
     boot();
   </script>
 </body>
-
 </html>
