@@ -8,26 +8,24 @@
 
   <style>
     :root {
-      --wall: #f4efe4;
-      --wood1: #9a6435;
-      --wood2: #8a572c;
-      --wood3: #a66d3b;
-      --string: #d9d2c4;
-      --shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
-      --photo-bg: #ffffff;
-      --clip-wood: #cfb28a;
-      --clip-line: #9a7b55;
+      --wall-bg: #f5efe7;
+      --shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+      --frame-bg: #ffffff;
+      --caption-text: #111;
+      --caption-height: 54px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background: var(--wall-bg);
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--wall);
     }
 
     body {
@@ -39,32 +37,12 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: linear-gradient(180deg, #f7f2e8 0%, #f1eadf 100%);
+      background-color: var(--wall-bg);
+      background-image: url("assets/fotowand_bg.png");
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
     }
-
-    /* Wand + Holzflächen */
-    .wall-board {
-      position: absolute;
-      left: 8%;
-      width: 84%;
-      border-radius: 2px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-      background:
-        linear-gradient(90deg,
-          rgba(255,255,255,0.05) 0%,
-          rgba(255,255,255,0.00) 12%,
-          rgba(0,0,0,0.05) 28%,
-          rgba(255,255,255,0.02) 46%,
-          rgba(0,0,0,0.05) 64%,
-          rgba(255,255,255,0.03) 82%,
-          rgba(0,0,0,0.04) 100%),
-        linear-gradient(180deg, var(--wood3), var(--wood2));
-    }
-
-    .board-1 { top: 10%; height: 10%; width: 82%; left: 9%; }
-    .board-2 { top: 28%; height: 12%; width: 88%; left: 6%; }
-    .board-3 { top: 49%; height: 13%; width: 84%; left: 10%; }
-    .board-4 { top: 72%; height: 12%; width: 86%; left: 7%; }
 
     .controls {
       position: absolute;
@@ -79,13 +57,14 @@
       border: none;
       border-radius: 999px;
       padding: 10px 16px;
-      background: rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.55);
       color: #fff;
       cursor: pointer;
       font-size: 0.95rem;
       font-weight: 700;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      color: #f8f8f8;
     }
 
     .empty-note {
@@ -93,7 +72,7 @@
       inset: 0;
       display: grid;
       place-items: center;
-      color: rgba(0,0,0,0.5);
+      color: rgba(0,0,0,0.45);
       font-size: clamp(1.1rem, 2vw, 1.6rem);
       text-align: center;
       padding: 24px;
@@ -101,45 +80,35 @@
       pointer-events: none;
     }
 
-    svg.string-layer {
+    .photo-card {
       position: absolute;
-      inset: 0;
-      z-index: 5;
+      z-index: 30;
       pointer-events: none;
     }
 
-    .photo-card {
-      position: absolute;
-      z-index: 20;
-      opacity: 0;
-      transform-origin: top center;
-      will-change: transform, opacity, left, top;
-    }
-
-    .card-frame {
+    .photo-frame {
       position: relative;
       width: 100%;
       height: 100%;
-      background: var(--photo-bg);
-      box-shadow: var(--shadow);
-      padding: 10px 10px 58px 10px;
+      background: var(--frame-bg);
       border-radius: 2px;
-      overflow: hidden;
+      box-shadow: var(--shadow);
+      overflow: visible;
+      transform-origin: top center;
+      padding: 10px 10px calc(var(--caption-height) + 10px) 10px;
     }
 
-    .photo-inner {
+    .media {
       width: 100%;
       height: 100%;
-      background: #f8f8f8;
+      background: #fff;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      border: 8px solid #fff;
-      border-bottom: 0;
     }
 
-    .photo-inner img {
+    .media img {
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -152,110 +121,119 @@
       left: 10px;
       right: 10px;
       bottom: 10px;
-      min-height: 42px;
-      max-height: 54px;
-      padding: 8px 10px;
+      height: var(--caption-height);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 0.9rem;
-      line-height: 1.15;
+      padding: 8px 10px;
+      font-size: 0.92rem;
+      line-height: 1.14;
       font-weight: 700;
-      color: #111;
-      border-radius: 0 0 2px 2px;
+      color: var(--caption-text);
       overflow: hidden;
     }
 
     .clip {
       position: absolute;
-      width: 22px;
-      height: 46px;
-      z-index: 40;
-      transform-origin: center 8px;
-      opacity: 0;
-      will-change: transform, opacity, left, top;
+      top: -24px;
+      width: 26px;
+      height: auto;
+      z-index: 3;
+      transform-origin: center top;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
     }
 
-    .clip::before {
-      content: "";
-      position: absolute;
-      left: 2px;
-      top: 10px;
-      width: 18px;
-      height: 30px;
-      border-radius: 2px;
-      background: linear-gradient(180deg, #e1c29a, var(--clip-wood));
-      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    .photo-card.attaching .photo-frame {
+      animation: attachPhoto 1.45s ease forwards;
     }
 
-    .clip::after {
-      content: "";
-      position: absolute;
-      left: 8px;
-      top: 0;
-      width: 6px;
-      height: 20px;
-      border: 2px solid var(--clip-line);
-      border-bottom: none;
-      border-radius: 6px 6px 0 0;
-      background: transparent;
+    .photo-card.attaching .clip {
+      animation: attachClip 1.2s ease forwards;
     }
 
-    @keyframes photoAttach {
+    .photo-card.detaching .photo-frame {
+      animation: detachPhoto 1.35s ease forwards;
+    }
+
+    .photo-card.detaching .clip {
+      animation: detachClip 1s ease forwards;
+    }
+
+    @keyframes attachPhoto {
       0% {
         opacity: 0;
-        transform: translate(var(--sx, 0px), var(--sy, 40px)) rotate(var(--sr, 0deg)) scale(0.92);
+        transform:
+          translate(var(--photo-start-x), var(--photo-start-y))
+          rotate(var(--photo-start-rot))
+          scale(0.94);
       }
       100% {
         opacity: 1;
-        transform: translate(0, 0) rotate(var(--rot, 0deg)) scale(1);
+        transform: rotate(var(--photo-rot)) scale(1);
       }
     }
 
-    @keyframes clipAttach {
+    @keyframes attachClip {
       0% {
         opacity: 0;
-        transform: translate(var(--csx, 0px), var(--csy, -30px)) rotate(var(--cr, 0deg)) scale(0.9);
+        transform:
+          translate(var(--clip-start-x), var(--clip-start-y))
+          rotate(var(--clip-start-rot))
+          scale(0.9);
       }
       100% {
         opacity: 1;
-        transform: translate(0, 0) rotate(var(--cliprot, 0deg)) scale(1);
+        transform: rotate(var(--clip-rot)) scale(1);
       }
     }
 
-    @keyframes photoDetach {
+    @keyframes detachPhoto {
       0% {
         opacity: 1;
-        transform: translate(0, 0) rotate(var(--rot, 0deg)) scale(1);
+        transform: rotate(var(--photo-rot)) scale(1);
       }
       100% {
         opacity: 0;
-        transform: translate(var(--dx, 0px), 160px) rotate(calc(var(--rot, 0deg) + var(--dr, 0deg))) scale(0.92);
+        transform:
+          translate(var(--photo-end-x), 180px)
+          rotate(calc(var(--photo-rot) + var(--photo-end-rot)))
+          scale(0.94);
       }
     }
 
-    @keyframes clipDetach {
+    @keyframes detachClip {
       0% {
         opacity: 1;
-        transform: translate(0,0) rotate(var(--cliprot, 0deg));
+        transform: rotate(var(--clip-rot)) scale(1);
       }
       100% {
         opacity: 0;
-        transform: translate(var(--cdx, 0px), var(--cdy, -20px)) rotate(calc(var(--cliprot, 0deg) + var(--cdr, 0deg)));
+        transform:
+          translate(var(--clip-end-x), var(--clip-end-y))
+          rotate(calc(var(--clip-rot) + var(--clip-end-rot)))
+          scale(0.92);
+      }
+    }
+
+    @media (max-width: 1400px) {
+      .caption {
+        font-size: 0.86rem;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .caption {
+        font-size: 0.8rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="stage" id="stage">
-    <div class="board-1 wall-board"></div>
-    <div class="board-2 wall-board"></div>
-    <div class="board-3 wall-board"></div>
-    <div class="board-4 wall-board"></div>
-
-    <svg class="string-layer" id="stringLayer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-
     <div class="controls">
       <button id="fullscreenBtn" class="control-btn" type="button">Vollbild</button>
     </div>
@@ -267,197 +245,59 @@
 
   <script>
     const stage = document.getElementById("stage");
-    const stringLayer = document.getElementById("stringLayer");
     const emptyNote = document.getElementById("emptyNote");
     const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+    const CLIP_IMAGES = [
+      "assets/klammer1.png",
+      "assets/klammer2.png",
+      "assets/klammer3.png"
+    ];
 
     const allAssets = [];
     const assetIds = new Set();
     const currentCards = [];
     const recentlyShown = [];
-    const MAX_RECENT_TRACK = 20;
+    const MAX_RECENT_TRACK = 30;
 
-    let initialized = false;
+    // 9 feste, an die Hintergrund-Fäden angepasste Slots.
+    // Keine Überlappung, saubere Ausrichtung am oberen Fotorand.
+    const slots = [
+      { id: "A", left: 4.5,  top: 10.3, width: 21.0, height: 18.0, type: "landscape" },
+      { id: "B", left: 29.0, top: 8.2,  width: 13.8, height: 24.8, type: "portrait" },
+      { id: "C", left: 55.0, top: 10.0, width: 19.8, height: 17.0, type: "landscape" },
 
-    // 3 Fäden
-    const strings = [
-      { y: 22, sag: 3.5, x1: 10, x2: 90 },
-      { y: 48, sag: 3.0, x1: 8, x2: 92 },
-      { y: 74, sag: 3.8, x1: 10, x2: 90 }
+      { id: "D", left: 6.0,  top: 38.8, width: 19.5, height: 16.2, type: "landscape" },
+      { id: "E", left: 33.0, top: 34.8, width: 15.8, height: 22.4, type: "square" },
+      { id: "F", left: 60.0, top: 33.8, width: 14.0, height: 25.0, type: "portrait" },
+
+      { id: "G", left: 5.0,  top: 69.6, width: 19.5, height: 16.4, type: "landscape" },
+      { id: "H", left: 34.5, top: 64.0, width: 14.0, height: 25.2, type: "portrait" },
+      { id: "I", left: 58.0, top: 70.0, width: 19.8, height: 16.2, type: "landscape" }
     ];
 
-    // Layout-Bibliothek: 24 Varianten
-    // type: portrait / landscape / square
-    const layouts = [
-      [
-        { string: 0, x: 18, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 39, y: 17, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 68, y: 18, w: 14, h: 14, type: "square" },
-        { string: 1, x: 28, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 62, y: 44, w: 15, h: 22, type: "portrait" }
+    const initialPatterns = {
+      3: [
+        ["A", "E", "I"],
+        ["B", "D", "I"],
+        ["A", "F", "G"]
       ],
-      [
-        { string: 0, x: 15, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 47, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 24, y: 44, w: 14, h: 14, type: "square" },
-        { string: 1, x: 48, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 72, y: 43, w: 20, h: 14, type: "landscape" }
+      4: [
+        ["A", "C", "E", "H"],
+        ["B", "D", "F", "I"],
+        ["A", "E", "G", "I"]
       ],
-      [
-        { string: 0, x: 19, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 46, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 20, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 47, y: 45, w: 14, h: 14, type: "square" },
-        { string: 1, x: 69, y: 44, w: 20, h: 14, type: "landscape" }
+      5: [
+        ["A", "C", "E", "G", "I"],
+        ["B", "D", "E", "F", "I"],
+        ["A", "B", "E", "F", "G"]
       ],
-      [
-        { string: 0, x: 16, y: 17, w: 14, h: 14, type: "square" },
-        { string: 0, x: 38, y: 17, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 67, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 22, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 57, y: 44, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 21, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 50, y: 18, w: 14, h: 14, type: "square" },
-        { string: 1, x: 17, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 43, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 72, y: 44, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 13, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 33, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 63, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 25, y: 44, w: 14, h: 14, type: "square" },
-        { string: 1, x: 56, y: 44, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 17, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 43, y: 18, w: 14, h: 14, type: "square" },
-        { string: 0, x: 68, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 20, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 2, x: 53, y: 70, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 20, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 18, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 45, y: 44, w: 14, h: 14, type: "square" },
-        { string: 1, x: 68, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 56, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 15, y: 18, w: 14, h: 14, type: "square" },
-        { string: 0, x: 38, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 63, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 22, y: 70, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 52, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 18, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 48, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 15, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 45, y: 44, w: 14, h: 14, type: "square" },
-        { string: 2, x: 69, y: 69, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 24, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 58, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 18, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 48, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 39, y: 70, w: 14, h: 14, type: "square" }
-      ],
-      [
-        { string: 0, x: 14, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 42, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 69, y: 18, w: 14, h: 14, type: "square" },
-        { string: 2, x: 22, y: 69, w: 15, h: 22, type: "portrait" },
-        { string: 2, x: 54, y: 70, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 18, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 19, y: 44, w: 14, h: 14, type: "square" },
-        { string: 1, x: 42, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 69, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 55, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 20, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 53, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 14, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 2, x: 33, y: 70, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 63, y: 70, w: 14, h: 14, type: "square" }
-      ],
-      [
-        { string: 0, x: 15, y: 18, w: 14, h: 14, type: "square" },
-        { string: 0, x: 37, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 23, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 55, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 70, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 18, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 45, y: 18, w: 14, h: 14, type: "square" },
-        { string: 0, x: 65, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 19, y: 70, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 50, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 24, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 18, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 48, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 33, y: 70, w: 14, h: 14, type: "square" },
-        { string: 2, x: 59, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 12, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 42, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 23, y: 44, w: 14, h: 14, type: "square" },
-        { string: 1, x: 50, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 68, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 19, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 60, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 21, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 52, y: 44, w: 14, h: 14, type: "square" },
-        { string: 2, x: 48, y: 70, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 16, y: 18, w: 14, h: 14, type: "square" },
-        { string: 0, x: 39, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 65, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 19, y: 70, w: 15, h: 22, type: "portrait" },
-        { string: 2, x: 46, y: 70, w: 20, h: 14, type: "landscape" }
-      ],
-      [
-        { string: 0, x: 20, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 52, y: 18, w: 14, h: 14, type: "square" },
-        { string: 1, x: 16, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 44, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 67, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 24, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 48, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 20, y: 44, w: 14, h: 14, type: "square" },
-        { string: 2, x: 31, y: 70, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 60, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 15, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 17, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 1, x: 48, y: 44, w: 20, h: 14, type: "landscape" },
-        { string: 2, x: 37, y: 70, w: 14, h: 14, type: "square" },
-        { string: 2, x: 66, y: 70, w: 15, h: 22, type: "portrait" }
-      ],
-      [
-        { string: 0, x: 18, y: 18, w: 20, h: 14, type: "landscape" },
-        { string: 0, x: 47, y: 18, w: 15, h: 22, type: "portrait" },
-        { string: 1, x: 22, y: 44, w: 15, h: 22, type: "portrait" },
-        { string: 2, x: 44, y: 70, w: 14, h: 14, type: "square" },
-        { string: 2, x: 61, y: 70, w: 20, h: 14, type: "landscape" }
+      6: [
+        ["A", "B", "C", "D", "E", "I"],
+        ["A", "C", "D", "E", "F", "G"],
+        ["B", "C", "D", "E", "H", "I"]
       ]
-    ];
+    };
 
     function requestFullscreen() {
       const el = document.documentElement;
@@ -468,42 +308,12 @@
 
     fullscreenBtn.addEventListener("click", requestFullscreen);
 
-    function drawStrings() {
-      const paths = strings.map((s, i) => {
-        const midX = (s.x1 + s.x2) / 2;
-        const midY = s.y + s.sag;
-        return `
-          <path d="M ${s.x1} ${s.y} Q ${midX} ${midY} ${s.x2} ${s.y}"
-                fill="none"
-                stroke="${getComputedStyle(document.documentElement).getPropertyValue('--string').trim()}"
-                stroke-width="0.35"
-                stroke-linecap="round" />
-        `;
-      }).join("");
-      stringLayer.innerHTML = paths;
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
     }
 
-    function stringYAt(stringIndex, xPercent) {
-      const s = strings[stringIndex];
-      const t = (xPercent - s.x1) / (s.x2 - s.x1);
-      const clamped = Math.max(0, Math.min(1, t));
-      // quadratische Kurve näherungsweise
-      return s.y + 4 * s.sag * clamped * (1 - clamped);
-    }
-
-    function getTaskStyle(asset) {
-      const taskId = asset?.context?.custom?.task_id || "";
-      const task = APP_CONFIG.tasks.find(t => t.id === taskId);
-
-      return {
-        caption: asset?.context?.custom?.caption || "Fotochallenge",
-        color: task?.color || "#f3f3f3",
-        taskId
-      };
-    }
-
-    function sortByUploadOrder(list) {
-      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
     }
 
     function shuffle(arr) {
@@ -515,9 +325,50 @@
       return copy;
     }
 
+    function classifyAsset(asset) {
+      const w = Number(asset.width || 0);
+      const h = Number(asset.height || 0);
+      if (!w || !h) return "square";
+      const ratio = w / h;
+      if (ratio > 1.18) return "landscape";
+      if (ratio < 0.84) return "portrait";
+      return "square";
+    }
+
+    function sortByUploadOrder(list) {
+      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
+    }
+
+    function getTaskStyle(asset) {
+      const taskId = asset?.context?.custom?.task_id || "";
+      const task = APP_CONFIG.tasks.find(t => t.id === taskId);
+
+      return {
+        caption: asset?.context?.custom?.caption || "Fotochallenge",
+        color: task?.color || "#f3f3f3"
+      };
+    }
+
     function rememberShown(publicId) {
       recentlyShown.push(publicId);
-      while (recentlyShown.length > MAX_RECENT_TRACK) recentlyShown.shift();
+      while (recentlyShown.length > MAX_RECENT_TRACK) {
+        recentlyShown.shift();
+      }
+    }
+
+    function getSlotById(id) {
+      return slots.find(s => s.id === id);
+    }
+
+    function availableSlots() {
+      const usedIds = new Set(currentCards.map(c => c.slot.id));
+      return slots.filter(s => !usedIds.has(s.id));
+    }
+
+    function chooseInitialSlots(count) {
+      const patterns = initialPatterns[count] || initialPatterns[5];
+      const ids = pick(patterns);
+      return ids.map(getSlotById);
     }
 
     function fetchAssets() {
@@ -543,349 +394,253 @@
             }
           });
 
-          if (allAssets.length > 0) emptyNote.style.display = "none";
+          if (allAssets.length > 0) {
+            emptyNote.style.display = "none";
+          }
         })
         .catch(error => {
           console.error(error);
         });
     }
 
-    function createCardElements(asset, slot) {
+    function getRecentAssets(limit = 8) {
+      return [...allAssets]
+        .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
+        .slice(0, limit);
+    }
+
+    function pickAssetForSlot(slot, extraExcluded = []) {
+      const shownIds = new Set(currentCards.map(c => c.asset.public_id));
+      const excluded = new Set([...shownIds, ...extraExcluded]);
+      const slotType = slot.type;
+
+      const recents = getRecentAssets(10).filter(a => !excluded.has(a.public_id));
+      const recentTyped = recents.filter(a => classifyAsset(a) === slotType);
+
+      if (recentTyped.length) return recentTyped[0];
+      if (recents.length) return recents[0];
+
+      const olderTyped = shuffle(
+        allAssets.filter(a =>
+          !excluded.has(a.public_id) &&
+          !recentlyShown.includes(a.public_id) &&
+          classifyAsset(a) === slotType
+        )
+      );
+      if (olderTyped.length) return olderTyped[0];
+
+      const olderAny = shuffle(
+        allAssets.filter(a =>
+          !excluded.has(a.public_id) &&
+          !recentlyShown.includes(a.public_id)
+        )
+      );
+      if (olderAny.length) return olderAny[0];
+
+      const fallbackTyped = shuffle(
+        allAssets.filter(a =>
+          !excluded.has(a.public_id) &&
+          classifyAsset(a) === slotType
+        )
+      );
+      if (fallbackTyped.length) return fallbackTyped[0];
+
+      const fallbackAny = shuffle(
+        allAssets.filter(a => !excluded.has(a.public_id))
+      );
+      return fallbackAny[0] || null;
+    }
+
+    function createCard(asset, slot) {
       const style = getTaskStyle(asset);
 
-      const card = document.createElement("div");
-      card.className = "photo-card";
+      const wrapper = document.createElement("div");
+      wrapper.className = "photo-card attaching";
+      wrapper.style.left = `${slot.left}%`;
+      wrapper.style.top = `${slot.top}%`;
+      wrapper.style.width = `${slot.width}%`;
+      wrapper.style.height = `${slot.height}%`;
 
       const frame = document.createElement("div");
-      frame.className = "card-frame";
+      frame.className = "photo-frame";
 
-      const photoWrap = document.createElement("div");
-      photoWrap.className = "photo-wrap";
-      photoWrap.style.borderColor = style.color;
+      const media = document.createElement("div");
+      media.className = "media";
 
       const img = document.createElement("img");
-      img.alt = style.caption;
       img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_1200,h_1200,q_auto,f_auto/${asset.public_id}`;
+      img.alt = style.caption;
 
       const caption = document.createElement("div");
       caption.className = "caption";
       caption.style.background = style.color;
       caption.textContent = style.caption;
 
-      const clip = document.createElement("div");
+      const clip = document.createElement("img");
       clip.className = "clip";
+      clip.src = pick(CLIP_IMAGES);
 
-      photoWrap.appendChild(img);
-      frame.appendChild(photoWrap);
+      const photoRot = rand(-7, 7).toFixed(2) + "deg";
+      const clipRot = rand(-9, 9).toFixed(2) + "deg";
+      const clipLeft = rand(26, 72).toFixed(1) + "%";
+
+      wrapper.style.setProperty("--photo-rot", photoRot);
+      wrapper.style.setProperty("--clip-rot", clipRot);
+
+      wrapper.style.setProperty("--photo-start-x", `${rand(-26, 26).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-y", `${rand(55, 95).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-10, 10).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--clip-start-x", `${rand(-20, 20).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-55, -28).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-rot", `${rand(-18, 18).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--photo-end-x", `${rand(-32, 32).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
+
+      wrapper.style.setProperty("--clip-end-x", `${rand(-24, 24).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-24, -8).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-22, 22).toFixed(2)}deg`);
+
+      clip.style.left = clipLeft;
+
+      media.appendChild(img);
+      frame.appendChild(media);
       frame.appendChild(caption);
-      card.appendChild(frame);
+      wrapper.appendChild(frame);
+      wrapper.appendChild(clip);
 
-      const angle = -8 + Math.random() * 16;
-      const clipAngle = -10 + Math.random() * 20;
-      const tapeOffset = 38 + Math.random() * 24;
+      stage.appendChild(wrapper);
 
-      const left = slot.x;
-      const top = slot.y;
-      const width = slot.w;
-      const height = slot.h;
-
-      card.style.left = `${left}%`;
-      card.style.top = `${top}%`;
-      card.style.width = `${width}%`;
-      card.style.height = `${height}%`;
-      card.style.setProperty("--rot", `${angle}deg`);
-
-      clip.style.left = `${left + (width * tapeOffset / 100)}%`;
-      clip.style.top = `${stringYAt(slot.string, left + width / 2) - 1.4}%`;
-      clip.style.setProperty("--cliprot", `${clipAngle}deg`);
-
-      // Attach-Animation Startwerte
-      const fromX = -20 + Math.random() * 40;
-      const fromY = 60 + Math.random() * 40;
-      const fromR = -10 + Math.random() * 20;
-
-      card.style.setProperty("--sx", `${fromX}px`);
-      card.style.setProperty("--sy", `${fromY}px`);
-      card.style.setProperty("--sr", `${fromR}deg`);
-
-      const clipFromX = -26 + Math.random() * 52;
-      const clipFromY = -50 - Math.random() * 25;
-      const clipFromR = -14 + Math.random() * 28;
-
-      clip.style.setProperty("--csx", `${clipFromX}px`);
-      clip.style.setProperty("--csy", `${clipFromY}px`);
-      clip.style.setProperty("--cr", `${clipFromR}deg`);
-
-      // Detach-Animation Werte
-      const downX = -30 + Math.random() * 60;
-      const downRot = -16 + Math.random() * 32;
-      card.style.setProperty("--dx", `${downX}px`);
-      card.style.setProperty("--dr", `${downRot}deg`);
-
-      const clipOutX = -24 + Math.random() * 48;
-      const clipOutY = -16 - Math.random() * 20;
-      const clipOutR = -16 + Math.random() * 32;
-      clip.style.setProperty("--cdx", `${clipOutX}px`);
-      clip.style.setProperty("--cdy", `${clipOutY}px`);
-      clip.style.setProperty("--cdr", `${clipOutR}deg`);
-
-      return {
+      const cardObj = {
         asset,
         slot,
-        card,
-        clip,
+        el: wrapper,
         mountedAt: Date.now()
       };
-    }
 
-    function attachCard(cardObj) {
-      stage.appendChild(cardObj.card);
-      stage.appendChild(cardObj.clip);
-
-      cardObj.card.style.animation = "photoAttach 0.9s ease forwards";
-      cardObj.clip.style.animation = "clipAttach 0.8s ease forwards";
-      cardObj.card.style.transform = `rotate(${cardObj.card.style.getPropertyValue('--rot')})`;
-
-      cardObj.card.classList.add("show");
-      cardObj.clip.style.opacity = "1";
+      wrapper.addEventListener("animationend", () => {
+        wrapper.classList.remove("attaching");
+      }, { once: true });
 
       currentCards.push(cardObj);
-      rememberShown(cardObj.asset.public_id);
+      rememberShown(asset.public_id);
+
+      return cardObj;
     }
 
     function detachCard(cardObj) {
       return new Promise(resolve => {
-        cardObj.card.style.animation = "photoDetach 0.9s ease forwards";
-        cardObj.clip.style.animation = "clipDetach 0.7s ease forwards";
+        cardObj.el.classList.remove("attaching");
+        cardObj.el.classList.add("detaching");
 
         setTimeout(() => {
-          cardObj.card.remove();
-          cardObj.clip.remove();
-
+          cardObj.el.remove();
           const idx = currentCards.indexOf(cardObj);
           if (idx >= 0) currentCards.splice(idx, 1);
-
-          resolve();
-        }, 950);
+          resolve(cardObj.slot);
+        }, 1400);
       });
     }
 
-    function pickLayout(targetCount) {
-      // wir nutzen die ersten N Slots einer zufälligen 5er-Grundstruktur
-      const base = layouts[Math.floor(Math.random() * layouts.length)];
-      const copy = JSON.parse(JSON.stringify(base));
-
-      if (targetCount === 3) {
-        return [copy[0], copy[2], copy[4]];
-      }
-      if (targetCount === 4) {
-        return [copy[0], copy[1], copy[3], copy[4]];
-      }
-      if (targetCount === 5) {
-        return copy;
-      }
-
-      // 6 Fotos: extra Slot ergänzen
-      const extraCandidates = [
-        { string: 2, x: 16, y: 68, w: 14, h: 14, type: "square" },
-        { string: 2, x: 73, y: 69, w: 14, h: 14, type: "square" },
-        { string: 1, x: 78, y: 42, w: 15, h: 22, type: "portrait" },
-        { string: 0, x: 77, y: 17, w: 15, h: 22, type: "portrait" }
-      ];
-      copy.push(extraCandidates[Math.floor(Math.random() * extraCandidates.length)]);
-      return copy;
-    }
-
-    function findBestAssetForType(candidates, type) {
-      const filtered = candidates.filter(asset => classifyAsset(asset) === type);
-      if (filtered.length > 0) return filtered[0];
-      return candidates[0] || null;
-    }
-
-    function classifyAsset(asset) {
-      const w = Number(asset.width || 0);
-      const h = Number(asset.height || 0);
-      if (!w || !h) return "square";
-      const ratio = w / h;
-      if (ratio > 1.18) return "landscape";
-      if (ratio < 0.84) return "portrait";
-      return "square";
-    }
-
-    function getCandidatePool(excludeIds = []) {
-      const exclude = new Set(excludeIds);
-
-      const recentThreshold = 2 * 60 * 1000; // 2 Minuten
-      const now = Date.now();
-
-      const fresh = allAssets
-        .filter(a => !exclude.has(a.public_id))
-        .filter(a => {
-          const created = new Date(a.created_at).getTime();
-          return (now - created) < recentThreshold;
-        })
-        .sort((a, b) => Number(b.version || 0) - Number(a.version || 0));
-
-      const older = shuffle(
-        allAssets.filter(a =>
-          !exclude.has(a.public_id) &&
-          !fresh.some(f => f.public_id === a.public_id) &&
-          !recentlyShown.includes(a.public_id)
-        )
-      );
-
-      const fallback = shuffle(
-        allAssets.filter(a =>
-          !exclude.has(a.public_id) &&
-          !fresh.some(f => f.public_id === a.public_id)
-        )
-      );
-
-      return [...fresh, ...older, ...fallback];
-    }
-
-    function selectAssetsForLayout(targetCount) {
-      const layout = pickLayout(targetCount);
-      const visibleIds = currentCards.map(c => c.asset.public_id);
-      const pool = getCandidatePool(visibleIds);
-
-      const chosen = [];
-      const used = new Set();
-
-      for (const slot of layout) {
-        const available = pool.filter(a => !used.has(a.public_id));
-        const pick = findBestAssetForType(available, slot.type);
-        if (pick) {
-          chosen.push({ asset: pick, slot });
-          used.add(pick.public_id);
-        }
-      }
-
-      return chosen;
+    function oldestCards(count) {
+      return [...currentCards]
+        .sort((a, b) => a.mountedAt - b.mountedAt)
+        .slice(0, count);
     }
 
     async function initialRender() {
-      if (allAssets.length === 0) {
+      if (!allAssets.length) {
         emptyNote.style.display = "grid";
         return;
       }
+
       emptyNote.style.display = "none";
 
       const startCount = Math.min(5, Math.max(3, allAssets.length >= 5 ? 5 : allAssets.length));
-      const selected = selectAssetsForLayout(startCount);
+      const startSlots = chooseInitialSlots(startCount);
+      const used = [];
 
-      selected.forEach(item => {
-        const cardObj = createCardElements(item.asset, item.slot);
-        attachCard(cardObj);
-      });
-
-      initialized = true;
-      scheduleNextCycle(5000);
+      for (const slot of startSlots) {
+        const asset = pickAssetForSlot(slot, used);
+        if (!asset) continue;
+        used.push(asset.public_id);
+        createCard(asset, slot);
+      }
     }
 
-    function decideExchangePlan() {
-      const currentCount = currentCards.length || 5;
+    function chooseExchangePlan() {
+      const currentCount = currentCards.length;
 
-      const variations = [
+      const plans = [
         { remove: 1, add: 1 },
         { remove: 1, add: 2 },
         { remove: 2, add: 1 },
         { remove: 2, add: 2 },
         { remove: 2, add: 3 },
         { remove: 3, add: 2 },
-        { remove: 3, add: 3 },
-        { remove: 1, add: 3 },
-        { remove: 3, add: 1 }
+        { remove: 3, add: 3 }
       ];
 
-      const possible = variations.filter(v => {
-        const nextCount = currentCount - v.remove + v.add;
+      const valid = plans.filter(plan => {
+        const nextCount = currentCount - plan.remove + plan.add;
         return nextCount >= 3 && nextCount <= 6;
       });
 
-      return possible[Math.floor(Math.random() * possible.length)];
-    }
-
-    function oldestCards(n) {
-      return [...currentCards]
-        .sort((a, b) => a.mountedAt - b.mountedAt)
-        .slice(0, n);
+      return pick(valid);
     }
 
     let nextTimer = null;
 
-    function scheduleNextCycle(delay) {
+    function scheduleNextCycle(delayMs) {
       clearTimeout(nextTimer);
-      nextTimer = setTimeout(runCycle, delay);
+      nextTimer = setTimeout(runCycle, delayMs);
     }
 
     async function runCycle() {
-      if (allAssets.length === 0) {
+      if (!allAssets.length || !currentCards.length) {
         scheduleNextCycle(5000);
         return;
       }
 
-      const plan = decideExchangePlan();
+      const plan = chooseExchangePlan();
       const toRemove = oldestCards(plan.remove);
 
-      // Abnehmen
-      await Promise.all(toRemove.map(detachCard));
+      const removedSlots = await Promise.all(toRemove.map(detachCard));
 
-      // 2 Sekunden warten
-      await new Promise(r => setTimeout(r, 2000));
+      // 2 Sekunden Pause nach dem Abnehmen
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Neu aufhängen
-      const targetCount = currentCards.length + plan.add;
-      const selected = selectAssetsForLayout(targetCount);
+      const stillFree = availableSlots();
+      const preferredSlots = [...removedSlots, ...stillFree.filter(s => !removedSlots.some(r => r.id === s.id))];
 
-      // vorhandene Karten neu auf neue Layoutpositionen verteilen
-      const keepers = [...currentCards];
-      const newLayout = selected.map(x => x.slot);
+      const slotsForNewCards = preferredSlots.slice(0, plan.add);
+      const usedNewIds = [];
 
-      // Zuerst alle verbleibenden Karten auf erste Slots setzen
-      keepers.forEach((cardObj, idx) => {
-        if (!newLayout[idx]) return;
-        const slot = newLayout[idx];
-        const angle = -8 + Math.random() * 16;
-        const clipAngle = -10 + Math.random() * 20;
-        const clipX = 38 + Math.random() * 24;
-
-        cardObj.slot = slot;
-        cardObj.card.style.left = `${slot.x}%`;
-        cardObj.card.style.top = `${slot.y}%`;
-        cardObj.card.style.width = `${slot.w}%`;
-        cardObj.card.style.height = `${slot.h}%`;
-        cardObj.card.style.transform = `rotate(${angle}deg)`;
-        cardObj.card.style.setProperty("--rot", `${angle}deg`);
-
-        cardObj.clip.style.left = `${slot.x + (slot.w * clipX / 100)}%`;
-        cardObj.clip.style.top = `${stringYAt(slot.string, slot.x + slot.w / 2) - 1.4}%`;
-        cardObj.clip.style.transform = `rotate(${clipAngle}deg)`;
-        cardObj.clip.style.setProperty("--cliprot", `${clipAngle}deg`);
-      });
-
-      // danach neue Assets für restliche Slots
-      const keepIds = new Set(keepers.map(k => k.asset.public_id));
-      const remainingSlots = newLayout.slice(keepers.length);
-      const pool = getCandidatePool([...keepIds]);
-
-      for (const slot of remainingSlots) {
-        const candidate = findBestAssetForType(pool.filter(a => !keepIds.has(a.public_id)), slot.type);
-        if (!candidate) continue;
-        keepIds.add(candidate.public_id);
-        const cardObj = createCardElements(candidate, slot);
-        attachCard(cardObj);
+      for (const slot of slotsForNewCards) {
+        const asset = pickAssetForSlot(slot, usedNewIds);
+        if (!asset) continue;
+        usedNewIds.push(asset.public_id);
+        createCard(asset, slot);
       }
 
-      const nextDelay = plan.remove === 1 ? 4000 : plan.remove === 2 ? 8000 : 12000;
-      scheduleNextCycle(nextDelay);
+      // Nächster Wechsel:
+      // 1 Foto -> 4s
+      // 2 Fotos -> 8s
+      // 3 Fotos -> 12s
+      const delay = plan.remove * 4000;
+      scheduleNextCycle(delay);
     }
 
     async function boot() {
-      drawStrings();
       await fetchAssets();
       await initialRender();
+
+      // neue Uploads regelmäßig nachladen
       setInterval(fetchAssets, 10000);
+
+      // erster Wechsel erst nach etwas Ruhe
+      scheduleNextCycle(8000);
     }
 
     boot();
