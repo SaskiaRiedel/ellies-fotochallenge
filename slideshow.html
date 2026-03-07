@@ -8,11 +8,12 @@
 
   <style>
     :root {
-      --wall-bg: #f5efe7;
-      --shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+      --wall-bg: #e9e4db;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.23);
       --frame-bg: #ffffff;
       --caption-text: #111;
       --caption-height: 54px;
+      --aspect: 16/9;
     }
 
     * {
@@ -24,31 +25,49 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: var(--wall-bg);
       font-family: Arial, Helvetica, sans-serif;
+      background: var(--wall-bg);
     }
 
     body {
       position: relative;
     }
 
-    .stage {
+    .viewport {
+      position: fixed;
+      inset: 0;
+      background: #111;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .stage-shell {
       position: relative;
       width: 100vw;
       height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100vw, calc(100vh * var(--aspect)));
+      height: min(100vh, calc(100vw / var(--aspect)));
       overflow: hidden;
       background-color: var(--wall-bg);
-      background-image: url("assets/fotowand_bg.png");
       background-repeat: no-repeat;
       background-position: center center;
-      background-size: cover;
+      background-size: 100% 100%;
     }
 
     .controls {
-      position: absolute;
-      top: 14px;
+      position: fixed;
       right: 16px;
-      z-index: 100;
+      bottom: 16px;
+      z-index: 200;
       display: flex;
       gap: 10px;
     }
@@ -57,14 +76,19 @@
       border: none;
       border-radius: 999px;
       padding: 10px 16px;
-      background: rgba(255,255,255,0.55);
-      color: #fff;
+      background: rgba(255,255,255,0.6);
+      color: #555;
       cursor: pointer;
       font-size: 0.95rem;
       font-weight: 700;
       backdrop-filter: blur(6px);
       box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-      color: #f8f8f8;
+      min-width: 68px;
+    }
+
+    .control-btn.active {
+      background: rgba(255,255,255,0.9);
+      color: #222;
     }
 
     .empty-note {
@@ -84,6 +108,7 @@
       position: absolute;
       z-index: 30;
       pointer-events: none;
+      transform-origin: top center;
     }
 
     .photo-frame {
@@ -94,7 +119,6 @@
       border-radius: 2px;
       box-shadow: var(--shadow);
       overflow: visible;
-      transform-origin: top center;
       padding: 10px 10px calc(var(--caption-height) + 10px) 10px;
     }
 
@@ -106,12 +130,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 8px solid #fff;
+      border-bottom: 0;
     }
 
     .media img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       display: block;
       background: #fff;
     }
@@ -137,9 +163,9 @@
     .clip {
       position: absolute;
       top: -24px;
-      width: 26px;
+      width: 18px;
       height: auto;
-      z-index: 3;
+      z-index: 5;
       transform-origin: center top;
       user-select: none;
       -webkit-user-drag: none;
@@ -148,19 +174,23 @@
     }
 
     .photo-card.attaching .photo-frame {
-      animation: attachPhoto 1.45s ease forwards;
+      animation: attachPhoto 1.55s ease forwards;
     }
 
     .photo-card.attaching .clip {
-      animation: attachClip 1.2s ease forwards;
+      animation: attachClip 1.25s ease forwards;
+    }
+
+    .photo-card.swinging {
+      animation: swayPhoto 1.8s ease-in-out 1;
     }
 
     .photo-card.detaching .photo-frame {
-      animation: detachPhoto 1.35s ease forwards;
+      animation: detachPhoto 1.45s ease forwards;
     }
 
     .photo-card.detaching .clip {
-      animation: detachClip 1s ease forwards;
+      animation: detachClip 1.05s ease forwards;
     }
 
     @keyframes attachPhoto {
@@ -189,6 +219,15 @@
         opacity: 1;
         transform: rotate(var(--clip-rot)) scale(1);
       }
+    }
+
+    @keyframes swayPhoto {
+      0%   { transform: rotate(var(--photo-rot)); }
+      20%  { transform: rotate(calc(var(--photo-rot) + 2.8deg)); }
+      40%  { transform: rotate(calc(var(--photo-rot) - 2.1deg)); }
+      60%  { transform: rotate(calc(var(--photo-rot) + 1.5deg)); }
+      80%  { transform: rotate(calc(var(--photo-rot) - 0.8deg)); }
+      100% { transform: rotate(var(--photo-rot)); }
     }
 
     @keyframes detachPhoto {
@@ -223,36 +262,53 @@
       .caption {
         font-size: 0.86rem;
       }
+      .clip {
+        width: 16px;
+      }
     }
 
     @media (max-width: 1100px) {
       .caption {
         font-size: 0.8rem;
       }
+      .clip {
+        width: 15px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="stage" id="stage">
-    <div class="controls">
-      <button id="fullscreenBtn" class="control-btn" type="button">Vollbild</button>
+  <div class="viewport">
+    <div class="stage-shell">
+      <div class="stage" id="stage">
+        <div class="empty-note" id="emptyNote">
+          Noch keine Bilder in der Fotowand gefunden.
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="empty-note" id="emptyNote">
-      Noch keine Bilder in der Fotowand gefunden.
-    </div>
+  <div class="controls">
+    <button id="btn43" class="control-btn" type="button">4:3</button>
+    <button id="btn169" class="control-btn active" type="button">16:9</button>
   </div>
 
   <script>
     const stage = document.getElementById("stage");
     const emptyNote = document.getElementById("emptyNote");
-    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const btn43 = document.getElementById("btn43");
+    const btn169 = document.getElementById("btn169");
 
     const CLIP_IMAGES = [
-      "assets/klammer1.png",
-      "assets/klammer2.png",
-      "assets/klammer3.png"
+      "./assets/klammer1_hd.png",
+      "./assets/klammer2_hd.png",
+      "./assets/klammer3_hd.png"
     ];
+
+    const BG_IMAGES = {
+      "16:9": "./assets/fotowand_bg_4k_16x9.png",
+      "4:3": "./assets/fotowand_bg_4k_4x3.png"
+    };
 
     const allAssets = [];
     const assetIds = new Set();
@@ -260,21 +316,37 @@
     const recentlyShown = [];
     const MAX_RECENT_TRACK = 30;
 
-    // 9 feste, an die Hintergrund-Fäden angepasste Slots.
-    // Keine Überlappung, saubere Ausrichtung am oberen Fotorand.
-    const slots = [
-      { id: "A", left: 4.5,  top: 10.3, width: 21.0, height: 18.0, type: "landscape" },
-      { id: "B", left: 29.0, top: 8.2,  width: 13.8, height: 24.8, type: "portrait" },
-      { id: "C", left: 55.0, top: 10.0, width: 19.8, height: 17.0, type: "landscape" },
+    let currentFormat = "16:9";
+    let nextTimer = null;
 
-      { id: "D", left: 6.0,  top: 38.8, width: 19.5, height: 16.2, type: "landscape" },
-      { id: "E", left: 33.0, top: 34.8, width: 15.8, height: 22.4, type: "square" },
-      { id: "F", left: 60.0, top: 33.8, width: 14.0, height: 25.0, type: "portrait" },
+    const slotSets = {
+      "16:9": [
+        { id: "A", x: 16.0, y: 11.0, maxW: 22, maxH: 27 },
+        { id: "B", x: 39.0, y: 10.2, maxW: 18, maxH: 31 },
+        { id: "C", x: 66.0, y: 11.4, maxW: 20, maxH: 24 },
 
-      { id: "G", left: 5.0,  top: 69.6, width: 19.5, height: 16.4, type: "landscape" },
-      { id: "H", left: 34.5, top: 64.0, width: 14.0, height: 25.2, type: "portrait" },
-      { id: "I", left: 58.0, top: 70.0, width: 19.8, height: 16.2, type: "landscape" }
-    ];
+        { id: "D", x: 14.0, y: 41.0, maxW: 20, maxH: 24 },
+        { id: "E", x: 42.0, y: 39.4, maxW: 18, maxH: 28 },
+        { id: "F", x: 69.0, y: 39.3, maxW: 16, maxH: 31 },
+
+        { id: "G", x: 14.0, y: 71.2, maxW: 20, maxH: 24 },
+        { id: "H", x: 44.0, y: 69.8, maxW: 16, maxH: 31 },
+        { id: "I", x: 69.0, y: 71.4, maxW: 20, maxH: 24 }
+      ],
+      "4:3": [
+        { id: "A", x: 16.0, y: 11.0, maxW: 22, maxH: 27 },
+        { id: "B", x: 39.0, y: 10.0, maxW: 18, maxH: 31 },
+        { id: "C", x: 66.0, y: 11.4, maxW: 20, maxH: 24 },
+
+        { id: "D", x: 14.0, y: 41.0, maxW: 20, maxH: 24 },
+        { id: "E", x: 42.0, y: 39.4, maxW: 18, maxH: 28 },
+        { id: "F", x: 69.0, y: 39.3, maxW: 16, maxH: 31 },
+
+        { id: "G", x: 14.0, y: 71.2, maxW: 20, maxH: 24 },
+        { id: "H", x: 44.0, y: 69.8, maxW: 16, maxH: 31 },
+        { id: "I", x: 69.0, y: 71.4, maxW: 20, maxH: 24 }
+      ]
+    };
 
     const initialPatterns = {
       3: [
@@ -299,6 +371,15 @@
       ]
     };
 
+    function setFormat(format) {
+      currentFormat = format;
+      document.documentElement.style.setProperty("--aspect", format === "4:3" ? (4 / 3) : (16 / 9));
+      stage.style.backgroundImage = `url("${BG_IMAGES[format]}")`;
+
+      btn43.classList.toggle("active", format === "4:3");
+      btn169.classList.toggle("active", format === "16:9");
+    }
+
     function requestFullscreen() {
       const el = document.documentElement;
       if (el.requestFullscreen) el.requestFullscreen();
@@ -306,7 +387,19 @@
       else if (el.msRequestFullscreen) el.msRequestFullscreen();
     }
 
-    fullscreenBtn.addEventListener("click", requestFullscreen);
+    btn43.addEventListener("click", async () => {
+      setFormat("4:3");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    btn169.addEventListener("click", async () => {
+      setFormat("16:9");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    setFormat("16:9");
 
     function rand(min, max) {
       return Math.random() * (max - min) + min;
@@ -325,6 +418,10 @@
       return copy;
     }
 
+    function sortByUploadOrder(list) {
+      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
+    }
+
     function classifyAsset(asset) {
       const w = Number(asset.width || 0);
       const h = Number(asset.height || 0);
@@ -333,10 +430,6 @@
       if (ratio > 1.18) return "landscape";
       if (ratio < 0.84) return "portrait";
       return "square";
-    }
-
-    function sortByUploadOrder(list) {
-      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
     }
 
     function getTaskStyle(asset) {
@@ -357,12 +450,12 @@
     }
 
     function getSlotById(id) {
-      return slots.find(s => s.id === id);
+      return slotSets[currentFormat].find(s => s.id === id);
     }
 
     function availableSlots() {
       const usedIds = new Set(currentCards.map(c => c.slot.id));
-      return slots.filter(s => !usedIds.has(s.id));
+      return slotSets[currentFormat].filter(s => !usedIds.has(s.id));
     }
 
     function chooseInitialSlots(count) {
@@ -403,7 +496,7 @@
         });
     }
 
-    function getRecentAssets(limit = 8) {
+    function getRecentAssets(limit = 12) {
       return [...allAssets]
         .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
         .slice(0, limit);
@@ -412,63 +505,76 @@
     function pickAssetForSlot(slot, extraExcluded = []) {
       const shownIds = new Set(currentCards.map(c => c.asset.public_id));
       const excluded = new Set([...shownIds, ...extraExcluded]);
-      const slotType = slot.type;
 
-      const recents = getRecentAssets(10).filter(a => !excluded.has(a.public_id));
-      const recentTyped = recents.filter(a => classifyAsset(a) === slotType);
-
-      if (recentTyped.length) return recentTyped[0];
+      const recents = getRecentAssets(12).filter(a => !excluded.has(a.public_id));
       if (recents.length) return recents[0];
 
-      const olderTyped = shuffle(
-        allAssets.filter(a =>
-          !excluded.has(a.public_id) &&
-          !recentlyShown.includes(a.public_id) &&
-          classifyAsset(a) === slotType
-        )
-      );
-      if (olderTyped.length) return olderTyped[0];
-
-      const olderAny = shuffle(
+      const older = shuffle(
         allAssets.filter(a =>
           !excluded.has(a.public_id) &&
           !recentlyShown.includes(a.public_id)
         )
       );
-      if (olderAny.length) return olderAny[0];
+      if (older.length) return older[0];
 
-      const fallbackTyped = shuffle(
-        allAssets.filter(a =>
-          !excluded.has(a.public_id) &&
-          classifyAsset(a) === slotType
-        )
-      );
-      if (fallbackTyped.length) return fallbackTyped[0];
-
-      const fallbackAny = shuffle(
+      const fallback = shuffle(
         allAssets.filter(a => !excluded.has(a.public_id))
       );
-      return fallbackAny[0] || null;
+      return fallback[0] || null;
+    }
+
+    function computeCardSize(asset, slot) {
+      const ratio = Math.max(0.55, Math.min(1.8, Number(asset.width || 1) / Number(asset.height || 1)));
+
+      let mediaW, mediaH;
+
+      if (ratio > 1.18) {
+        mediaW = slot.maxW;
+        mediaH = mediaW / ratio;
+        if (mediaH > slot.maxH - 6) {
+          mediaH = slot.maxH - 6;
+          mediaW = mediaH * ratio;
+        }
+      } else if (ratio < 0.84) {
+        mediaH = slot.maxH - 6;
+        mediaW = mediaH * ratio;
+        if (mediaW > slot.maxW) {
+          mediaW = slot.maxW;
+          mediaH = mediaW / ratio;
+        }
+      } else {
+        const base = Math.min(slot.maxW, slot.maxH - 6);
+        mediaW = base;
+        mediaH = base;
+      }
+
+      const frameW = mediaW + 2.8;
+      const frameH = mediaH + 7.2;
+
+      return { frameW, frameH };
     }
 
     function createCard(asset, slot) {
       const style = getTaskStyle(asset);
+      const size = computeCardSize(asset, slot);
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
-      wrapper.style.left = `${slot.left}%`;
-      wrapper.style.top = `${slot.top}%`;
-      wrapper.style.width = `${slot.width}%`;
-      wrapper.style.height = `${slot.height}%`;
+      wrapper.style.width = `${size.frameW}%`;
+      wrapper.style.height = `${size.frameH}%`;
+      wrapper.style.left = `${slot.x}%`;
+      wrapper.style.top = `${slot.y}%`;
+      wrapper.style.transform = "translateX(-50%)";
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
 
       const media = document.createElement("div");
       media.className = "media";
+      media.style.borderColor = style.color;
 
       const img = document.createElement("img");
-      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_1200,h_1200,q_auto,f_auto/${asset.public_id}`;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_fill,w_2200,h_2200,q_auto,f_auto/${asset.public_id}`;
       img.alt = style.caption;
 
       const caption = document.createElement("div");
@@ -479,23 +585,26 @@
       const clip = document.createElement("img");
       clip.className = "clip";
       clip.src = pick(CLIP_IMAGES);
+      clip.onerror = function () {
+        this.style.display = "none";
+      };
 
       const photoRot = rand(-7, 7).toFixed(2) + "deg";
       const clipRot = rand(-9, 9).toFixed(2) + "deg";
-      const clipLeft = rand(26, 72).toFixed(1) + "%";
+      const clipLeft = rand(46, 54).toFixed(1) + "%";
 
       wrapper.style.setProperty("--photo-rot", photoRot);
       wrapper.style.setProperty("--clip-rot", clipRot);
 
-      wrapper.style.setProperty("--photo-start-x", `${rand(-26, 26).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-start-y", `${rand(55, 95).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-x", `${rand(-22, 22).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-start-y", `${rand(55, 90).toFixed(0)}px`);
       wrapper.style.setProperty("--photo-start-rot", `${rand(-10, 10).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-start-x", `${rand(-20, 20).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-start-y", `${rand(-55, -28).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-x", `${rand(-16, 16).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-52, -28).toFixed(0)}px`);
       wrapper.style.setProperty("--clip-start-rot", `${rand(-18, 18).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--photo-end-x", `${rand(-32, 32).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-x", `${rand(-28, 28).toFixed(0)}px`);
       wrapper.style.setProperty("--photo-end-rot", `${rand(-18, 18).toFixed(2)}deg`);
 
       wrapper.style.setProperty("--clip-end-x", `${rand(-24, 24).toFixed(0)}px`);
@@ -521,6 +630,8 @@
 
       wrapper.addEventListener("animationend", () => {
         wrapper.classList.remove("attaching");
+        wrapper.classList.add("swinging");
+        setTimeout(() => wrapper.classList.remove("swinging"), 1800);
       }, { once: true });
 
       currentCards.push(cardObj);
@@ -531,7 +642,7 @@
 
     function detachCard(cardObj) {
       return new Promise(resolve => {
-        cardObj.el.classList.remove("attaching");
+        cardObj.el.classList.remove("attaching", "swinging");
         cardObj.el.classList.add("detaching");
 
         setTimeout(() => {
@@ -539,7 +650,7 @@
           const idx = currentCards.indexOf(cardObj);
           if (idx >= 0) currentCards.splice(idx, 1);
           resolve(cardObj.slot);
-        }, 1400);
+        }, 1450);
       });
     }
 
@@ -590,8 +701,6 @@
       return pick(valid);
     }
 
-    let nextTimer = null;
-
     function scheduleNextCycle(delayMs) {
       clearTimeout(nextTimer);
       nextTimer = setTimeout(runCycle, delayMs);
@@ -605,15 +714,12 @@
 
       const plan = chooseExchangePlan();
       const toRemove = oldestCards(plan.remove);
-
       const removedSlots = await Promise.all(toRemove.map(detachCard));
 
-      // 2 Sekunden Pause nach dem Abnehmen
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       const stillFree = availableSlots();
       const preferredSlots = [...removedSlots, ...stillFree.filter(s => !removedSlots.some(r => r.id === s.id))];
-
       const slotsForNewCards = preferredSlots.slice(0, plan.add);
       const usedNewIds = [];
 
@@ -624,22 +730,27 @@
         createCard(asset, slot);
       }
 
-      // Nächster Wechsel:
-      // 1 Foto -> 4s
-      // 2 Fotos -> 8s
-      // 3 Fotos -> 12s
-      const delay = plan.remove * 4000;
+      const delay = plan.remove === 1 ? 5000 : plan.remove === 2 ? 10000 : 15000;
       scheduleNextCycle(delay);
+    }
+
+    async function rebuildWall() {
+      clearTimeout(nextTimer);
+
+      while (currentCards.length) {
+        const card = currentCards.pop();
+        card.el.remove();
+      }
+
+      await initialRender();
+      scheduleNextCycle(8000);
     }
 
     async function boot() {
       await fetchAssets();
       await initialRender();
 
-      // neue Uploads regelmäßig nachladen
       setInterval(fetchAssets, 10000);
-
-      // erster Wechsel erst nach etwas Ruhe
       scheduleNextCycle(8000);
     }
 
