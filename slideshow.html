@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fotochallenge</title>
   <script src="config.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --wall-bg:#efe8de;
-      --shadow:0 14px 28px rgba(0,0,0,.18);
+      --wall-bg:#efe7dc;
+      --shadow:0 16px 30px rgba(0,0,0,.18);
       --aspect-num:16;
       --aspect-den:9;
     }
 
     *{ box-sizing:border-box; }
 
-    html, body{
+    html,body{
       margin:0;
       width:100%;
       height:100%;
@@ -102,7 +103,7 @@
       border-radius:999px;
       padding:8px 12px;
       min-width:62px;
-      background:rgba(255,255,255,.72);
+      background:rgba(255,255,255,.74);
       color:#333;
       cursor:pointer;
       font-size:.88rem;
@@ -125,6 +126,8 @@
 
     .photo-frame{
       position:relative;
+      width:100%;
+      height:100%;
       background:#fff;
       box-shadow:var(--shadow);
       overflow:visible;
@@ -134,8 +137,8 @@
 
     .media-wrap{
       width:100%;
-      background:#fff;
       overflow:hidden;
+      background:#fff;
     }
 
     .media-img{
@@ -148,16 +151,16 @@
 
     .caption{
       width:100%;
-      text-align:center;
-      color:#111;
-      line-height:1.04;
-      font-family:'Kalam', cursive;
-      font-weight:700;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:0 10px;
+      text-align:center;
+      color:#111;
+      font-family:'Kalam', cursive;
+      font-weight:700;
+      line-height:1.02;
       overflow:hidden;
+      padding:0 10px;
       word-break:break-word;
     }
 
@@ -165,7 +168,7 @@
       position:absolute;
       z-index:8;
       left:var(--clip-x);
-      top:calc(var(--clip-h) * -0.80);
+      top:calc(var(--clip-h) * -0.80); /* nur ca. 1/5 unter dem Faden */
       height:var(--clip-h);
       width:auto;
       transform:translateX(-50%) rotate(var(--clip-rot));
@@ -173,20 +176,20 @@
       pointer-events:none;
       user-select:none;
       -webkit-user-drag:none;
-      filter:drop-shadow(0 2px 4px rgba(0,0,0,.14));
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));
       will-change:transform, opacity;
     }
 
     .photo-card.attaching .photo-frame{
-      animation:attachPhoto var(--attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
+      animation:attachPhoto var(--attach-duration,1s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
     .photo-card.attaching .clip{
-      animation:attachClip var(--clip-attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
+      animation:attachClip var(--clip-attach-duration,1s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
     .photo-card.swinging .photo-frame{
-      animation:swingToRest var(--swing-duration,2.4s) ease-out forwards;
+      animation:swingToRest var(--swing-duration,2.5s) ease-out forwards;
     }
 
     .photo-card.detaching .photo-frame{
@@ -194,7 +197,7 @@
     }
 
     .photo-card.detaching .clip{
-      animation:detachClip .8s ease forwards;
+      animation:detachClip .78s ease forwards;
     }
 
     @keyframes attachPhoto{
@@ -209,8 +212,7 @@
         opacity:1;
         transform:
           translate(0,0)
-          rotate(var(--rest-rot))
-          scale(1);
+          rotate(calc(var(--rest-rot) + var(--swing-start)));
       }
     }
 
@@ -234,7 +236,7 @@
 
     @keyframes swingToRest{
       0%{
-        transform:translate(0,0) rotate(calc(var(--rest-rot) + var(--swing-a)));
+        transform:translate(0,0) rotate(calc(var(--rest-rot) + var(--swing-start)));
       }
       18%{
         transform:translate(var(--swing-x1), var(--swing-y1)) rotate(calc(var(--rest-rot) - var(--swing-b)));
@@ -242,13 +244,13 @@
       36%{
         transform:translate(var(--swing-x2), var(--swing-y2)) rotate(calc(var(--rest-rot) + var(--swing-c)));
       }
-      54%{
+      56%{
         transform:translate(var(--swing-x3), var(--swing-y3)) rotate(calc(var(--rest-rot) - var(--swing-d)));
       }
-      72%{
+      76%{
         transform:translate(var(--swing-x4), var(--swing-y4)) rotate(calc(var(--rest-rot) + var(--swing-e)));
       }
-      88%{
+      90%{
         transform:translate(var(--swing-x5), var(--swing-y5)) rotate(calc(var(--rest-rot) - var(--swing-f)));
       }
       100%{
@@ -290,8 +292,8 @@
   <div class="viewport">
     <div class="stage-shell">
       <div class="stage" id="stage">
-        <div class="bg-layer" id="bgLayer"></div>
-        <div class="empty-note" id="emptyNote">Noch keine Bilder in der Fotowand gefunden.</div>
+        <div id="bgLayer" class="bg-layer"></div>
+        <div id="emptyNote" class="empty-note">Noch keine Bilder in der Fotowand gefunden.</div>
       </div>
     </div>
   </div>
@@ -315,7 +317,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308e";
+    const CACHE_BUSTER = "v=20260308f";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -324,9 +326,9 @@
     const BG_IMAGE = assetUrl("bg_16_9.png");
 
     const CLIP_VARIANTS = [
-      { src: assetUrl("klammer1_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer2_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer3_uhd.png"), scale: 0.17 }
+      { src: assetUrl("klammer1_uhd.png"), scale: 1.00 },
+      { src: assetUrl("klammer2_uhd.png"), scale: 1.00 },
+      { src: assetUrl("klammer3_uhd.png"), scale: 0.50 } // halb so groß
     ];
 
     const aspectMap = {
@@ -342,9 +344,9 @@
       assetIds: new Set(),
       cards: new Map(),
       showCounts: new Map(),
-      usedPatterns: [],
       nextTimer: null,
-      fetchTimer: null
+      fetchTimer: null,
+      recentPatternKeys: []
     };
 
     const TOP_ROPE = [
@@ -373,20 +375,6 @@
       { x: 95.0, y: 30.7 }
     ];
 
-    const SLOT_POINTS = [
-      { id:"t1", row:"top", x:16 },
-      { id:"t2", row:"top", x:32 },
-      { id:"t3", row:"top", x:48 },
-      { id:"t4", row:"top", x:66 },
-      { id:"t5", row:"top", x:84 },
-
-      { id:"m1", row:"mid", x:18 },
-      { id:"m2", row:"mid", x:36 },
-      { id:"m3", row:"mid", x:52 },
-      { id:"m4", row:"mid", x:68 },
-      { id:"m5", row:"mid", x:84 }
-    ];
-
     function clamp(value, min, max){
       return Math.max(min, Math.min(max, value));
     }
@@ -412,16 +400,6 @@
       return copy;
     }
 
-    function uniqueBy(list, keyFn){
-      const seen = new Set();
-      return list.filter(item => {
-        const key = keyFn(item);
-        if(seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-
     function ropeY(curve, x){
       for(let i = 0; i < curve.length - 1; i++){
         const a = curve[i];
@@ -434,16 +412,34 @@
       return curve[curve.length - 1].y;
     }
 
-    const SLOTS = SLOT_POINTS.map(slot => ({
-      ...slot,
-      y: slot.row === "top" ? ropeY(TOP_ROPE, slot.x) : ropeY(MID_ROPE, slot.x)
-    }));
+    const SLOT_KEYS = {
+      TL: { key:"TL", row:"top", x:18,  y:ropeY(TOP_ROPE,18) },
+      TC: { key:"TC", row:"top", x:50,  y:ropeY(TOP_ROPE,50) },
+      TR: { key:"TR", row:"top", x:82,  y:ropeY(TOP_ROPE,82) },
+      ML: { key:"ML", row:"mid", x:18,  y:ropeY(MID_ROPE,18) },
+      MC: { key:"MC", row:"mid", x:50,  y:ropeY(MID_ROPE,50) },
+      MR: { key:"MR", row:"mid", x:82,  y:ropeY(MID_ROPE,82) }
+    };
 
-    function getSlot(id){
-      return SLOTS.find(s => s.id === id);
+    // bewusst nur wenige, saubere Grundmuster
+    const PATTERNS = [
+      ["TL","TR"],
+      ["TC","ML"],
+      ["TC","MR"],
+      ["TL","MC"],
+      ["TR","MC"],
+      ["ML","MR"],
+      ["TL","MC","TR"],
+      ["TC","ML","MR"],
+      ["TL","MR","MC"],
+      ["TR","ML","MC"]
+    ];
+
+    function slotOf(key){
+      return SLOT_KEYS[key];
     }
 
-    function preloadImage(url){
+    async function preloadImage(url){
       return new Promise(resolve => {
         const img = new Image();
         img.onload = () => resolve(true);
@@ -455,7 +451,6 @@
     async function setFormat(format){
       state.currentFormat = format;
       const cfg = aspectMap[format];
-
       document.documentElement.style.setProperty("--aspect-num", String(cfg.num));
       document.documentElement.style.setProperty("--aspect-den", String(cfg.den));
 
@@ -477,8 +472,7 @@
     }
 
     function updateControlsVisibility(){
-      const fullscreen = !!document.fullscreenElement;
-      controls.classList.toggle("hidden", fullscreen);
+      controls.classList.toggle("hidden", !!document.fullscreenElement);
     }
 
     document.addEventListener("fullscreenchange", updateControlsVisibility);
@@ -508,7 +502,6 @@
 
         const data = await response.json();
         const resources = Array.isArray(data.resources) ? data.resources : [];
-
         const onlyImages = resources.filter(asset => {
           const format = (asset.format || "").toLowerCase();
           return ["jpg","jpeg","png","webp","heic"].includes(format);
@@ -533,54 +526,98 @@
         ? APP_CONFIG.tasks.find(t => t.id === taskId)
         : null;
 
-      const caption =
-        asset?.context?.custom?.caption ||
-        task?.caption ||
-        task?.subtitle ||
-        task?.label ||
-        "Fotochallenge";
-
       return {
-        taskId,
-        caption,
-        color: task?.color || "#dce9f4"
+        caption:
+          asset?.context?.custom?.caption ||
+          task?.subtitle ||
+          task?.caption ||
+          "Fotochallenge",
+        color: task?.color || "#dce8f5"
       };
     }
 
-    function estimateCaptionMinWidth(text){
-      const len = (text || "").trim().length;
-      return clamp(12 + len * 0.22, 16, 28);
+    function getShownCount(id){
+      return state.showCounts.get(id) || 0;
     }
 
-    function buildLayout(asset){
+    function markShown(id){
+      state.showCounts.set(id, getShownCount(id) + 1);
+    }
+
+    function recentAssets(maxAgeSeconds = 300){
+      const now = Date.now() / 1000;
+      return state.allAssets.filter(a => Number(a.version || 0) >= now - maxAgeSeconds);
+    }
+
+    function getAssetPool(){
+      const currentIds = new Set(Array.from(state.cards.values()).map(c => c.asset.public_id));
+      const fresh = recentAssets(300)
+        .filter(a => !currentIds.has(a.public_id))
+        .sort((a,b) => Number(b.version || 0) - Number(a.version || 0));
+
+      const others = state.allAssets
+        .filter(a => !currentIds.has(a.public_id))
+        .sort((a,b) => {
+          const diff = getShownCount(a.public_id) - getShownCount(b.public_id);
+          if(diff !== 0) return diff;
+          return Number(a.version || 0) - Number(b.version || 0);
+        });
+
+      const result = [];
+      const seen = new Set();
+
+      for(const a of fresh.slice(0,2)){
+        if(!seen.has(a.public_id)){
+          seen.add(a.public_id);
+          result.push(a);
+        }
+      }
+      for(const a of others){
+        if(!seen.has(a.public_id)){
+          seen.add(a.public_id);
+          result.push(a);
+        }
+      }
+      return result;
+    }
+
+    function stageMetrics(){
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      const diag = Math.sqrt(w*w + h*h);
+      return { w, h, diag };
+    }
+
+    function computeLayout(asset, photoCount){
+      const metrics = stageMetrics();
       const ratio = Math.max(0.45, Math.min(2.8, Number(asset.width || 1) / Number(asset.height || 1)));
       const meta = getTaskMeta(asset);
 
-      const sidePad = 1.3;
-      const topPad = 1.2;
-      const bottomPad = 1.1;
+      // Bilddiagonale = 35% der Bildschirmdiagonale
+      let targetDiag = metrics.diag * 0.35;
 
-      const LONGEST_SIDE = 40.0;
+      // kleine Korrektur für 3 Bilder, damit es noch sauber bleibt
+      if(photoCount === 3) targetDiag *= 0.94;
 
       let mediaW, mediaH;
       if(ratio >= 1){
-        mediaW = LONGEST_SIDE;
+        mediaW = targetDiag / Math.sqrt(1 + (1 / (ratio * ratio)));
         mediaH = mediaW / ratio;
       }else{
-        mediaH = LONGEST_SIDE;
+        mediaH = targetDiag / Math.sqrt(1 + ratio * ratio);
         mediaW = mediaH * ratio;
       }
 
-      mediaW = clamp(mediaW, 18, 40);
-      mediaH = clamp(mediaH, 18, 40);
+      // harte Grenzen gegen Übertreibung / Herauslaufen
+      mediaW = clamp(mediaW, 250, metrics.w * 0.40);
+      mediaH = clamp(mediaH, 220, metrics.h * 0.46);
 
-      let frameW = mediaW + sidePad * 2;
-      frameW = Math.max(frameW, estimateCaptionMinWidth(meta.caption) + 2.2);
+      const outerPad = clamp(metrics.w * 0.006, 8, 14);
+      const frameBorder = clamp(metrics.w * 0.0045, 5, 10);
 
-      let captionFont = clamp(frameW * 0.10, 1.35, 2.55);
-      const captionBoxH = clamp(captionFont * 2.55, 5.2, 8.2);
-
-      const frameH = mediaH + topPad + bottomPad + captionBoxH;
+      const frameW = mediaW + outerPad * 2;
+      const captionH = clamp(mediaH * 0.20, 64, 104);
+      const frameH = mediaH + outerPad * 2 + captionH;
 
       return {
         ratio,
@@ -589,35 +626,41 @@
         mediaH,
         frameW,
         frameH,
-        sidePad,
-        topPad,
-        bottomPad,
-        captionFont,
-        captionBoxH
+        outerPad,
+        frameBorder,
+        captionH
       };
     }
 
-    function rectForPlacement(slot, layout, rotDeg){
-      const clipXPercent = clamp(50 + rand(-8, 8), 42, 58);
+    function rectForPlacement(slotKey, layout, rotDeg){
+      const slot = slotOf(slotKey);
 
-      const left = slot.x - (layout.frameW * (clipXPercent / 100));
-      const top = slot.y;
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
 
-      const w = layout.frameW;
-      const h = layout.frameH;
+      const anchorX = stageW * (slot.x / 100);
+      const anchorY = stageH * (slot.y / 100);
 
-      const inflate = Math.abs(rotDeg) * 0.12 + 0.8;
+      const clipXPercent = clamp(50 + rand(-7, 7), 44, 56);
+
+      const left = anchorX - layout.frameW * (clipXPercent / 100);
+      const top = anchorY;
+
+      const pad = Math.abs(rotDeg) * 2.2 + 8;
 
       return {
+        slotKey,
         clipXPercent,
+        anchorX,
+        anchorY,
         left,
         top,
-        width: w,
-        height: h,
-        boxLeft: left - inflate,
-        boxTop: top - 1.0,
-        boxRight: left + w + inflate,
-        boxBottom: top + h + inflate
+        width: layout.frameW,
+        height: layout.frameH,
+        boxLeft: left - pad,
+        boxTop: top - 4,
+        boxRight: left + layout.frameW + pad,
+        boxBottom: top + layout.frameH + pad
       };
     }
 
@@ -636,176 +679,160 @@
       return inter / Math.min(areaA, areaB);
     }
 
-    function withinStage(rect){
+    function insideStage(rect){
       return (
-        rect.left >= 1 &&
-        rect.top >= 1 &&
-        rect.left + rect.width <= 99 &&
-        rect.top + rect.height <= 97.5
+        rect.left >= 20 &&
+        rect.top >= 18 &&
+        rect.left + rect.width <= stage.clientWidth - 20 &&
+        rect.top + rect.height <= stage.clientHeight - 18
       );
     }
 
-    function generatePatterns(){
-      const twoers = [];
-      const threeers = [];
+    function fitCaption(el, maxPx, minPx = 16){
+      let size = maxPx;
+      el.style.fontSize = `${size}px`;
+      el.style.maxHeight = "2.12em";
 
-      for(let i = 0; i < SLOTS.length; i++){
-        for(let j = i + 1; j < SLOTS.length; j++){
-          const a = SLOTS[i], b = SLOTS[j];
-          const dx = Math.abs(a.x - b.x);
-          const sameRow = a.row === b.row;
-
-          if((sameRow && dx >= 20) || (!sameRow && dx >= 10)){
-            twoers.push([a.id, b.id]);
-          }
-        }
+      while(size > minPx && el.scrollHeight > el.clientHeight + 1){
+        size -= 1;
+        el.style.fontSize = `${size}px`;
       }
-
-      for(let i = 0; i < SLOTS.length; i++){
-        for(let j = i + 1; j < SLOTS.length; j++){
-          for(let k = j + 1; k < SLOTS.length; k++){
-            const ids = [SLOTS[i], SLOTS[j], SLOTS[k]];
-            const topCount = ids.filter(s => s.row === "top").length;
-            const midCount = ids.filter(s => s.row === "mid").length;
-            if(topCount === 0 || midCount === 0) continue;
-
-            let ok = true;
-            for(let a = 0; a < ids.length; a++){
-              for(let b = a + 1; b < ids.length; b++){
-                const dx = Math.abs(ids[a].x - ids[b].x);
-                const sameRow = ids[a].row === ids[b].row;
-                if((sameRow && dx < 18) || (!sameRow && dx < 10)){
-                  ok = false;
-                }
-              }
-            }
-            if(ok) threeers.push(ids.map(s => s.id));
-          }
-        }
-      }
-
-      return [...twoers, ...threeers];
     }
 
-    const PATTERNS = generatePatterns();
+    function makePatternKey(pattern){
+      return pattern.join("|");
+    }
 
     function chooseNextPattern(){
-      const currentIds = Array.from(state.cards.keys());
-      const currentSet = new Set(currentIds);
+      const current = Array.from(state.cards.keys());
+      const currentSet = new Set(current);
 
       const candidates = PATTERNS.filter(pattern => {
-        const overlap = pattern.filter(id => currentSet.has(id)).length;
-        if(currentIds.length === 0) return true;
-        return overlap >= 1 && overlap < currentIds.length;
+        const overlap = pattern.filter(key => currentSet.has(key)).length;
+        if(current.length === 0) return true;
+        return overlap >= 1 && overlap <= 2;
       });
 
-      let pool = candidates.length ? candidates : PATTERNS;
+      const recent = new Set(state.recentPatternKeys.slice(-5));
+      const filtered = candidates.filter(p => !recent.has(makePatternKey(p)));
+      const pool = filtered.length ? filtered : candidates;
 
-      const recentKeySet = new Set(state.usedPatterns.slice(-8));
-      pool = pool.filter(p => !recentKeySet.has(p.join("|"))) || pool;
-
-      const weighted = shuffle(pool).sort((a, b) => a.length - b.length);
-      const chosen = pick(weighted);
-
-      state.usedPatterns.push(chosen.join("|"));
-      if(state.usedPatterns.length > 40) state.usedPatterns.shift();
+      const chosen = pick(shuffle(pool));
+      state.recentPatternKeys.push(makePatternKey(chosen));
+      if(state.recentPatternKeys.length > 20) state.recentPatternKeys.shift();
 
       return chosen;
     }
 
-    function getShownCount(id){
-      return state.showCounts.get(id) || 0;
-    }
+    function tryBuildAssetsForPattern(pattern){
+      const keepCards = Array.from(state.cards.values()).filter(card => pattern.includes(card.slotKey));
+      const assetsBySlot = {};
 
-    function markShown(id){
-      state.showCounts.set(id, getShownCount(id) + 1);
-    }
-
-    function recentAssets(maxAgeSeconds = 300){
-      const now = Date.now() / 1000;
-      return state.allAssets.filter(a => Number(a.version || 0) >= now - maxAgeSeconds);
-    }
-
-    function chooseAssetsForAdd(count){
-      const currentIds = new Set(Array.from(state.cards.values()).map(card => card.asset.public_id));
-      const allFree = state.allAssets.filter(a => !currentIds.has(a.public_id));
-      const newest = recentAssets(300).filter(a => !currentIds.has(a.public_id));
-
-      const chosen = [];
-      const chosenIds = new Set();
-
-      const newestSorted = [...newest].sort((a, b) => Number(b.version || 0) - Number(a.version || 0));
-      const maxFresh = Math.min(2, count);
-
-      for(const a of newestSorted){
-        if(chosen.length >= maxFresh) break;
-        chosen.push(a);
-        chosenIds.add(a.public_id);
+      for(const card of keepCards){
+        assetsBySlot[card.slotKey] = card.asset;
       }
 
-      const remaining = allFree
-        .filter(a => !chosenIds.has(a.public_id))
-        .sort((a, b) => {
-          const c = getShownCount(a.public_id) - getShownCount(b.public_id);
-          if(c !== 0) return c;
-          return Number(a.version || 0) - Number(b.version || 0);
-        });
+      const missing = pattern.filter(key => !assetsBySlot[key]);
+      const pool = getAssetPool();
 
-      for(const a of remaining){
-        if(chosen.length >= count) break;
-        chosen.push(a);
-        chosenIds.add(a.public_id);
+      for(const key of missing){
+        let chosen = null;
+        for(const asset of pool){
+          const usedIds = new Set(Object.values(assetsBySlot).filter(Boolean).map(a => a.public_id));
+          if(usedIds.has(asset.public_id)) continue;
+
+          assetsBySlot[key] = asset;
+
+          if(patternWouldFit(pattern, assetsBySlot)){
+            chosen = asset;
+            break;
+          }
+        }
+        if(!chosen) return null;
       }
 
-      return chosen.slice(0, count);
+      return assetsBySlot;
     }
 
-    function fitCaption(captionEl, maxPx = 40, minPx = 20){
-      let size = maxPx;
-      captionEl.style.fontSize = `${size}px`;
-      captionEl.style.lineHeight = "1.02";
-      captionEl.style.maxHeight = "2.15em";
+    function patternWouldFit(pattern, assetsBySlot){
+      const rects = [];
+      for(const slotKey of pattern){
+        const asset = assetsBySlot[slotKey];
+        if(!asset) return false;
 
-      while(size > minPx && captionEl.scrollHeight > captionEl.clientHeight + 1){
-        size -= 1;
-        captionEl.style.fontSize = `${size}px`;
+        const layout = computeLayout(asset, pattern.length);
+        const rot = 0;
+        const rect = rectForPlacement(slotKey, layout, rot);
+
+        if(!insideStage(rect)) return false;
+
+        for(const other of rects){
+          if(overlapRatio(rect, other) > 0.04) return false;
+        }
+        rects.push(rect);
       }
+      return true;
     }
 
-    function createCard(asset, slotId, startDelay = 0){
-      const slot = getSlot(slotId);
-      const layout = buildLayout(asset);
+    function choosePatternAndAssets(){
+      const tries = shuffle(PATTERNS.filter(p => p.length >= 2 && p.length <= 3));
+      const currentSet = new Set(state.cards.keys());
+
+      const sorted = tries.sort((a,b) => {
+        const oa = a.filter(k => currentSet.has(k)).length;
+        const ob = b.filter(k => currentSet.has(k)).length;
+        return ob - oa;
+      });
+
+      for(const pattern of sorted){
+        const overlap = pattern.filter(k => currentSet.has(k)).length;
+        if(state.cards.size && (overlap < 1 || overlap > 2)) continue;
+
+        const assetsBySlot = tryBuildAssetsForPattern(pattern);
+        if(assetsBySlot){
+          return { pattern, assetsBySlot };
+        }
+      }
+
+      // Notfall
+      const fallback = PATTERNS.find(p => p.length === 2) || PATTERNS[0];
+      return {
+        pattern: fallback,
+        assetsBySlot: tryBuildAssetsForPattern(fallback)
+      };
+    }
+
+    function createCard(asset, slotKey, totalCount, startDelay = 0){
+      const layout = computeLayout(asset, totalCount);
       const restRot = rand(-7.5, 7.5);
-      const rect = rectForPlacement(slot, layout, restRot);
+      const rect = rectForPlacement(slotKey, layout, restRot);
 
       const wrapper = document.createElement("div");
-      wrapper.className = "photo-card attaching";
-      wrapper.style.left = `${rect.left}%`;
-      wrapper.style.top = `${rect.top}%`;
-      wrapper.style.width = `${layout.frameW}%`;
-      wrapper.style.height = `${layout.frameH}%`;
+      wrapper.className = "photo-card";
+      wrapper.style.left = `${rect.left}px`;
+      wrapper.style.top = `${rect.top}px`;
+      wrapper.style.width = `${layout.frameW}px`;
+      wrapper.style.height = `${layout.frameH}px`;
+      wrapper.style.opacity = "0";
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.width = "100%";
-      frame.style.height = "100%";
       frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
-      frame.style.padding = `${layout.topPad}% ${layout.sidePad}% ${layout.bottomPad}% ${layout.sidePad}%`;
-      frame.style.background = "#fff";
+      frame.style.padding = `${layout.outerPad}px`;
+      frame.style.border = `${layout.frameBorder}px solid #fff`;
 
       const mediaWrap = document.createElement("div");
       mediaWrap.className = "media-wrap";
-      mediaWrap.style.height = `${layout.mediaH}%`;
-      mediaWrap.style.background = "#fff";
+      mediaWrap.style.height = `${layout.mediaH}px`;
 
       const mediaImg = document.createElement("img");
       mediaImg.className = "media-img";
       mediaImg.alt = layout.meta.caption;
-      mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
+      mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3200,h_3200,q_auto,f_auto/${asset.public_id}`;
 
       const caption = document.createElement("div");
       caption.className = "caption";
-      caption.style.height = `${layout.captionBoxH}%`;
+      caption.style.height = `${layout.captionH}px`;
       caption.style.background = layout.meta.color;
       caption.textContent = layout.meta.caption;
 
@@ -815,84 +842,78 @@
       clip.src = clipDef.src;
       clip.alt = "";
       clip.style.setProperty("--clip-x", `${rect.clipXPercent}%`);
-      clip.style.setProperty("--clip-h", `${(layout.frameW * clipDef.scale).toFixed(2)}%`);
+
+      const baseClipHeight = clamp(stage.clientWidth * 0.11, 120, 230);
+      const clipHeight = baseClipHeight * clipDef.scale;
+      clip.style.setProperty("--clip-h", `${clipHeight}px`);
 
       const clipRot = `${rand(-9, 9).toFixed(2)}deg`;
       const restRotCss = `${restRot.toFixed(2)}deg`;
+      const swingStart = `${rand(2.0, 3.6).toFixed(2)}deg`;
 
       wrapper.style.setProperty("--rest-rot", restRotCss);
       wrapper.style.setProperty("--clip-rot", clipRot);
+      wrapper.style.setProperty("--swing-start", swingStart);
 
-      const fromSide = pick(["left","right","bottomLeft","bottomRight"]);
+      const photoFrom = pick(["left","right","bottomLeft","bottomRight"]);
       let photoStartX = 0, photoStartY = 0;
-      if(fromSide === "left"){ photoStartX = -36; photoStartY = 10; }
-      if(fromSide === "right"){ photoStartX = 36; photoStartY = 10; }
-      if(fromSide === "bottomLeft"){ photoStartX = -20; photoStartY = 34; }
-      if(fromSide === "bottomRight"){ photoStartX = 20; photoStartY = 34; }
+
+      if(photoFrom === "left"){ photoStartX = -34; photoStartY = 10; }
+      if(photoFrom === "right"){ photoStartX = 34; photoStartY = 10; }
+      if(photoFrom === "bottomLeft"){ photoStartX = -18; photoStartY = 28; }
+      if(photoFrom === "bottomRight"){ photoStartX = 18; photoStartY = 28; }
 
       wrapper.style.setProperty("--photo-start-x", `${photoStartX}px`);
       wrapper.style.setProperty("--photo-start-y", `${photoStartY}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-2.8, 2.8)).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-1.6, 1.6)).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-start-x", `${rand(-10, 10).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-start-y", `${rand(-34, -20).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-start-rot", `${rand(-14, 14).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-start-x", `${rand(-8,8).toFixed(1)}px`);
+      wrapper.style.setProperty("--clip-start-y", `${rand(-32,-18).toFixed(1)}px`);
+      wrapper.style.setProperty("--clip-start-rot", `${rand(-12,12).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--photo-end-x", `${rand(-26, 26).toFixed(1)}px`);
-      wrapper.style.setProperty("--photo-end-y", `${rand(18, 28).toFixed(1)}px`);
-      wrapper.style.setProperty("--photo-end-rot", `${rand(-6, 6).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-end-x", `${rand(-18,18).toFixed(1)}px`);
+      wrapper.style.setProperty("--photo-end-y", `${rand(16,26).toFixed(1)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-5,5).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-end-x", `${rand(-10, 10).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-end-y", `${rand(-24, -10).toFixed(1)}px`);
-      wrapper.style.setProperty("--clip-end-rot", `${rand(-12, 12).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-end-x", `${rand(-8,8).toFixed(1)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-20,-8).toFixed(1)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-10,10).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--attach-duration", `${rand(0.95, 1.08).toFixed(2)}s`);
-      wrapper.style.setProperty("--clip-attach-duration", `${rand(0.92, 1.03).toFixed(2)}s`);
-      wrapper.style.setProperty("--swing-duration", `${rand(2.0, 2.9).toFixed(2)}s`);
+      wrapper.style.setProperty("--attach-duration", `${rand(0.95,1.05).toFixed(2)}s`);
+      wrapper.style.setProperty("--clip-attach-duration", `${rand(0.90,1.00).toFixed(2)}s`);
+      wrapper.style.setProperty("--swing-duration", `${rand(2.0,3.0).toFixed(2)}s`);
 
-      wrapper.style.setProperty("--swing-a", `${rand(2.2, 3.5).toFixed(2)}deg`);
-      wrapper.style.setProperty("--swing-b", `${rand(1.4, 2.2).toFixed(2)}deg`);
-      wrapper.style.setProperty("--swing-c", `${rand(0.9, 1.6).toFixed(2)}deg`);
-      wrapper.style.setProperty("--swing-d", `${rand(0.55, 1.10).toFixed(2)}deg`);
-      wrapper.style.setProperty("--swing-e", `${rand(0.28, 0.65).toFixed(2)}deg`);
-      wrapper.style.setProperty("--swing-f", `${rand(0.10, 0.28).toFixed(2)}deg`);
+      wrapper.style.setProperty("--swing-b", `${rand(1.3,2.0).toFixed(2)}deg`);
+      wrapper.style.setProperty("--swing-c", `${rand(0.8,1.3).toFixed(2)}deg`);
+      wrapper.style.setProperty("--swing-d", `${rand(0.45,0.9).toFixed(2)}deg`);
+      wrapper.style.setProperty("--swing-e", `${rand(0.20,0.45).toFixed(2)}deg`);
+      wrapper.style.setProperty("--swing-f", `${rand(0.08,0.18).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--swing-x1", `${rand(-1.6, 1.6).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-y1", `${rand(-1.1, 1.1).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-x2", `${rand(-1.0, 1.0).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-y2", `${rand(-0.8, 0.8).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-x3", `${rand(-0.65, 0.65).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-y3", `${rand(-0.55, 0.55).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-x4", `${rand(-0.38, 0.38).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-y4", `${rand(-0.28, 0.28).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-x5", `${rand(-0.20, 0.20).toFixed(2)}px`);
-      wrapper.style.setProperty("--swing-y5", `${rand(-0.14, 0.14).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-x1", `${rand(-1.2,1.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-y1", `${rand(-0.9,0.9).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-x2", `${rand(-0.8,0.8).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-y2", `${rand(-0.6,0.6).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-x3", `${rand(-0.45,0.45).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-y3", `${rand(-0.30,0.30).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-x4", `${rand(-0.25,0.25).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-y4", `${rand(-0.16,0.16).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-x5", `${rand(-0.10,0.10).toFixed(2)}px`);
+      wrapper.style.setProperty("--swing-y5", `${rand(-0.06,0.06).toFixed(2)}px`);
 
       mediaWrap.appendChild(mediaImg);
       frame.appendChild(mediaWrap);
       frame.appendChild(caption);
       wrapper.appendChild(frame);
       wrapper.appendChild(clip);
-
-      wrapper.style.opacity = "0";
       stage.appendChild(wrapper);
 
       requestAnimationFrame(() => {
         setTimeout(() => {
           wrapper.style.opacity = "1";
-          fitCaption(caption, layout.captionFont * 16, 16);
           wrapper.classList.add("attaching");
+          fitCaption(caption, clamp(layout.captionH * 0.52, 22, 46), 16);
         }, startDelay);
       });
-
-      const card = {
-        asset,
-        slotId,
-        el: wrapper,
-        mountedAt: Date.now(),
-        layout,
-        rect
-      };
 
       wrapper.addEventListener("animationend", (ev) => {
         if(ev.animationName === "attachPhoto"){
@@ -901,7 +922,14 @@
         }
       });
 
-      state.cards.set(slotId, card);
+      const card = {
+        asset,
+        slotKey,
+        el: wrapper,
+        mountedAt: Date.now()
+      };
+
+      state.cards.set(slotKey, card);
       markShown(asset.public_id);
       return card;
     }
@@ -918,88 +946,10 @@
 
         setTimeout(() => {
           card.el.remove();
-          state.cards.delete(card.slotId);
+          state.cards.delete(card.slotKey);
           resolve();
         }, 980);
       });
-    }
-
-    function cardBoundingFor(slotId, asset){
-      const slot = getSlot(slotId);
-      const layout = buildLayout(asset);
-      const testRot = 0;
-      return rectForPlacement(slot, layout, testRot);
-    }
-
-    function candidateOk(pattern, assetsBySlot){
-      const rects = [];
-
-      for(const slotId of pattern){
-        const asset = assetsBySlot[slotId];
-        if(!asset) return false;
-        const rect = cardBoundingFor(slotId, asset);
-        if(!withinStage(rect)) return false;
-
-        for(const other of rects){
-          if(overlapRatio(rect, other) > 0.08) return false;
-        }
-        rects.push(rect);
-      }
-      return true;
-    }
-
-    function chooseAssetsForPattern(pattern, cardsToKeep){
-      const keepAssetIds = new Set(cardsToKeep.map(c => c.asset.public_id));
-      const assetsBySlot = {};
-
-      for(const c of cardsToKeep){
-        assetsBySlot[c.slotId] = c.asset;
-      }
-
-      const freeSlots = pattern.filter(id => !assetsBySlot[id]);
-      const additions = chooseAssetsForAdd(freeSlots.length);
-
-      freeSlots.forEach((slotId, idx) => {
-        assetsBySlot[slotId] = additions[idx] || null;
-      });
-
-      return assetsBySlot;
-    }
-
-    function chooseValidPattern(){
-      const currentIds = Array.from(state.cards.keys());
-      const currentSet = new Set(currentIds);
-
-      const preferred = PATTERNS.filter(pattern => {
-        const overlap = pattern.filter(id => currentSet.has(id)).length;
-        if(currentIds.length === 0) return pattern.length >= 2 && pattern.length <= 3;
-        return pattern.length >= 2 && pattern.length <= 3 && overlap >= 1 && overlap <= 2;
-      });
-
-      const tryPools = [
-        preferred,
-        PATTERNS.filter(p => p.length >= 2 && p.length <= 3),
-        PATTERNS
-      ];
-
-      for(const pool of tryPools){
-        for(const pattern of shuffle(pool)){
-          const keepCards = Array.from(state.cards.values()).filter(c => pattern.includes(c.slotId));
-          const assetsBySlot = chooseAssetsForPattern(pattern, keepCards);
-          if(candidateOk(pattern, assetsBySlot)){
-            state.usedPatterns.push(pattern.join("|"));
-            if(state.usedPatterns.length > 50) state.usedPatterns.shift();
-            return { pattern, assetsBySlot };
-          }
-        }
-      }
-
-      const fallback = pick(preferred.length ? preferred : PATTERNS);
-      const keepCards = Array.from(state.cards.values()).filter(c => fallback.includes(c.slotId));
-      return {
-        pattern: fallback,
-        assetsBySlot: chooseAssetsForPattern(fallback, keepCards)
-      };
     }
 
     async function initialRender(){
@@ -1010,19 +960,19 @@
 
       emptyNote.style.display = "none";
 
-      const first = chooseValidPattern();
-      const delayStep = 360;
+      const first = choosePatternAndAssets();
+      if(!first || !first.assetsBySlot) return;
 
-      first.pattern.forEach((slotId, idx) => {
-        const asset = first.assetsBySlot[slotId];
+      first.pattern.forEach((slotKey, index) => {
+        const asset = first.assetsBySlot[slotKey];
         if(asset){
-          createCard(asset, slotId, idx * delayStep);
+          createCard(asset, slotKey, first.pattern.length, index * 420);
         }
       });
     }
 
     function nextDelayMs(){
-      return randInt(7000, 9500);
+      return randInt(8200, 9800);
     }
 
     async function runCycle(){
@@ -1031,29 +981,29 @@
         return;
       }
 
-      const { pattern, assetsBySlot } = chooseValidPattern();
+      const result = choosePatternAndAssets();
+      if(!result || !result.assetsBySlot){
+        scheduleNextCycle(7000);
+        return;
+      }
 
-      const currentSlotIds = Array.from(state.cards.keys());
+      const { pattern, assetsBySlot } = result;
       const nextSet = new Set(pattern);
 
-      const toRemove = currentSlotIds
-        .filter(slotId => !nextSet.has(slotId))
-        .map(slotId => state.cards.get(slotId))
-        .filter(Boolean);
+      const toRemove = Array.from(state.cards.values())
+        .filter(card => !nextSet.has(card.slotKey));
 
       for(const card of toRemove){
         await detachCard(card);
       }
 
-      await new Promise(resolve => setTimeout(resolve, 280));
+      await new Promise(resolve => setTimeout(resolve, 260));
 
-      const missing = pattern.filter(slotId => !state.cards.has(slotId));
-      const delayStep = 420;
-
-      missing.forEach((slotId, idx) => {
-        const asset = assetsBySlot[slotId];
+      const missing = pattern.filter(slotKey => !state.cards.has(slotKey));
+      missing.forEach((slotKey, index) => {
+        const asset = assetsBySlot[slotKey];
         if(asset){
-          createCard(asset, slotId, idx * delayStep);
+          createCard(asset, slotKey, pattern.length, index * 420);
         }
       });
 
@@ -1066,40 +1016,33 @@
     }
 
     function rebuildWithCurrentCards(){
-      const currentEntries = Array.from(state.cards.entries()).map(([slotId, card]) => ({
-        slotId,
-        asset: card.asset
-      }));
-
+      const oldCards = Array.from(state.cards.values()).map(c => ({ slotKey:c.slotKey, asset:c.asset }));
       state.cards.forEach(card => card.el.remove());
       state.cards.clear();
 
-      const valid = [];
+      const kept = [];
+      for(const item of oldCards){
+        const layout = computeLayout(item.asset, oldCards.length || 2);
+        const rect = rectForPlacement(item.slotKey, layout, 0);
 
-      for(const entry of currentEntries){
-        const slot = getSlot(entry.slotId);
-        if(!slot) continue;
-
-        const rect = cardBoundingFor(entry.slotId, entry.asset);
-        if(!withinStage(rect)) continue;
+        if(!insideStage(rect)) continue;
 
         let ok = true;
-        for(const other of valid){
-          if(overlapRatio(rect, other.rect) > 0.08){
+        for(const other of kept){
+          if(overlapRatio(rect, other.rect) > 0.04){
             ok = false;
             break;
           }
         }
+
         if(ok){
-          valid.push({ ...entry, rect });
+          kept.push({ ...item, rect });
         }
       }
 
-      const kept = valid.slice(0, 3);
-      kept.forEach(entry => createCard(entry.asset, entry.slotId, 0));
+      kept.slice(0,3).forEach(item => createCard(item.asset, item.slotKey, kept.length || 2, 0));
 
       if(state.cards.size < 2){
-        clearTimeout(state.nextTimer);
         initialRender();
       }else{
         scheduleNextCycle(nextDelayMs());
