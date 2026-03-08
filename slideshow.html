@@ -129,13 +129,11 @@
       overflow:visible;
       transform-origin:var(--pin-x) 0px;
       will-change:transform, opacity;
+      background:#fff;
     }
 
     .media-wrap{
       overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
       background:#fff;
     }
 
@@ -157,9 +155,9 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:0 10px;
       overflow:hidden;
       word-break:break-word;
+      padding:0 10px;
     }
 
     .clip{
@@ -316,7 +314,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308g";
+    const CACHE_BUSTER = "v=20260308f";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -327,7 +325,7 @@
     const CLIP_VARIANTS = [
       { src: assetUrl("klammer1_uhd.png"), scale: 0.34 },
       { src: assetUrl("klammer2_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer3_uhd.png"), scale: 0.21 }
+      { src: assetUrl("klammer3_uhd.png"), scale: 0.425 } // 0.17 * 2.5
     ];
 
     const aspectMap = {
@@ -542,72 +540,71 @@
       const meta = getTaskMeta(asset);
 
       const stageRect = stage.getBoundingClientRect();
-      const stageDiagPx = Math.sqrt(stageRect.width ** 2 + stageRect.height ** 2);
+      const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
+
+      // FOTO-DIAGONALE = 30% der BILDSCHIRMDIAGONALE
+      const targetPhotoDiagPx = stageDiagPx * 0.30;
 
       const imgW = Number(asset.width || 1000);
       const imgH = Number(asset.height || 1000);
       const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
 
-      const targetPhotoDiagPx = stageDiagPx * 0.30;
       const scale = targetPhotoDiagPx / imgDiag;
 
       const photoWPx = imgW * scale;
       const photoHPx = imgH * scale;
 
-      const mediaW = (photoWPx / stageRect.width) * 100;
-      const mediaH = (photoHPx / stageRect.height) * 100;
+      // fester farbiger Rahmen
+      const borderSidePx = 14;
+      const borderTopPx = 14;
+      const borderBottomPadPx = 12;
 
-      const borderXPx = clamp(stageDiagPx * 0.007, 10, 18);
-      const borderYPx = clamp(stageDiagPx * 0.007, 10, 18);
+      // erste Schätzung Caption-Höhe
+      let captionFontPx = clamp(targetPhotoDiagPx * 0.075, 22, 42);
+      let captionHeightPx = captionFontPx * 3.35; // max 3 Zeilen
 
-      const borderX = (borderXPx / stageRect.width) * 100;
-      const borderTop = (borderYPx / stageRect.height) * 100;
-
-      let captionFontPx = clamp(stageDiagPx * 0.020, 18, 34);
-      const captionPadYPx = clamp(stageDiagPx * 0.006, 8, 14);
-      const captionPadY = (captionPadYPx / stageRect.height) * 100;
-
-      const captionBoxHpx = captionFontPx * 1.02 * 3 + captionPadYPx * 2;
-      const captionBoxH = (captionBoxHpx / stageRect.height) * 100;
-
-      const frameW = mediaW + borderX * 2;
-      const frameH = borderTop + mediaH + captionBoxH + captionPadY;
+      const frameWPx = photoWPx + borderSidePx * 2;
+      const frameHPx = photoHPx + borderTopPx + borderBottomPadPx + captionHeightPx;
 
       return {
         meta,
-        mediaW,
-        mediaH,
-        frameW,
-        frameH,
-        borderX,
-        borderTop,
-        captionBoxH,
-        captionPadY,
-        captionFontPx
+        photoWPx,
+        photoHPx,
+        borderSidePx,
+        borderTopPx,
+        borderBottomPadPx,
+        captionFontPx,
+        captionHeightPx,
+        frameWPx,
+        frameHPx,
+        frameW: (frameWPx / stageRect.width) * 100,
+        frameH: (frameHPx / stageRect.height) * 100
       };
     }
 
     function rectForPlacement(slot, layout, rotDeg){
-      const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
+      const stageRect = stage.getBoundingClientRect();
 
-      const left = slot.x - (layout.frameW * (clipXPercent / 100));
+      const frameWPercent = (layout.frameWPx / stageRect.width) * 100;
+      const frameHPercent = (layout.frameHPx / stageRect.height) * 100;
+
+      const clipXPercent = clamp(50 + rand(-7, 7), 44, 56);
+
+      const left = slot.x - (frameWPercent * (clipXPercent / 100));
       const top = slot.y;
 
-      const w = layout.frameW;
-      const h = layout.frameH;
-
-      const inflate = Math.abs(rotDeg) * 0.12 + 0.7;
+      const inflate = Math.abs(rotDeg) * 0.10 + 0.7;
 
       return {
         clipXPercent,
         left,
         top,
-        width: w,
-        height: h,
+        width: frameWPercent,
+        height: frameHPercent,
         boxLeft: left - inflate,
         boxTop: top - 0.8,
-        boxRight: left + w + inflate,
-        boxBottom: top + h + inflate
+        boxRight: left + frameWPercent + inflate,
+        boxBottom: top + frameHPercent + inflate
       };
     }
 
@@ -726,11 +723,11 @@
       return chosen.slice(0, count);
     }
 
-    function fitCaption(captionEl, maxPx = 34, minPx = 14, maxLines = 3){
+    function fitCaption(captionEl, maxPx = 42, minPx = 16, maxLines = 3){
       let size = maxPx;
       captionEl.style.fontSize = `${size}px`;
       captionEl.style.lineHeight = "1.02";
-      captionEl.style.maxHeight = `${maxLines * 1.05}em`;
+      captionEl.style.maxHeight = `${maxLines * 1.08}em`;
 
       while(size > minPx && captionEl.scrollHeight > captionEl.clientHeight + 1){
         size -= 1;
@@ -743,27 +740,32 @@
       const layout = buildLayout(asset);
       const restRot = rand(-7.5, 7.5);
       const rect = rectForPlacement(slot, layout, restRot);
+      const stageRect = stage.getBoundingClientRect();
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
       wrapper.style.left = `${rect.left}%`;
       wrapper.style.top = `${rect.top}%`;
-      wrapper.style.width = `${layout.frameW}%`;
-      wrapper.style.height = `${layout.frameH}%`;
+      wrapper.style.width = `${rect.width}%`;
+      wrapper.style.height = `${rect.height}%`;
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
       frame.style.width = "100%";
       frame.style.height = "100%";
       frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
-      frame.style.background = layout.meta.color;
+      frame.style.background = "#fff";
 
       const mediaWrap = document.createElement("div");
       mediaWrap.className = "media-wrap";
-      mediaWrap.style.width = `${layout.mediaW}%`;
-      mediaWrap.style.height = `${layout.mediaH}%`;
-      mediaWrap.style.marginLeft = `${layout.borderX}%`;
-      mediaWrap.style.marginTop = `${layout.borderTop}%`;
+      mediaWrap.style.position = "absolute";
+      mediaWrap.style.left = `${(layout.borderSidePx / stageRect.width) * 100}%`;
+      mediaWrap.style.top = `${(layout.borderTopPx / stageRect.height) * 100}%`;
+      mediaWrap.style.width = `${(layout.photoWPx / stageRect.width) * 100}%`;
+      mediaWrap.style.height = `${(layout.photoHPx / stageRect.height) * 100}%`;
+      mediaWrap.style.border = `${layout.borderSidePx}px solid ${layout.meta.color}`;
+      mediaWrap.style.borderTopWidth = `${layout.borderTopPx}px`;
+      mediaWrap.style.borderBottomWidth = "0px";
 
       const mediaImg = document.createElement("img");
       mediaImg.className = "media-img";
@@ -772,11 +774,11 @@
 
       const caption = document.createElement("div");
       caption.className = "caption";
-      caption.style.width = `calc(100% - ${layout.borderX * 2}%)`;
-      caption.style.marginLeft = `${layout.borderX}%`;
-      caption.style.height = `${layout.captionBoxH}%`;
-      caption.style.paddingTop = `${layout.captionPadY / 2}%`;
-      caption.style.paddingBottom = `${layout.captionPadY / 2}%`;
+      caption.style.position = "absolute";
+      caption.style.left = "0";
+      caption.style.bottom = "0";
+      caption.style.width = "100%";
+      caption.style.height = `${(layout.captionHeightPx + layout.borderBottomPadPx) / stageRect.height * 100}%`;
       caption.style.background = layout.meta.color;
       caption.textContent = layout.meta.caption;
 
@@ -786,7 +788,7 @@
       clip.src = clipDef.src;
       clip.alt = "";
       clip.style.setProperty("--clip-x", `${rect.clipXPercent}%`);
-      clip.style.setProperty("--clip-h", `${(layout.frameW * clipDef.scale).toFixed(2)}%`);
+      clip.style.setProperty("--clip-h", `${(rect.width * clipDef.scale).toFixed(2)}%`);
 
       const clipRot = `${rand(-9, 9).toFixed(2)}deg`;
       const restRotCss = `${restRot.toFixed(2)}deg`;
@@ -851,7 +853,7 @@
       requestAnimationFrame(() => {
         setTimeout(() => {
           wrapper.style.opacity = "1";
-          fitCaption(caption, layout.captionFontPx, 14, 3);
+          fitCaption(caption, layout.captionFontPx, 16, 3);
           wrapper.classList.add("attaching");
         }, startDelay);
       });
@@ -898,7 +900,8 @@
     function cardBoundingFor(slotId, asset){
       const slot = getSlot(slotId);
       const layout = buildLayout(asset);
-      return rectForPlacement(slot, layout, 0);
+      const testRot = 0;
+      return rectForPlacement(slot, layout, testRot);
     }
 
     function candidateOk(pattern, assetsBySlot){
@@ -1046,6 +1049,9 @@
       const valid = [];
 
       for(const entry of currentEntries){
+        const slot = getSlot(entry.slotId);
+        if(!slot) continue;
+
         const rect = cardBoundingFor(entry.slotId, entry.asset);
         if(!withinStage(rect)) continue;
 
