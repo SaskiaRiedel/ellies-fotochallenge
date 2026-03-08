@@ -11,7 +11,7 @@
 
     :root{
       --wall-bg:#e9e4db;
-      --shadow:0 10px 28px rgba(0,0,0,.18);
+      --shadow:0 12px 26px rgba(0,0,0,.18);
       --caption-text:#111;
       --aspect-num:16;
       --aspect-den:9;
@@ -19,7 +19,7 @@
 
     *{ box-sizing:border-box; }
 
-    html, body{
+    html,body{
       margin:0;
       width:100%;
       height:100%;
@@ -28,9 +28,7 @@
       font-family:Arial, Helvetica, sans-serif;
     }
 
-    body{
-      position:relative;
-    }
+    body{ position:relative; }
 
     .viewport{
       position:fixed;
@@ -84,14 +82,14 @@
 
     .controls{
       position:fixed;
-      right:14px;
-      bottom:14px;
+      right:12px;
+      bottom:12px;
       z-index:250;
       display:grid;
       grid-template-columns:repeat(2, auto);
-      gap:7px 7px;
+      gap:6px;
       justify-content:end;
-      transition:opacity .2s ease;
+      transition:opacity .18s ease;
     }
 
     .controls.hidden{
@@ -102,15 +100,15 @@
     .control-btn{
       border:none;
       border-radius:999px;
-      padding:7px 12px;
-      min-width:62px;
-      background:rgba(255,255,255,.52);
+      padding:6px 11px;
+      min-width:60px;
+      background:rgba(255,255,255,.45);
       color:#3d3d3d;
       cursor:pointer;
-      font-size:.84rem;
+      font-size:.82rem;
       font-weight:700;
       backdrop-filter:blur(4px);
-      box-shadow:0 4px 12px rgba(0,0,0,.10);
+      box-shadow:0 4px 10px rgba(0,0,0,.09);
     }
 
     .control-btn.active{
@@ -122,7 +120,7 @@
       position:absolute;
       z-index:30;
       pointer-events:none;
-      will-change:left, top, width, height;
+      will-change:left, top, width;
     }
 
     .photo-frame{
@@ -142,7 +140,7 @@
       justify-content:center;
       overflow:hidden;
       background:#fff;
-      border-radius:1px;
+      border-radius:1px 1px 0 0;
     }
 
     .photo-top img.photo-image{
@@ -162,7 +160,7 @@
       color:var(--caption-text);
       font-family:"Kalam","Segoe Print","Trebuchet MS",Arial,sans-serif;
       font-weight:700;
-      line-height:1.03;
+      line-height:1.02;
       letter-spacing:.01em;
       overflow:hidden;
       word-break:break-word;
@@ -197,7 +195,7 @@
     }
 
     .photo-card.swinging .photo-frame{
-      animation:swayPhotoDamped var(--sway-duration,2s) cubic-bezier(.22,.65,.18,1) forwards;
+      animation:swayPhotoDamped var(--sway-duration,2.4s) cubic-bezier(.22,.65,.18,1) forwards;
     }
 
     .photo-card.detaching .photo-frame{
@@ -214,7 +212,7 @@
         transform:
           translate(var(--photo-start-x), var(--photo-start-y))
           rotate(var(--photo-start-rot))
-          scale(.985);
+          scale(.988);
       }
       100%{
         opacity:1;
@@ -231,7 +229,7 @@
         transform:
           translate(var(--clip-start-x), var(--clip-start-y))
           rotate(var(--clip-start-rot))
-          scale(.985);
+          scale(.988);
       }
       100%{
         opacity:1;
@@ -246,20 +244,20 @@
       0%{
         transform:translate(0,0) rotate(var(--photo-rest-rot));
       }
-      16%{
-        transform:translate(var(--sway-x1), var(--sway-y1)) rotate(calc(var(--photo-rest-rot) + var(--sway-r1)));
+      15%{
+        transform:translate(var(--sway-x1), var(--sway-y1)) rotate(calc(var(--photo-final-rot) + var(--sway-r1)));
       }
       32%{
-        transform:translate(var(--sway-x2), var(--sway-y2)) rotate(calc(var(--photo-rest-rot) - var(--sway-r2)));
+        transform:translate(var(--sway-x2), var(--sway-y2)) rotate(calc(var(--photo-final-rot) - var(--sway-r2)));
       }
-      48%{
-        transform:translate(var(--sway-x3), var(--sway-y3)) rotate(calc(var(--photo-rest-rot) + var(--sway-r3)));
+      50%{
+        transform:translate(var(--sway-x3), var(--sway-y3)) rotate(calc(var(--photo-final-rot) + var(--sway-r3)));
       }
-      64%{
-        transform:translate(var(--sway-x4), var(--sway-y4)) rotate(calc(var(--photo-rest-rot) - var(--sway-r4)));
+      70%{
+        transform:translate(var(--sway-x4), var(--sway-y4)) rotate(calc(var(--photo-final-rot) - var(--sway-r4)));
       }
-      80%{
-        transform:translate(var(--sway-x5), var(--sway-y5)) rotate(calc(var(--photo-rest-rot) + var(--sway-r5)));
+      86%{
+        transform:translate(var(--sway-x5), var(--sway-y5)) rotate(calc(var(--photo-final-rot) + var(--sway-r5)));
       }
       100%{
         transform:translate(0,0) rotate(var(--photo-final-rot));
@@ -324,14 +322,13 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308b";
+    const CACHE_BUSTER = "v=20260308c";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
     }
 
     const BG_IMAGE = assetUrl("bg_16_9.png");
-    const BG_GUIDE_IMAGE = assetUrl("bg_16_9_Fadenposition.png"); // nur zur Kalibrierung vorhanden
     const CLIP_IMAGES = [
       assetUrl("klammer1_uhd.png"),
       assetUrl("klammer2_uhd.png"),
@@ -350,54 +347,63 @@
     const currentCards = [];
     const showCounts = new Map();
     const recentlyShown = [];
-    const MAX_RECENT_TRACK = 50;
+    const MAX_RECENT_TRACK = 40;
 
     let currentFormat = "16:9";
     let nextTimer = null;
     let fetchTimer = null;
-    let variantPointer = null;
-    let variants = [];
 
     /*
-      Feste Ankerpunkte entlang der Seile.
-      anchorX / anchorY = Punkt, an dem die Klammer den Faden schneidet.
-      group = grobe Platzgruppe
-      wBias = Breitenneigung für den Slot
+      Nur noch obere + mittlere Reihe.
+      anchorX/anchorY = Punkt auf dem Faden, den die Klammer treffen soll.
+      Größerer Abstand zwischen den Slots, damit 3 große Bilder sauber passen.
     */
-    const anchors = [
-      // oberes Seil
-      { id:"t1", row:"top",    anchorX:13.5, anchorY:8.9,  group:"edge",   wBias:0.98 },
-      { id:"t2", row:"top",    anchorX:28.5, anchorY:11.3, group:"mid",    wBias:1.00 },
-      { id:"t3", row:"top",    anchorX:48.5, anchorY:11.8, group:"mid",    wBias:1.05 },
-      { id:"t4", row:"top",    anchorX:67.0, anchorY:11.0, group:"mid",    wBias:1.00 },
-      { id:"t5", row:"top",    anchorX:86.0, anchorY:8.8,  group:"edge",   wBias:0.98 },
+    const SLOT_VARIANTS = [
+      ["t1","t3","m5"],
+      ["t1","t4","m2"],
+      ["t2","t4","m1"],
+      ["t2","t5","m3"],
+      ["t1","t3","m4"],
+      ["t2","t4","m5"],
+      ["t1","t4","m4"],
+      ["t2","t3","m5"],
+      ["t1","t5","m3"],
+      ["t2","t5","m2"],
 
-      // mittleres Seil
-      { id:"m1", row:"middle", anchorX:12.5, anchorY:37.2, group:"edge",   wBias:0.98 },
-      { id:"m2", row:"middle", anchorX:27.0, anchorY:40.3, group:"mid",    wBias:1.00 },
-      { id:"m3", row:"middle", anchorX:43.5, anchorY:41.4, group:"center", wBias:1.03 },
-      { id:"m4", row:"middle", anchorX:60.0, anchorY:41.2, group:"center", wBias:1.03 },
-      { id:"m5", row:"middle", anchorX:76.0, anchorY:39.1, group:"mid",    wBias:1.00 },
-      { id:"m6", row:"middle", anchorX:88.0, anchorY:36.5, group:"edge",   wBias:0.96 },
-
-      // unteres Seil
-      { id:"b1", row:"bottom", anchorX:13.0, anchorY:68.0, group:"edge",   wBias:0.98 },
-      { id:"b2", row:"bottom", anchorX:28.0, anchorY:72.5, group:"mid",    wBias:1.00 },
-      { id:"b3", row:"bottom", anchorX:47.5, anchorY:73.8, group:"center", wBias:1.04 },
-      { id:"b4", row:"bottom", anchorX:66.0, anchorY:72.9, group:"center", wBias:1.02 },
-      { id:"b5", row:"bottom", anchorX:83.0, anchorY:68.6, group:"mid",    wBias:0.98 }
+      ["t1","m2"],
+      ["t2","m4"],
+      ["t4","m2"],
+      ["t5","m4"],
+      ["t3","m1"],
+      ["t3","m5"],
+      ["t2","m3"],
+      ["t4","m3"]
     ];
 
+    const ANCHORS = {
+      t1:{ id:"t1", row:"top",    x:16.0, y:9.2 },
+      t2:{ id:"t2", row:"top",    x:31.5, y:11.1 },
+      t3:{ id:"t3", row:"top",    x:49.5, y:11.9 },
+      t4:{ id:"t4", row:"top",    x:68.5, y:10.9 },
+      t5:{ id:"t5", row:"top",    x:84.5, y:8.9 },
+
+      m1:{ id:"m1", row:"middle", x:15.0, y:37.0 },
+      m2:{ id:"m2", row:"middle", x:30.5, y:40.2 },
+      m3:{ id:"m3", row:"middle", x:48.0, y:41.3 },
+      m4:{ id:"m4", row:"middle", x:67.5, y:40.4 },
+      m5:{ id:"m5", row:"middle", x:83.8, y:36.9 }
+    };
+
     function getAnchor(id){
-      return anchors.find(a => a.id === id);
+      return ANCHORS[id];
     }
 
     function rand(min, max){
       return Math.random() * (max - min) + min;
     }
 
-    function clamp(value, min, max){
-      return Math.max(min, Math.min(max, value));
+    function clamp(v, min, max){
+      return Math.max(min, Math.min(max, v));
     }
 
     function pick(arr){
@@ -417,23 +423,6 @@
       return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
     }
 
-    function combinations(arr, k){
-      const result = [];
-      function run(start, combo){
-        if(combo.length === k){
-          result.push([...combo]);
-          return;
-        }
-        for(let i = start; i < arr.length; i++){
-          combo.push(arr[i]);
-          run(i + 1, combo);
-          combo.pop();
-        }
-      }
-      run(0, []);
-      return result;
-    }
-
     function preloadImage(url){
       return new Promise(resolve => {
         const img = new Image();
@@ -446,7 +435,6 @@
     async function setFormat(format){
       currentFormat = format;
       const cfg = aspectMap[format];
-
       document.documentElement.style.setProperty("--aspect-num", String(cfg.num));
       document.documentElement.style.setProperty("--aspect-den", String(cfg.den));
 
@@ -471,7 +459,6 @@
     }
 
     document.addEventListener("fullscreenchange", updateControlVisibility);
-    document.addEventListener("webkitfullscreenchange", updateControlVisibility);
 
     btn43.addEventListener("click", async () => {
       await setFormat("4:3");
@@ -564,266 +551,120 @@
       return uploadMs > (Date.now() - 5 * 60 * 1000);
     }
 
-    function getCurrentPublicIds(){
-      return new Set(currentCards.map(c => c.asset.public_id));
+    function estimateCaptionMinWidth(caption){
+      const len = caption.length;
+      if(len <= 18) return 13.5;
+      if(len <= 28) return 15.5;
+      if(len <= 38) return 17.0;
+      return 18.5;
     }
 
-    function generateVariants(){
-      const tops = anchors.filter(a => a.row === "top").map(a => a.id);
-      const mids = anchors.filter(a => a.row === "middle").map(a => a.id);
-      const bots = anchors.filter(a => a.row === "bottom").map(a => a.id);
+    function pickBalancedVariant(currentSlotIds = []){
+      const currentSet = new Set(currentSlotIds);
 
-      const topPairs = combinations(tops, 2).filter(pair => {
-        const a = getAnchor(pair[0]).anchorX;
-        const b = getAnchor(pair[1]).anchorX;
-        return Math.abs(a - b) >= 17;
+      const ranked = SLOT_VARIANTS.map(v => {
+        const overlap = v.filter(id => currentSet.has(id)).length;
+        const score =
+          overlap * 4 +
+          rand(0, 1.4);
+        return { variant:v, score };
       });
 
-      const midPairs = combinations(mids, 2).filter(pair => {
-        const a = getAnchor(pair[0]).anchorX;
-        const b = getAnchor(pair[1]).anchorX;
-        return Math.abs(a - b) >= 16;
+      /*
+        Gewünschtes Verhalten:
+        - max 3 Fotos
+        - min 2 Fotos
+        - nicht immer dieselben Slots
+        - aber auch nicht alles komplett neu
+      */
+      const filtered = ranked.filter(item => {
+        if(currentSlotIds.length === 0) return true;
+        const overlap = item.variant.filter(id => currentSet.has(id)).length;
+        return overlap >= Math.max(0, currentSlotIds.length - 2) && overlap < currentSlotIds.length;
       });
 
-      const botPairs = combinations(bots, 2).filter(pair => {
-        const a = getAnchor(pair[0]).anchorX;
-        const b = getAnchor(pair[1]).anchorX;
-        return Math.abs(a - b) >= 17;
-      });
+      const pool = filtered.length ? filtered : ranked;
+      pool.sort((a,b) => b.score - a.score);
 
-      const raw = [];
-
-      // 3er-Varianten
-      tops.forEach(t => {
-        mids.forEach(m => {
-          bots.forEach(b => {
-            raw.push([t, m, b]);
-          });
-        });
-      });
-
-      // 4er-Varianten
-      topPairs.forEach(tp => {
-        mids.forEach(m => {
-          bots.forEach(b => raw.push([...tp, m, b]));
-        });
-      });
-
-      tops.forEach(t => {
-        midPairs.forEach(mp => {
-          bots.forEach(b => raw.push([t, ...mp, b]));
-        });
-      });
-
-      tops.forEach(t => {
-        mids.forEach(m => {
-          botPairs.forEach(bp => raw.push([t, m, ...bp]));
-        });
-      });
-
-      const unique = new Map();
-
-      raw.forEach(ids => {
-        const sortedIds = [...ids].sort();
-        const key = sortedIds.join("|");
-        if(unique.has(key)) return;
-
-        const rows = sortedIds.map(id => getAnchor(id).row);
-        const topCount = rows.filter(r => r === "top").length;
-        const midCount = rows.filter(r => r === "middle").length;
-        const botCount = rows.filter(r => r === "bottom").length;
-
-        if(sortedIds.length === 3){
-          if(!(topCount === 1 && midCount === 1 && botCount === 1)) return;
-        }
-
-        if(sortedIds.length === 4){
-          const okay =
-            (topCount === 2 && midCount === 1 && botCount === 1) ||
-            (topCount === 1 && midCount === 2 && botCount === 1) ||
-            (topCount === 1 && midCount === 1 && botCount === 2);
-          if(!okay) return;
-        }
-
-        unique.set(key, { ids: sortedIds });
-      });
-
-      const list = [...unique.values()];
-
-      const scored = list.map(v => {
-        const xs = v.ids.map(id => getAnchor(id).anchorX);
-        const spread = Math.max(...xs) - Math.min(...xs);
-        const count = v.ids.length;
-        let score = spread + (count === 4 ? 8 : 0);
-
-        const hasCenter = v.ids.some(id => ["m3","m4","b3","t3"].includes(id));
-        if(hasCenter) score += 6;
-
-        return { ...v, score };
-      });
-
-      const ordered = scored
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 60)
-        .map(v => v.ids);
-
-      return ordered;
+      return pick(pool.slice(0, Math.min(8, pool.length))).variant.slice();
     }
 
-    function intersectionCount(a, b){
-      const setB = new Set(b);
-      return a.filter(id => setB.has(id)).length;
-    }
-
-    function chooseNextVariant(currentIds){
-      const targetShareMin = currentIds.length - 2; // max. 2 Fotos tauschen
-      const currentKey = currentIds.slice().sort().join("|");
-
-      const candidates = variants.filter(v => {
-        const key = v.slice().sort().join("|");
-        if(key === currentKey) return false;
-        const shared = intersectionCount(v, currentIds);
-        return shared >= targetShareMin && shared < currentIds.length;
-      });
-
-      const sorted = candidates
-        .map(v => {
-          const shared = intersectionCount(v, currentIds);
-          const diff = v.length - shared;
-          const score = shared * 10 - diff;
-          return { v, score };
-        })
-        .sort((a, b) => b.score - a.score);
-
-      if(sorted.length){
-        return pick(sorted.slice(0, Math.min(10, sorted.length))).v;
-      }
-
-      return pick(variants);
-    }
-
-    function getFreshCandidates(excludedIds){
-      return allAssets.filter(a => isFreshAsset(a) && !excludedIds.has(a.public_id));
-    }
-
-    function chooseAssetsForNewSlots(slotLayouts){
+    function chooseAssets(count){
+      const currentIds = new Set(currentCards.map(c => c.asset.public_id));
       const chosen = [];
-      const excludedIds = new Set(getCurrentPublicIds());
-      let freshPicked = 0;
+      const excluded = new Set(currentIds);
 
-      for(const layout of slotLayouts){
-        let pool = allAssets.filter(a => !excludedIds.has(a.public_id));
+      let freshUsed = 0;
 
-        const fresh = getFreshCandidates(excludedIds);
-        if(fresh.length && freshPicked < 2){
-          const rankedFresh = shuffle(fresh)
-            .sort((a, b) => {
-              const sa = showCounts.get(a.public_id) || 0;
-              const sb = showCounts.get(b.public_id) || 0;
-              return sa - sb;
-            });
-          const asset = rankedFresh[0];
+      for(let i = 0; i < count; i++){
+        let candidates = allAssets.filter(a => !excluded.has(a.public_id));
+        if(!candidates.length) break;
+
+        const fresh = candidates.filter(a => isFreshAsset(a));
+        if(fresh.length && freshUsed < 2){
+          fresh.sort((a,b) => (showCounts.get(a.public_id)||0) - (showCounts.get(b.public_id)||0));
+          const asset = fresh[0];
           chosen.push(asset);
-          excludedIds.add(asset.public_id);
-          freshPicked++;
+          excluded.add(asset.public_id);
+          freshUsed++;
           continue;
         }
 
-        pool = pool
-          .map(asset => {
-            const shown = showCounts.get(asset.public_id) || 0;
-            const recentPenalty = recentlyShown.includes(asset.public_id) ? 2 : 0;
-            const freshnessBoost = isFreshAsset(asset) ? -1 : 0;
-            return {
-              asset,
-              score: shown + recentPenalty + freshnessBoost + rand(0, 0.8)
-            };
-          })
-          .sort((a, b) => a.score - b.score)
-          .slice(0, Math.min(14, pool.length));
+        candidates = candidates
+          .map(asset => ({
+            asset,
+            score:
+              (showCounts.get(asset.public_id) || 0) +
+              (recentlyShown.includes(asset.public_id) ? 2 : 0) +
+              rand(0, 0.8)
+          }))
+          .sort((a,b) => a.score - b.score)
+          .slice(0, Math.min(12, candidates.length));
 
-        if(pool.length){
-          const asset = pick(pool).asset;
-          chosen.push(asset);
-          excludedIds.add(asset.public_id);
-        }
+        const asset = pick(candidates).asset;
+        chosen.push(asset);
+        excluded.add(asset.public_id);
       }
 
       return chosen;
     }
 
-    function estimateCaptionMinWidth(caption){
-      const len = caption.length;
-      if(len <= 18) return 14.5;
-      if(len <= 28) return 16.5;
-      if(len <= 38) return 18.5;
-      if(len <= 52) return 20.5;
-      return 22.5;
+    function overlapArea(a, b){
+      const xOverlap = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+      const yOverlap = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+      return xOverlap * yOverlap;
     }
 
-    function getLayoutForSlot(asset, anchor, count){
+    function buildLayout(asset, anchor, totalCount){
       const meta = getCardMeta(asset);
-      const ratio = clamp(Number(asset.width || 1) / Number(asset.height || 1), 0.55, 2.6);
+      const ratio = clamp(Number(asset.width || 1) / Number(asset.height || 1), 0.55, 2.5);
 
-      const isPortrait = ratio < 0.90;
-      const isLandscape = ratio > 1.25;
-      const isSquareish = !isPortrait && !isLandscape;
+      const isPortrait = ratio < 0.92;
+      const isLandscape = ratio > 1.20;
 
-      const countBase = count === 3 ? 20.8 : 18.8;
-      let frameW = countBase * anchor.wBias;
-
-      if(isPortrait) frameW *= 0.88;
-      if(isLandscape) frameW *= 1.10;
-      if(isSquareish) frameW *= 0.98;
+      /*
+        Deutlich größere Fotos
+      */
+      let frameW = totalCount === 2 ? 20.5 : 17.8;
+      if(anchor.row === "top") frameW += 0.8;
+      if(isPortrait) frameW *= 0.96;
+      if(isLandscape) frameW *= 1.12;
 
       frameW = Math.max(frameW, estimateCaptionMinWidth(meta.caption));
+      frameW = clamp(frameW, 16.2, totalCount === 2 ? 24.0 : 21.0);
 
-      if(anchor.row === "top") frameW *= 1.02;
-      if(anchor.row === "bottom" && isPortrait) frameW *= 0.92;
-
-      frameW = clamp(frameW, 14.5, count === 3 ? 26.5 : 23.5);
-
-      const sidePad = clamp(frameW * 0.032, 0.52, 0.86);
-      const topPad = clamp(frameW * 0.024, 0.38, 0.62);
+      const sidePad = clamp(frameW * 0.024, 0.38, 0.62);
+      const topPad = clamp(frameW * 0.018, 0.26, 0.42);
       const innerW = frameW - sidePad * 2;
 
       let mediaH = innerW / ratio;
-      const captionFont = clamp(frameW * 0.115, 1.15, 1.95);
-      const captionH = clamp(captionFont * 2.05, 2.45, 4.15);
+      mediaH = Math.max(mediaH, isPortrait ? 12.0 : 8.8);
+      mediaH = Math.min(mediaH, isPortrait ? 24.0 : 15.0);
 
-      // Foto nicht zu klein werden lassen
-      mediaH = Math.max(mediaH, isPortrait ? 11.4 : 8.3);
+      let captionFont = clamp(frameW * 0.102, 1.0, 1.72);
+      let captionH = clamp(captionFont * 1.85, 2.0, 3.25);
 
-      let frameH = topPad + mediaH + captionH;
-
-      // untere Reihe begrenzen
-      if(anchor.row === "bottom"){
-        const maxBottom = 28.8;
-        if(frameH > maxBottom){
-          const scale = maxBottom / frameH;
-          frameW *= scale;
-          const newSidePad = clamp(frameW * 0.032, 0.48, 0.82);
-          const newTopPad = clamp(frameW * 0.024, 0.36, 0.60);
-          const newInnerW = frameW - newSidePad * 2;
-          mediaH = Math.max(newInnerW / ratio, isPortrait ? 9.8 : 7.4);
-          const newCaptionFont = clamp(frameW * 0.112, 1.02, 1.78);
-          const newCaptionH = clamp(newCaptionFont * 2.0, 2.2, 3.75);
-
-          return {
-            meta,
-            ratio,
-            frameW,
-            frameH: newTopPad + mediaH + newCaptionH,
-            sidePad: newSidePad,
-            topPad: newTopPad,
-            mediaH,
-            captionH: newCaptionH,
-            captionFont: newCaptionFont,
-            isPortrait,
-            isLandscape
-          };
-        }
-      }
+      const frameH = topPad + mediaH + captionH;
 
       return {
         meta,
@@ -834,109 +675,84 @@
         topPad,
         mediaH,
         captionH,
-        captionFont,
-        isPortrait,
-        isLandscape
+        captionFont
       };
     }
 
-    function buildCardGeometry(anchor, layout, count){
-      const clipXPercent = clamp(50 + rand(-7, 7), 42, 58);
+    function buildGeometry(anchor, layout){
+      const clipXPercent = clamp(50 + rand(-6, 6), 45, 55);
 
-      const left = anchor.anchorX - (layout.frameW * (clipXPercent / 100));
-      const top = anchor.anchorY;
+      const left = anchor.x - (layout.frameW * (clipXPercent / 100));
+      const top = anchor.y;
 
-      const baseRot = clamp(rand(-7.5, 7.5), -7.5, 7.5);
-      const finalRot = clamp(baseRot + rand(-1.3, 1.3), -8.5, 8.5);
-
-      const rect = {
-        x:left,
-        y:top,
-        w:layout.frameW,
-        h:layout.frameH
-      };
+      const restRot = rand(-5.5, 5.5);
+      const finalRot = restRot + rand(-0.9, 0.9);
 
       return {
-        anchor,
-        layout,
         clipXPercent,
         left,
         top,
-        baseRot,
+        restRot,
         finalRot,
-        rect
+        rect:{
+          x:left,
+          y:top,
+          w:layout.frameW,
+          h:layout.frameH
+        }
       };
     }
 
-    function overlapArea(a, b){
-      const xOverlap = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
-      const yOverlap = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
-      return xOverlap * yOverlap;
-    }
+    function validatePrepared(items){
+      for(let i = 0; i < items.length; i++){
+        const r = items[i].geometry.rect;
 
-    function validatePlacement(geometries){
-      for(let i = 0; i < geometries.length; i++){
-        const g = geometries[i];
-        const r = g.rect;
+        if(r.x < 1.6) return false;
+        if(r.x + r.w > 98.4) return false;
+        if(r.y < 4.8) return false;
+        if(r.y + r.h > 92.0) return false;
 
-        if(r.x < 1.2) return false;
-        if(r.x + r.w > 98.6) return false;
-        if(r.y < 4.2) return false;
-        if(r.y + r.h > 96.6) return false;
-
-        for(let j = i + 1; j < geometries.length; j++){
-          const other = geometries[j];
-          const area = overlapArea(r, other.rect);
-          const minArea = Math.min(r.w * r.h, other.rect.w * other.rect.h);
-          if(area / minArea > 0.10) return false;
+        for(let j = i + 1; j < items.length; j++){
+          const r2 = items[j].geometry.rect;
+          const area = overlapArea(r, r2);
+          const minArea = Math.min(r.w * r.h, r2.w * r2.h);
+          if(area / minArea > 0.08) return false;
         }
       }
       return true;
     }
 
-    function prepareNewCardLayouts(slotIds, assets){
-      const count = slotIds.length;
+    function prepareVariant(variant, chosenAssets){
       const prepared = [];
 
-      for(let i = 0; i < slotIds.length; i++){
-        const anchor = getAnchor(slotIds[i]);
-        const asset = assets[i];
-        const layout = getLayoutForSlot(asset, anchor, count);
-        const geometry = buildCardGeometry(anchor, layout, count);
+      for(let i = 0; i < variant.length; i++){
+        const anchor = getAnchor(variant[i]);
+        const asset = chosenAssets[i];
+        const layout = buildLayout(asset, anchor, variant.length);
+        const geometry = buildGeometry(anchor, layout);
+
         prepared.push({
-          slotId: slotIds[i],
-          asset,
+          slotId: variant[i],
           anchor,
+          asset,
           layout,
           geometry
         });
       }
 
-      return validatePlacement(prepared.map(p => p.geometry)) ? prepared : null;
+      return validatePrepared(prepared) ? prepared : null;
     }
 
-    function resolvePreparedLayouts(slotIds){
-      // mehrere Versuche, bis die Kombination sauber passt
-      for(let attempt = 0; attempt < 120; attempt++){
-        const assets = chooseAssetsForNewSlots(slotIds);
-        if(assets.length !== slotIds.length) return null;
-
-        const prepared = prepareNewCardLayouts(slotIds, assets);
-        if(prepared) return prepared;
-      }
-      return null;
-    }
-
-    function createCard(prepared, attachDelayMs = 0){
-      const { asset, anchor, layout, geometry } = prepared;
+    function createCard(prepared, attachDelay = 0){
+      const { asset, layout, geometry } = prepared;
       const meta = layout.meta;
 
       const wrapper = document.createElement("div");
-      wrapper.className = "photo-card attaching";
+      wrapper.className = "photo-card";
       wrapper.style.left = `${geometry.left}%`;
       wrapper.style.top = `${geometry.top}%`;
       wrapper.style.width = `${layout.frameW}%`;
-      wrapper.style.zIndex = String(30 + currentCards.length);
+      wrapper.style.opacity = "0";
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
@@ -947,8 +763,6 @@
       const photoTop = document.createElement("div");
       photoTop.className = "photo-top";
       photoTop.style.height = `${layout.mediaH}%`;
-      photoTop.style.padding = "0";
-      photoTop.style.margin = "0";
       photoTop.style.background = "#fff";
 
       const img = document.createElement("img");
@@ -960,7 +774,7 @@
       captionStrip.className = "caption-strip";
       captionStrip.style.background = meta.color;
       captionStrip.style.height = `${layout.captionH}%`;
-      captionStrip.style.padding = "0.35em 0.55em 0.48em";
+      captionStrip.style.padding = "0.20em 0.50em 0.34em";
       captionStrip.style.fontSize = `${layout.captionFont}vw`;
 
       const captionInner = document.createElement("div");
@@ -974,131 +788,115 @@
         this.style.display = "none";
       };
 
-      const clipHeight = clamp(layout.frameW * 0.36, 3.4, 5.8); // deutlich größer
+      /*
+        Klammern deutlich größer und einheitlicher
+      */
+      const clipHeight = 5.8; // % von Stage-Höhe durch absolute Positionierung im Wrapper-Kontext
       clip.style.height = `${clipHeight}%`;
       clip.style.width = "auto";
       clip.style.left = `${geometry.clipXPercent}%`;
-      clip.style.top = `${-clipHeight * 0.72}%`; // unteres Viertel schneidet den Faden
-      clip.style.marginLeft = "-9999px"; // wird gleich überschrieben
-      clip.style.transform = "translateX(-50%)";
+      clip.style.top = `-4.4%`;
 
-      const clipRestRot = `${rand(-11, 11).toFixed(2)}deg`;
-      const clipStartRot = `${(parseFloat(clipRestRot) + rand(-5, 5)).toFixed(2)}deg`;
+      const photoRestRot = `${geometry.restRot.toFixed(2)}deg`;
+      const photoFinalRot = `${geometry.finalRot.toFixed(2)}deg`;
 
-      const attachMode = pick(["below","below","left","right"]);
-      let photoStartX = 0;
-      let photoStartY = 0;
+      const clipRestRot = `${rand(-9, 9).toFixed(2)}deg`;
+      const clipStartRot = `${(parseFloat(clipRestRot) + rand(-4, 4)).toFixed(2)}deg`;
 
-      if(attachMode === "below"){
-        photoStartX = rand(-10, 10);
-        photoStartY = rand(16, 28);
-      }else if(attachMode === "left"){
-        photoStartX = rand(-20, -12);
-        photoStartY = rand(4, 16);
+      const photoMode = pick(["below","below-left","below-right","left","right"]);
+      let psx = 0, psy = 0;
+
+      if(photoMode === "below"){
+        psx = rand(-8,8); psy = rand(14,22);
+      }else if(photoMode === "below-left"){
+        psx = rand(-14,-7); psy = rand(14,22);
+      }else if(photoMode === "below-right"){
+        psx = rand(7,14); psy = rand(14,22);
+      }else if(photoMode === "left"){
+        psx = rand(-16,-10); psy = rand(5,14);
       }else{
-        photoStartX = rand(12, 20);
-        photoStartY = rand(4, 16);
+        psx = rand(10,16); psy = rand(5,14);
       }
 
       const clipMode = pick(["top","diag-left","diag-right"]);
-      let clipStartX = 0;
-      let clipStartY = 0;
-
+      let csx = 0, csy = 0;
       if(clipMode === "top"){
-        clipStartX = rand(-3, 3);
-        clipStartY = rand(-24, -16);
+        csx = rand(-2,2); csy = rand(-18,-12);
       }else if(clipMode === "diag-left"){
-        clipStartX = rand(-14, -8);
-        clipStartY = rand(-23, -15);
+        csx = rand(-10,-5); csy = rand(-18,-12);
       }else{
-        clipStartX = rand(8, 14);
-        clipStartY = rand(-23, -15);
+        csx = rand(5,10); csy = rand(-18,-12);
       }
-
-      const photoRestRot = `${geometry.baseRot.toFixed(2)}deg`;
-      const photoFinalRot = `${geometry.finalRot.toFixed(2)}deg`;
 
       wrapper.style.setProperty("--attach-duration", "1s");
 
-      wrapper.style.setProperty("--photo-start-x", `${photoStartX}px`);
-      wrapper.style.setProperty("--photo-start-y", `${photoStartY}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${rand(-2.4, 2.4).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-x", `${psx}px`);
+      wrapper.style.setProperty("--photo-start-y", `${psy}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-2.0,2.0).toFixed(2)}deg`);
       wrapper.style.setProperty("--photo-rest-rot", photoRestRot);
       wrapper.style.setProperty("--photo-final-rot", photoFinalRot);
 
-      wrapper.style.setProperty("--clip-start-x", `${clipStartX}px`);
-      wrapper.style.setProperty("--clip-start-y", `${clipStartY}px`);
+      wrapper.style.setProperty("--clip-start-x", `${csx}px`);
+      wrapper.style.setProperty("--clip-start-y", `${csy}px`);
       wrapper.style.setProperty("--clip-start-rot", clipStartRot);
       wrapper.style.setProperty("--clip-rest-rot", clipRestRot);
 
-      wrapper.style.setProperty("--sway-duration", `${rand(1.65, 2.05).toFixed(2)}s`);
-      wrapper.style.setProperty("--sway-r1", `${rand(1.6, 2.8).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r2", `${rand(1.0, 1.8).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r3", `${rand(0.55, 1.05).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r4", `${rand(0.25, 0.58).toFixed(2)}deg`);
-      wrapper.style.setProperty("--sway-r5", `${rand(0.10, 0.28).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-duration", `${rand(2.05, 2.85).toFixed(2)}s`);
+      wrapper.style.setProperty("--sway-r1", `${rand(1.3, 2.1).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(0.85, 1.45).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.45, 0.85).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r4", `${rand(0.20, 0.45).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r5", `${rand(0.07, 0.20).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--sway-x1", `${rand(-1.2, 1.2).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y1", `${rand(-0.6, 0.6).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x2", `${rand(-0.9, 0.9).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y2", `${rand(-0.45, 0.45).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x3", `${rand(-0.55, 0.55).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y3", `${rand(-0.26, 0.26).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x4", `${rand(-0.28, 0.28).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y4", `${rand(-0.12, 0.12).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-x5", `${rand(-0.12, 0.12).toFixed(2)}px`);
-      wrapper.style.setProperty("--sway-y5", `${rand(-0.06, 0.06).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x1", `${rand(-0.9, 0.9).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-0.4, 0.4).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x2", `${rand(-0.6, 0.6).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-0.25, 0.25).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x3", `${rand(-0.35, 0.35).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-0.15, 0.15).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x4", `${rand(-0.18, 0.18).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y4", `${rand(-0.08, 0.08).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x5", `${rand(-0.08, 0.08).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y5", `${rand(-0.04, 0.04).toFixed(2)}px`);
 
-      wrapper.style.setProperty("--photo-end-x", `${rand(-10, 10).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-end-y", `${rand(18, 28).toFixed(0)}px`);
-      wrapper.style.setProperty("--photo-end-rot", `${rand(-2.4, 2.4).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-end-x", `${rand(-8,8).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-y", `${rand(14,20).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-2.0,2.0).toFixed(2)}deg`);
 
-      wrapper.style.setProperty("--clip-end-x", `${rand(-10, 10).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-end-y", `${rand(-18, -10).toFixed(0)}px`);
-      wrapper.style.setProperty("--clip-end-rot", `${rand(-7, 7).toFixed(2)}deg`);
+      wrapper.style.setProperty("--clip-end-x", `${rand(-8,8).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-16,-10).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-6,6).toFixed(2)}deg`);
 
       photoTop.appendChild(img);
-      captionInner.style.fontFamily = `"Kalam","Segoe Print","Trebuchet MS",Arial,sans-serif`;
       captionStrip.appendChild(captionInner);
-
       frame.appendChild(photoTop);
       frame.appendChild(captionStrip);
       wrapper.appendChild(frame);
       wrapper.appendChild(clip);
-
-      clip.style.marginLeft = "0";
-
-      wrapper.style.opacity = "0";
       stage.appendChild(wrapper);
 
       const cardObj = {
-        asset,
         slotId: prepared.slotId,
-        anchor,
+        asset,
         el: wrapper,
-        mountedAt: Date.now(),
-        layout,
-        geometry
+        mountedAt: Date.now()
       };
-
       currentCards.push(cardObj);
       markShown(asset.public_id);
 
-      const startAnimation = () => {
+      setTimeout(() => {
         wrapper.style.opacity = "1";
         wrapper.classList.add("attaching");
-      };
-
-      setTimeout(startAnimation, attachDelayMs);
+      }, attachDelay);
 
       setTimeout(() => {
         wrapper.classList.remove("attaching");
         wrapper.classList.add("swinging");
-      }, attachDelayMs + 1020);
+      }, attachDelay + 1020);
 
       setTimeout(() => {
         wrapper.classList.remove("swinging");
-      }, attachDelayMs + 3050);
+      }, attachDelay + 1020 + 2900);
 
       return cardObj;
     }
@@ -1114,14 +912,34 @@
             const idx = currentCards.indexOf(cardObj);
             if(idx >= 0) currentCards.splice(idx, 1);
             resolve(cardObj.slotId);
-          }, 960);
+          }, 980);
         }, delay);
       });
     }
 
     function chooseInitialVariant(){
-      const preferred = variants.filter(v => v.length === 4);
-      return preferred.length ? pick(preferred) : pick(variants);
+      const preferred = SLOT_VARIANTS.filter(v => v.length === 3);
+      return pick(preferred).slice();
+    }
+
+    function getCurrentSlotIds(){
+      return currentCards.map(c => c.slotId);
+    }
+
+    function chooseNextVariant(){
+      const currentSlots = getCurrentSlotIds();
+      return pickBalancedVariant(currentSlots);
+    }
+
+    function prepareChosenVariant(variant){
+      for(let attempt = 0; attempt < 80; attempt++){
+        const assets = chooseAssets(variant.length);
+        if(assets.length !== variant.length) return null;
+
+        const prepared = prepareVariant(variant, assets);
+        if(prepared) return prepared;
+      }
+      return null;
     }
 
     async function initialRender(){
@@ -1133,18 +951,10 @@
       emptyNote.style.display = "none";
 
       const variant = chooseInitialVariant();
-      variantPointer = variant.slice();
-
-      const prepared = resolvePreparedLayouts(variantPointer);
+      const prepared = prepareChosenVariant(variant);
       if(!prepared) return;
 
-      prepared.forEach((item, index) => {
-        createCard(item, index * 500);
-      });
-    }
-
-    function currentSlotIds(){
-      return currentCards.map(c => c.slotId).sort();
+      prepared.forEach((item, index) => createCard(item, index * 500));
     }
 
     function scheduleNextCycle(delayMs){
@@ -1158,41 +968,41 @@
         return;
       }
 
-      const currentIds = currentSlotIds();
-      const nextVariant = chooseNextVariant(currentIds);
-      variantPointer = nextVariant.slice();
-
-      const currentSet = new Set(currentIds);
+      const nextVariant = chooseNextVariant();
+      const currentSet = new Set(getCurrentSlotIds());
       const nextSet = new Set(nextVariant);
 
-      const toKeep = currentCards.filter(c => nextSet.has(c.slotId));
       const toRemove = currentCards.filter(c => !nextSet.has(c.slotId));
-      const toAddSlotIds = nextVariant.filter(id => !currentSet.has(id));
+      const toKeepIds = currentCards.filter(c => nextSet.has(c.slotId)).map(c => c.slotId);
+      const toAddIds = nextVariant.filter(id => !currentSet.has(id));
 
-      // max. 2 Fotos tauschen
-      const safeRemove = toRemove.slice(0, 2);
-      const safeAdd = toAddSlotIds.slice(0, 2);
+      // Falls die neue Variante identisch wäre, erzwingen wir Wechsel
+      if(toRemove.length === 0 && toAddIds.length === 0){
+        scheduleNextCycle(6000);
+        return;
+      }
 
-      const prepared = resolvePreparedLayouts(safeAdd);
-      if(!prepared){
-        scheduleNextCycle(6500);
+      const prepared = prepareChosenVariant(toAddIds);
+      if(toAddIds.length && !prepared){
+        scheduleNextCycle(6000);
         return;
       }
 
       await Promise.all(
-        safeRemove.map((card, index) => detachCard(card, index * 130))
+        toRemove.map((card, i) => detachCard(card, i * 140))
       );
 
-      // kurze Pause nach Entfernen
       await new Promise(resolve => setTimeout(resolve, 260));
 
-      prepared.forEach((item, index) => {
-        createCard(item, index * 500);
-      });
+      if(prepared){
+        prepared.forEach((item, index) => createCard(item, index * 500));
+      }
 
-      // min. 5 Sekunden sichtbar nach Ende des Anbringens
-      const attachEnd = 1000 + (prepared.length > 1 ? (prepared.length - 1) * 500 : 0);
-      scheduleNextCycle(attachEnd + 5000);
+      const addedCount = prepared ? prepared.length : 0;
+      const attachEnd = addedCount ? 1000 + ((addedCount - 1) * 500) : 0;
+
+      // min. 5 s sichtbar nach Anbringung
+      scheduleNextCycle(attachEnd + 5200);
     }
 
     async function rebuildWall(){
@@ -1204,12 +1014,10 @@
       }
 
       await initialRender();
-      scheduleNextCycle(7000);
+      scheduleNextCycle(6500);
     }
 
     async function boot(){
-      variants = generateVariants();
-
       await setFormat("16:9");
       await fetchAssets();
       await initialRender();
@@ -1217,11 +1025,8 @@
       clearInterval(fetchTimer);
       fetchTimer = setInterval(fetchAssets, 10000);
 
-      scheduleNextCycle(7000);
+      scheduleNextCycle(6500);
       updateControlVisibility();
-
-      // Hilfsbild einmal vorladen, wird aber nie sichtbar angezeigt
-      preloadImage(BG_GUIDE_IMAGE).catch(() => {});
     }
 
     boot();
