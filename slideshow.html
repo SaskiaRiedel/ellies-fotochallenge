@@ -161,7 +161,7 @@
       color:var(--caption-text);
       font-family:"Kalam","Segoe Print","Trebuchet MS",Arial,sans-serif;
       font-weight:700;
-      line-height:1.02;
+      line-height:0.98;
       letter-spacing:.01em;
       overflow:hidden;
       word-break:break-word;
@@ -185,6 +185,9 @@
       -webkit-user-drag:none;
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));
       will-change:transform, opacity;
+      width:auto;
+      height:auto;
+      max-width:none;
     }
 
     .photo-card.attaching .photo-frame{
@@ -323,17 +326,18 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308d";
+    const CACHE_BUSTER = "v=20260308e";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
     }
 
     const BG_IMAGE = assetUrl("bg_16_9.png");
+
     const CLIP_IMAGES = [
-      assetUrl("klammer1_uhd.png"),
-      assetUrl("klammer2_uhd.png"),
-      assetUrl("klammer3_uhd.png")
+      { src: assetUrl("klammer1_uhd.png"), scale: 1.00 },
+      { src: assetUrl("klammer2_uhd.png"), scale: 1.00 },
+      { src: assetUrl("klammer3_uhd.png"), scale: 0.50 }   // Klammer 3 nur halb so groß
     ];
 
     const aspectMap = {
@@ -355,10 +359,6 @@
     let fetchTimer = null;
     let variantHistory = [];
 
-    /*
-      Nur noch obere + mittlere Reihe.
-      Extra weit auseinander, damit 3 große Fotos sauber passen.
-    */
     const VARIANTS = [
       ["t1","t4"],
       ["t2","t5"],
@@ -552,11 +552,11 @@
 
     function estimateCaptionMinWidth(caption){
       const len = caption.length;
-      if(len <= 16) return 14.0;
-      if(len <= 24) return 16.2;
-      if(len <= 32) return 18.5;
-      if(len <= 40) return 20.0;
-      return 21.6;
+      if(len <= 16) return 15.5;
+      if(len <= 24) return 17.8;
+      if(len <= 32) return 19.8;
+      if(len <= 40) return 21.4;
+      return 22.8;
     }
 
     function pickBalancedVariant(currentSlotIds = []){
@@ -578,11 +578,6 @@
           };
         });
 
-      /*
-        nicht komplett alles tauschen:
-        - bei 3 Fotos mind. 1 gleich lassen
-        - bei 2 Fotos mind. 1 gleich lassen
-      */
       let filtered = candidates.filter(c => {
         const overlap = c.variant.filter(id => currentSet.has(id)).length;
         if(currentSlotIds.length === 3) return overlap >= 1 && overlap <= 2;
@@ -641,12 +636,22 @@
       return xOverlap * yOverlap;
     }
 
+    function expandRect(rect, padX, padY){
+      return {
+        x: rect.x - padX,
+        y: rect.y - padY,
+        w: rect.w + padX * 2,
+        h: rect.h + padY * 2
+      };
+    }
+
     function computeCaptionFont(frameW, caption){
-      let font = clamp(frameW * 0.115, 1.0, 1.95);
-      if(caption.length > 24) font *= 0.92;
-      if(caption.length > 32) font *= 0.86;
-      if(caption.length > 40) font *= 0.80;
-      return clamp(font, 0.92, 1.75);
+      let font = clamp(frameW * 0.106, 0.90, 1.58);
+      if(caption.length > 24) font *= 0.90;
+      if(caption.length > 32) font *= 0.84;
+      if(caption.length > 40) font *= 0.78;
+      if(caption.length > 52) font *= 0.72;
+      return clamp(font, 0.82, 1.52);
     }
 
     function buildLayout(asset, anchor, totalCount){
@@ -655,35 +660,46 @@
 
       const isPortrait = ratio < 0.92;
       const isLandscape = ratio > 1.20;
+      const isSquareish = !isPortrait && !isLandscape;
 
-      /*
-        Deutlich größere Fotos:
-        Ziel grob 20–30 % Bildschirmfläche
-      */
-      let frameW = totalCount === 2 ? 25.5 : 22.0;
-      if(anchor.row === "top") frameW += 0.8;
-      if(isPortrait) frameW *= 0.98;
-      if(isLandscape) frameW *= 1.10;
+      let frameW;
 
+      if(isPortrait){
+        frameW = totalCount === 2 ? 22.2 : 20.4;
+      }else if(isLandscape){
+        frameW = totalCount === 2 ? 25.5 : 23.4;
+      }else{
+        frameW = totalCount === 2 ? 23.8 : 21.8;
+      }
+
+      if(anchor.row === "top") frameW += 0.6;
       frameW = Math.max(frameW, estimateCaptionMinWidth(meta.caption));
-      frameW = clamp(frameW, 20.0, totalCount === 2 ? 30.0 : 25.5);
+      frameW = clamp(frameW, 19.5, totalCount === 2 ? 28.0 : 24.8);
 
-      const sidePad = clamp(frameW * 0.040, 0.70, 1.10);
-      const topPad = clamp(frameW * 0.028, 0.42, 0.72);
+      const sidePad = clamp(frameW * 0.055, 0.95, 1.35);
+      const topPad = clamp(frameW * 0.040, 0.70, 1.10);
       const innerW = frameW - sidePad * 2;
 
       let mediaH = innerW / ratio;
-      mediaH = Math.max(mediaH, isPortrait ? 16.5 : 11.0);
-      mediaH = Math.min(mediaH, isPortrait ? 31.0 : 18.0);
+
+      if(isPortrait){
+        mediaH = clamp(mediaH, 21.5, 29.5);
+      }else if(isLandscape){
+        mediaH = clamp(mediaH, 12.4, 17.4);
+      }else{
+        mediaH = clamp(mediaH, 16.4, 21.5);
+      }
 
       const captionFont = computeCaptionFont(frameW, meta.caption);
-      const captionH = clamp(captionFont * 2.05, 2.6, 4.2);
-
+      const captionH = clamp(captionFont * 2.15, 2.9, 4.4);
       const frameH = topPad + mediaH + captionH;
 
       return {
         meta,
         ratio,
+        isPortrait,
+        isLandscape,
+        isSquareish,
         frameW,
         frameH,
         sidePad,
@@ -695,13 +711,13 @@
     }
 
     function buildGeometry(anchor, layout){
-      const clipXPercent = clamp(50 + rand(-5, 5), 45, 55);
+      const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
 
       const left = anchor.x - (layout.frameW * (clipXPercent / 100));
       const top = anchor.y;
 
       const restRot = rand(-5.2, 5.2);
-      const finalRot = restRot + rand(-1.0, 1.0);
+      const finalRot = restRot + rand(-1.1, 1.1);
 
       return {
         clipXPercent,
@@ -721,17 +737,32 @@
     function validatePrepared(items){
       for(let i = 0; i < items.length; i++){
         const r = items[i].geometry.rect;
+        const layout = items[i].layout;
 
         if(r.x < 2.0) return false;
         if(r.x + r.w > 98.0) return false;
         if(r.y < 5.0) return false;
         if(r.y + r.h > 92.0) return false;
 
+        const padX = layout.isPortrait ? 2.4 : 2.0;
+        const padY = layout.isPortrait ? 1.6 : 1.4;
+        const safeR = expandRect(r, padX, padY);
+
         for(let j = i + 1; j < items.length; j++){
           const r2 = items[j].geometry.rect;
+          const layout2 = items[j].layout;
+          const safeR2 = expandRect(
+            r2,
+            layout2.isPortrait ? 2.4 : 2.0,
+            layout2.isPortrait ? 1.6 : 1.4
+          );
+
+          const safeOverlap = overlapArea(safeR, safeR2);
+          if(safeOverlap > 0) return false;
+
           const area = overlapArea(r, r2);
           const minArea = Math.min(r.w * r.h, r2.w * r2.h);
-          if(area / minArea > 0.05) return false;
+          if(area / minArea > 0.015) return false;
         }
       }
       return true;
@@ -756,6 +787,10 @@
       }
 
       return validatePrepared(prepared) ? prepared : null;
+    }
+
+    function chooseClip(){
+      return pick(CLIP_IMAGES);
     }
 
     function createCard(prepared, attachDelay = 0){
@@ -787,27 +822,28 @@
       captionStrip.className = "caption-strip";
       captionStrip.style.background = meta.color;
       captionStrip.style.height = `${layout.captionH}%`;
-      captionStrip.style.padding = "0.22em 0.58em 0.36em";
+      captionStrip.style.padding = "0.18em 0.56em 0.32em";
       captionStrip.style.fontSize = `${layout.captionFont}vw`;
 
       const captionInner = document.createElement("div");
       captionInner.className = "caption-inner";
       captionInner.textContent = meta.caption;
 
+      const clipChoice = chooseClip();
       const clip = document.createElement("img");
       clip.className = "clip";
-      clip.src = pick(CLIP_IMAGES);
+      clip.src = clipChoice.src;
       clip.onerror = function(){
         this.style.display = "none";
       };
 
-      /*
-        Klammern ca. Faktor 4 größer als zuvor
-      */
-      clip.style.width = "24%";
-      clip.style.height = "auto";
-      clip.style.left = `${geometry.clipXPercent}%`;
-      clip.style.top = `-8%`;
+      photoTop.appendChild(img);
+      captionStrip.appendChild(captionInner);
+      frame.appendChild(photoTop);
+      frame.appendChild(captionStrip);
+      wrapper.appendChild(frame);
+      wrapper.appendChild(clip);
+      stage.appendChild(wrapper);
 
       const photoRestRot = `${geometry.restRot.toFixed(2)}deg`;
       const photoFinalRot = `${geometry.finalRot.toFixed(2)}deg`;
@@ -878,13 +914,26 @@
       wrapper.style.setProperty("--clip-end-y", `${rand(-16,-10).toFixed(0)}px`);
       wrapper.style.setProperty("--clip-end-rot", `${rand(-6,6).toFixed(2)}deg`);
 
-      photoTop.appendChild(img);
-      captionStrip.appendChild(captionInner);
-      frame.appendChild(photoTop);
-      frame.appendChild(captionStrip);
-      wrapper.appendChild(frame);
-      wrapper.appendChild(clip);
-      stage.appendChild(wrapper);
+      const stagePxW = stage.getBoundingClientRect().width;
+      const wrapperPxW = stagePxW * (layout.frameW / 100);
+
+      /*
+        Einheitliche Klammerhöhe:
+        - groß genug
+        - Klammer 3 halbiert
+      */
+      const baseClipHeight = clamp(wrapperPxW * 0.42, 82, 150);
+      const clipHeight = baseClipHeight * clipChoice.scale;
+
+      clip.style.height = `${clipHeight}px`;
+      clip.style.width = "auto";
+      clip.style.left = `${geometry.clipXPercent}%`;
+
+      /*
+        Nur 1/5 der Klammer unterhalb des Fadens:
+        80% oberhalb, 20% unterhalb
+      */
+      clip.style.top = `${-(clipHeight * 0.80)}px`;
 
       const cardObj = {
         slotId: prepared.slotId,
@@ -953,7 +1002,7 @@
     }
 
     function prepareChosenVariant(variant){
-      for(let attempt = 0; attempt < 120; attempt++){
+      for(let attempt = 0; attempt < 160; attempt++){
         const assets = chooseAssets(variant.length);
         if(assets.length !== variant.length) return null;
 
