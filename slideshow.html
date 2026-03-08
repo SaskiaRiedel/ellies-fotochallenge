@@ -125,7 +125,6 @@
 
     .photo-frame{
       position:relative;
-      background:#fff;
       box-shadow:var(--shadow);
       overflow:visible;
       transform-origin:var(--pin-x) 0px;
@@ -133,12 +132,11 @@
     }
 
     .media-wrap{
-      width:100%;
-      background:#fff;
       overflow:hidden;
       display:flex;
       align-items:center;
       justify-content:center;
+      background:#fff;
     }
 
     .media-img{
@@ -318,7 +316,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308f";
+    const CACHE_BUSTER = "v=20260308g";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -329,7 +327,7 @@
     const CLIP_VARIANTS = [
       { src: assetUrl("klammer1_uhd.png"), scale: 0.34 },
       { src: assetUrl("klammer2_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer3_uhd.png"), scale: 0.425 } // 0.17 * 2.5
+      { src: assetUrl("klammer3_uhd.png"), scale: 0.21 }
     ];
 
     const aspectMap = {
@@ -550,7 +548,7 @@
       const imgH = Number(asset.height || 1000);
       const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
 
-      const targetPhotoDiagPx = stageDiagPx * 0.35;
+      const targetPhotoDiagPx = stageDiagPx * 0.30;
       const scale = targetPhotoDiagPx / imgDiag;
 
       const photoWPx = imgW * scale;
@@ -559,18 +557,21 @@
       const mediaW = (photoWPx / stageRect.width) * 100;
       const mediaH = (photoHPx / stageRect.height) * 100;
 
-      const borderSide = clamp((stageDiagPx * 0.0045 / stageRect.width) * 100, 0.65, 1.2);
-      const borderTop = clamp((stageDiagPx * 0.0045 / stageRect.height) * 100, 0.75, 1.35);
+      const borderXPx = clamp(stageDiagPx * 0.007, 10, 18);
+      const borderYPx = clamp(stageDiagPx * 0.007, 10, 18);
 
-      const frameW = mediaW + borderSide * 2;
+      const borderX = (borderXPx / stageRect.width) * 100;
+      const borderTop = (borderYPx / stageRect.height) * 100;
 
-      let captionFontPx = clamp(stageDiagPx * 0.021, 18, 38);
-      let captionLineHeight = 1.02;
-      let captionBoxHpx = captionFontPx * captionLineHeight * 3 + 22;
+      let captionFontPx = clamp(stageDiagPx * 0.020, 18, 34);
+      const captionPadYPx = clamp(stageDiagPx * 0.006, 8, 14);
+      const captionPadY = (captionPadYPx / stageRect.height) * 100;
 
+      const captionBoxHpx = captionFontPx * 1.02 * 3 + captionPadYPx * 2;
       const captionBoxH = (captionBoxHpx / stageRect.height) * 100;
 
-      const frameH = mediaH + borderTop + captionBoxH;
+      const frameW = mediaW + borderX * 2;
+      const frameH = borderTop + mediaH + captionBoxH + captionPadY;
 
       return {
         meta,
@@ -578,9 +579,10 @@
         mediaH,
         frameW,
         frameH,
-        borderSide,
+        borderX,
         borderTop,
         captionBoxH,
+        captionPadY,
         captionFontPx
       };
     }
@@ -594,7 +596,7 @@
       const w = layout.frameW;
       const h = layout.frameH;
 
-      const inflate = Math.abs(rotDeg) * 0.12 + 0.6;
+      const inflate = Math.abs(rotDeg) * 0.12 + 0.7;
 
       return {
         clipXPercent,
@@ -724,7 +726,7 @@
       return chosen.slice(0, count);
     }
 
-    function fitCaption(captionEl, maxPx = 38, minPx = 14, maxLines = 3){
+    function fitCaption(captionEl, maxPx = 34, minPx = 14, maxLines = 3){
       let size = maxPx;
       captionEl.style.fontSize = `${size}px`;
       captionEl.style.lineHeight = "1.02";
@@ -754,27 +756,27 @@
       frame.style.width = "100%";
       frame.style.height = "100%";
       frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
-      frame.style.background = "#fff";
+      frame.style.background = layout.meta.color;
 
       const mediaWrap = document.createElement("div");
       mediaWrap.className = "media-wrap";
       mediaWrap.style.width = `${layout.mediaW}%`;
       mediaWrap.style.height = `${layout.mediaH}%`;
-      mediaWrap.style.marginLeft = `${layout.borderSide}%`;
+      mediaWrap.style.marginLeft = `${layout.borderX}%`;
       mediaWrap.style.marginTop = `${layout.borderTop}%`;
-      mediaWrap.style.background = layout.meta.color;
 
       const mediaImg = document.createElement("img");
       mediaImg.className = "media-img";
       mediaImg.alt = layout.meta.caption;
       mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
-      mediaImg.style.background = "#fff";
 
       const caption = document.createElement("div");
       caption.className = "caption";
-      caption.style.width = `${layout.mediaW}%`;
-      caption.style.marginLeft = `${layout.borderSide}%`;
+      caption.style.width = `calc(100% - ${layout.borderX * 2}%)`;
+      caption.style.marginLeft = `${layout.borderX}%`;
       caption.style.height = `${layout.captionBoxH}%`;
+      caption.style.paddingTop = `${layout.captionPadY / 2}%`;
+      caption.style.paddingBottom = `${layout.captionPadY / 2}%`;
       caption.style.background = layout.meta.color;
       caption.textContent = layout.meta.caption;
 
@@ -896,8 +898,7 @@
     function cardBoundingFor(slotId, asset){
       const slot = getSlot(slotId);
       const layout = buildLayout(asset);
-      const testRot = 0;
-      return rectForPlacement(slot, layout, testRot);
+      return rectForPlacement(slot, layout, 0);
     }
 
     function candidateOk(pattern, assetsBySlot){
@@ -1045,9 +1046,6 @@
       const valid = [];
 
       for(const entry of currentEntries){
-        const slot = getSlot(entry.slotId);
-        if(!slot) continue;
-
         const rect = cardBoundingFor(entry.slotId, entry.asset);
         if(!withinStage(rect)) continue;
 
