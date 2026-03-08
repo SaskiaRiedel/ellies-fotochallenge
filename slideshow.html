@@ -5,998 +5,1226 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fotochallenge</title>
   <script src="config.js"></script>
+
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
+
     :root{
-      --page-bg: #000;
-      --wall-bg: #ece7dc;
-      --button-bg: rgba(255,255,255,.72);
-      --button-bg-active: rgba(255,255,255,.92);
-      --button-text: #3f352d;
-      --card-shadow: 0 10px 24px rgba(0,0,0,.16);
+      --wall-bg:#e9e4db;
+      --shadow:0 10px 28px rgba(0,0,0,.18);
+      --caption-text:#111;
+      --aspect-num:16;
+      --aspect-den:9;
     }
 
     *{ box-sizing:border-box; }
 
     html, body{
       margin:0;
-      padding:0;
       width:100%;
       height:100%;
       overflow:hidden;
-      background:var(--page-bg);
-      font-family: Arial, Helvetica, sans-serif;
+      background:#111;
+      font-family:Arial, Helvetica, sans-serif;
     }
 
     body{
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      position:relative;
     }
 
-    #app{
+    .viewport{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:#111;
+      overflow:hidden;
+    }
+
+    .stage-shell{
       position:relative;
       width:100vw;
       height:100vh;
+      display:grid;
+      place-items:center;
       overflow:hidden;
-      background:#000;
+      background:#111;
     }
 
-    #stage{
-      position:absolute;
-      inset:0;
-      margin:auto;
+    .stage{
+      position:relative;
+      width:min(100vw, calc(100vh * (var(--aspect-num) / var(--aspect-den))));
+      height:min(100vh, calc(100vw * (var(--aspect-den) / var(--aspect-num))));
       overflow:hidden;
       background:var(--wall-bg);
-      transform-origin:center center;
     }
 
-    #wall{
+    .bg-layer{
       position:absolute;
       inset:0;
+      z-index:1;
       background-color:var(--wall-bg);
-      background-image:url("assets/bg_16_9.png");
       background-repeat:no-repeat;
       background-position:center center;
       background-size:100% 100%;
-      pointer-events:none;
     }
 
-    #cards{
+    .empty-note{
       position:absolute;
       inset:0;
-      overflow:hidden;
+      display:grid;
+      place-items:center;
+      color:rgba(0,0,0,.45);
+      font-size:clamp(1rem,1.8vw,1.45rem);
+      text-align:center;
+      padding:24px;
+      z-index:20;
       pointer-events:none;
     }
 
-    .polaroid{
+    .controls{
+      position:fixed;
+      right:14px;
+      bottom:14px;
+      z-index:250;
+      display:grid;
+      grid-template-columns:repeat(2, auto);
+      gap:7px 7px;
+      justify-content:end;
+      transition:opacity .2s ease;
+    }
+
+    .controls.hidden{
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .control-btn{
+      border:none;
+      border-radius:999px;
+      padding:7px 12px;
+      min-width:62px;
+      background:rgba(255,255,255,.52);
+      color:#3d3d3d;
+      cursor:pointer;
+      font-size:.84rem;
+      font-weight:700;
+      backdrop-filter:blur(4px);
+      box-shadow:0 4px 12px rgba(0,0,0,.10);
+    }
+
+    .control-btn.active{
+      background:rgba(255,255,255,.82);
+      color:#1f1f1f;
+    }
+
+    .photo-card{
       position:absolute;
+      z-index:30;
+      pointer-events:none;
+      will-change:left, top, width, height;
+    }
+
+    .photo-frame{
+      position:relative;
+      border-radius:2px;
+      overflow:visible;
+      box-shadow:var(--shadow);
       transform-origin:50% 0%;
       will-change:transform, opacity;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.16));
-      opacity:1;
+      background:#fff;
     }
 
-    .polaroid.entering{
-      opacity:0;
-    }
-
-    .card{
-      position:relative;
+    .photo-top{
       width:100%;
-      height:100%;
-      overflow:visible;
-      border-radius:2px;
-      box-shadow:var(--card-shadow);
-    }
-
-    .clip{
-      position:absolute;
-      left:50%;
-      top:0;
-      transform-origin:center top;
-      z-index:8;
-      pointer-events:none;
-      user-select:none;
-      -webkit-user-drag:none;
-      width:auto;
-      height:auto;
-      display:block;
-    }
-
-    .inner{
-      position:absolute;
-      inset:0;
-      border-radius:2px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .photo-wrap{
-      position:relative;
-      flex:0 0 auto;
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
+      background:#fff;
+      border-radius:1px;
     }
 
-    .photo-wrap img{
+    .photo-top img.photo-image{
       display:block;
-      width:auto;
-      height:auto;
-      max-width:100%;
-      max-height:100%;
+      width:100%;
+      height:100%;
       object-fit:contain;
-      user-select:none;
-      -webkit-user-drag:none;
+      background:#fff;
     }
 
-    .caption{
-      flex:0 0 auto;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      line-clamp:2;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .caption-strip{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       text-align:center;
+      color:var(--caption-text);
+      font-family:"Kalam","Segoe Print","Trebuchet MS",Arial,sans-serif;
       font-weight:700;
-      color:#111;
+      line-height:1.03;
+      letter-spacing:.01em;
+      overflow:hidden;
       word-break:break-word;
       hyphens:auto;
     }
 
-    #controls{
+    .caption-inner{
+      width:100%;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
+    }
+
+    .clip{
       position:absolute;
-      right:10px;
-      bottom:10px;
-      z-index:999;
-      display:grid;
-      grid-template-columns:repeat(2, auto);
-      gap:6px;
-      transition:opacity .25s ease;
-    }
-
-    #controls.hidden{
-      opacity:0;
+      z-index:8;
+      transform-origin:50% 10%;
       pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));
+      will-change:transform, opacity;
     }
 
-    .fmt-btn{
-      appearance:none;
-      border:none;
-      border-radius:999px;
-      background:var(--button-bg);
-      color:var(--button-text);
-      font-size:11px;
-      font-weight:700;
-      line-height:1;
-      padding:7px 11px;
-      min-width:48px;
-      cursor:pointer;
-      backdrop-filter: blur(3px);
-      box-shadow:0 2px 7px rgba(0,0,0,.08);
-      transition:.18s ease;
+    .photo-card.attaching .photo-frame{
+      animation:attachPhoto var(--attach-duration,1s) cubic-bezier(.2,.72,.2,1) forwards;
     }
 
-    .fmt-btn:hover{
-      background:rgba(255,255,255,.85);
+    .photo-card.attaching .clip{
+      animation:attachClip var(--attach-duration,1s) cubic-bezier(.2,.72,.2,1) forwards;
     }
 
-    .fmt-btn.active{
-      background:var(--button-bg-active);
+    .photo-card.swinging .photo-frame{
+      animation:swayPhotoDamped var(--sway-duration,2s) cubic-bezier(.22,.65,.18,1) forwards;
     }
 
-    @keyframes cardIn {
-      0% {
+    .photo-card.detaching .photo-frame{
+      animation:detachPhoto .95s cubic-bezier(.28,.7,.3,1) forwards;
+    }
+
+    .photo-card.detaching .clip{
+      animation:detachClip .85s cubic-bezier(.28,.7,.3,1) forwards;
+    }
+
+    @keyframes attachPhoto{
+      0%{
         opacity:0;
         transform:
-          translate(var(--in-x0), var(--in-y0))
-          rotate(var(--in-r0))
-          scale(.93);
+          translate(var(--photo-start-x), var(--photo-start-y))
+          rotate(var(--photo-start-rot))
+          scale(.985);
       }
-      18% {
-        opacity:.7;
-      }
-      45% {
-        opacity:1;
-        transform:
-          translate(var(--in-x1), var(--in-y1))
-          rotate(var(--in-r1))
-          scale(1.01);
-      }
-      70% {
-        transform:
-          translate(var(--in-x2), var(--in-y2))
-          rotate(var(--in-r2))
-          scale(1);
-      }
-      100% {
+      100%{
         opacity:1;
         transform:
           translate(0,0)
-          rotate(var(--rest-r))
+          rotate(var(--photo-rest-rot))
           scale(1);
       }
     }
 
-    @keyframes clipIn {
-      0% {
+    @keyframes attachClip{
+      0%{
         opacity:0;
         transform:
-          translate(-50%, 0)
-          translate(var(--clip-x0), var(--clip-y0))
-          rotate(var(--clip-r0))
-          scale(.9);
+          translate(var(--clip-start-x), var(--clip-start-y))
+          rotate(var(--clip-start-rot))
+          scale(.985);
       }
-      55% {
-        opacity:1;
-        transform:
-          translate(-50%, 0)
-          translate(var(--clip-x1), var(--clip-y1))
-          rotate(var(--clip-r1))
-          scale(1.02);
-      }
-      100% {
-        opacity:1;
-        transform:
-          translate(-50%, 0)
-          translate(var(--clip-xf), var(--clip-yf))
-          rotate(var(--clip-rf))
-          scale(1);
-      }
-    }
-
-    @keyframes cardOut {
-      0% {
+      100%{
         opacity:1;
         transform:
           translate(0,0)
-          rotate(var(--rest-r));
-      }
-      100% {
-        opacity:0;
-        transform:
-          translate(var(--out-x), var(--out-y))
-          rotate(calc(var(--rest-r) + var(--out-r)))
-          scale(.92);
+          rotate(var(--clip-rest-rot))
+          scale(1);
       }
     }
 
-    @keyframes clipOut {
-      0% {
-        opacity:1;
-        transform:
-          translate(-50%, 0)
-          translate(var(--clip-xf), var(--clip-yf))
-          rotate(var(--clip-rf))
-          scale(1);
+    @keyframes swayPhotoDamped{
+      0%{
+        transform:translate(0,0) rotate(var(--photo-rest-rot));
       }
-      100% {
+      16%{
+        transform:translate(var(--sway-x1), var(--sway-y1)) rotate(calc(var(--photo-rest-rot) + var(--sway-r1)));
+      }
+      32%{
+        transform:translate(var(--sway-x2), var(--sway-y2)) rotate(calc(var(--photo-rest-rot) - var(--sway-r2)));
+      }
+      48%{
+        transform:translate(var(--sway-x3), var(--sway-y3)) rotate(calc(var(--photo-rest-rot) + var(--sway-r3)));
+      }
+      64%{
+        transform:translate(var(--sway-x4), var(--sway-y4)) rotate(calc(var(--photo-rest-rot) - var(--sway-r4)));
+      }
+      80%{
+        transform:translate(var(--sway-x5), var(--sway-y5)) rotate(calc(var(--photo-rest-rot) + var(--sway-r5)));
+      }
+      100%{
+        transform:translate(0,0) rotate(var(--photo-final-rot));
+      }
+    }
+
+    @keyframes detachPhoto{
+      0%{
+        opacity:1;
+        transform:translate(0,0) rotate(var(--photo-final-rot)) scale(1);
+      }
+      100%{
         opacity:0;
         transform:
-          translate(-50%, 0)
-          translate(var(--clip-ox), var(--clip-oy))
-          rotate(calc(var(--clip-rf) + var(--clip-or)))
-          scale(.92);
+          translate(var(--photo-end-x), var(--photo-end-y))
+          rotate(calc(var(--photo-final-rot) + var(--photo-end-rot)))
+          scale(.985);
+      }
+    }
+
+    @keyframes detachClip{
+      0%{
+        opacity:1;
+        transform:translate(0,0) rotate(var(--clip-rest-rot)) scale(1);
+      }
+      100%{
+        opacity:0;
+        transform:
+          translate(var(--clip-end-x), var(--clip-end-y))
+          rotate(calc(var(--clip-rest-rot) + var(--clip-end-rot)))
+          scale(.985);
       }
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div id="stage">
-      <div id="wall"></div>
-      <div id="cards"></div>
-    </div>
-
-    <div id="controls">
-      <button class="fmt-btn" data-format="4:3">4:3</button>
-      <button class="fmt-btn active" data-format="16:9">16:9</button>
-      <button class="fmt-btn" data-format="16:10">16:10</button>
-      <button class="fmt-btn" data-format="7:5">7:5</button>
+  <div class="viewport">
+    <div class="stage-shell">
+      <div class="stage" id="stage">
+        <div id="bgLayer" class="bg-layer"></div>
+        <div id="emptyNote" class="empty-note">Noch keine Bilder in der Fotowand gefunden.</div>
+      </div>
     </div>
   </div>
 
-  <script>
-    (() => {
-      const stageEl = document.getElementById("stage");
-      const wallEl = document.getElementById("wall");
-      const cardsEl = document.getElementById("cards");
-      const controlsEl = document.getElementById("controls");
+  <div class="controls" id="controls">
+    <button id="btn43" class="control-btn" type="button">4:3</button>
+    <button id="btn75" class="control-btn" type="button">7:5</button>
+    <button id="btn169" class="control-btn active" type="button">16:9</button>
+    <button id="btn1610" class="control-btn" type="button">16:10</button>
+  </div>
 
-      const FORMATS = {
-        "4:3":   { w:4,  h:3  },
-        "16:9":  { w:16, h:9  },
-        "16:10": { w:16, h:10 },
-        "7:5":   { w:7,  h:5  }
+  <script>
+    const stage = document.getElementById("stage");
+    const bgLayer = document.getElementById("bgLayer");
+    const emptyNote = document.getElementById("emptyNote");
+    const controls = document.getElementById("controls");
+
+    const btn43 = document.getElementById("btn43");
+    const btn75 = document.getElementById("btn75");
+    const btn169 = document.getElementById("btn169");
+    const btn1610 = document.getElementById("btn1610");
+
+    const REPO_BASE = "/ellies-fotochallenge/";
+    const CACHE_BUSTER = "v=20260308b";
+
+    function assetUrl(filename){
+      return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
+    }
+
+    const BG_IMAGE = assetUrl("bg_16_9.png");
+    const BG_GUIDE_IMAGE = assetUrl("bg_16_9_Fadenposition.png"); // nur zur Kalibrierung vorhanden
+    const CLIP_IMAGES = [
+      assetUrl("klammer1_uhd.png"),
+      assetUrl("klammer2_uhd.png"),
+      assetUrl("klammer3_uhd.png")
+    ];
+
+    const aspectMap = {
+      "4:3":   { num:4,  den:3  },
+      "7:5":   { num:7,  den:5  },
+      "16:9":  { num:16, den:9  },
+      "16:10": { num:16, den:10 }
+    };
+
+    const allAssets = [];
+    const assetIds = new Set();
+    const currentCards = [];
+    const showCounts = new Map();
+    const recentlyShown = [];
+    const MAX_RECENT_TRACK = 50;
+
+    let currentFormat = "16:9";
+    let nextTimer = null;
+    let fetchTimer = null;
+    let variantPointer = null;
+    let variants = [];
+
+    /*
+      Feste Ankerpunkte entlang der Seile.
+      anchorX / anchorY = Punkt, an dem die Klammer den Faden schneidet.
+      group = grobe Platzgruppe
+      wBias = Breitenneigung für den Slot
+    */
+    const anchors = [
+      // oberes Seil
+      { id:"t1", row:"top",    anchorX:13.5, anchorY:8.9,  group:"edge",   wBias:0.98 },
+      { id:"t2", row:"top",    anchorX:28.5, anchorY:11.3, group:"mid",    wBias:1.00 },
+      { id:"t3", row:"top",    anchorX:48.5, anchorY:11.8, group:"mid",    wBias:1.05 },
+      { id:"t4", row:"top",    anchorX:67.0, anchorY:11.0, group:"mid",    wBias:1.00 },
+      { id:"t5", row:"top",    anchorX:86.0, anchorY:8.8,  group:"edge",   wBias:0.98 },
+
+      // mittleres Seil
+      { id:"m1", row:"middle", anchorX:12.5, anchorY:37.2, group:"edge",   wBias:0.98 },
+      { id:"m2", row:"middle", anchorX:27.0, anchorY:40.3, group:"mid",    wBias:1.00 },
+      { id:"m3", row:"middle", anchorX:43.5, anchorY:41.4, group:"center", wBias:1.03 },
+      { id:"m4", row:"middle", anchorX:60.0, anchorY:41.2, group:"center", wBias:1.03 },
+      { id:"m5", row:"middle", anchorX:76.0, anchorY:39.1, group:"mid",    wBias:1.00 },
+      { id:"m6", row:"middle", anchorX:88.0, anchorY:36.5, group:"edge",   wBias:0.96 },
+
+      // unteres Seil
+      { id:"b1", row:"bottom", anchorX:13.0, anchorY:68.0, group:"edge",   wBias:0.98 },
+      { id:"b2", row:"bottom", anchorX:28.0, anchorY:72.5, group:"mid",    wBias:1.00 },
+      { id:"b3", row:"bottom", anchorX:47.5, anchorY:73.8, group:"center", wBias:1.04 },
+      { id:"b4", row:"bottom", anchorX:66.0, anchorY:72.9, group:"center", wBias:1.02 },
+      { id:"b5", row:"bottom", anchorX:83.0, anchorY:68.6, group:"mid",    wBias:0.98 }
+    ];
+
+    function getAnchor(id){
+      return anchors.find(a => a.id === id);
+    }
+
+    function rand(min, max){
+      return Math.random() * (max - min) + min;
+    }
+
+    function clamp(value, min, max){
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function pick(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr){
+      const copy = [...arr];
+      for(let i = copy.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function sortByUploadOrder(list){
+      return list.sort((a, b) => Number(a.version || 0) - Number(b.version || 0));
+    }
+
+    function combinations(arr, k){
+      const result = [];
+      function run(start, combo){
+        if(combo.length === k){
+          result.push([...combo]);
+          return;
+        }
+        for(let i = start; i < arr.length; i++){
+          combo.push(arr[i]);
+          run(i + 1, combo);
+          combo.pop();
+        }
+      }
+      run(0, []);
+      return result;
+    }
+
+    function preloadImage(url){
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    }
+
+    async function setFormat(format){
+      currentFormat = format;
+      const cfg = aspectMap[format];
+
+      document.documentElement.style.setProperty("--aspect-num", String(cfg.num));
+      document.documentElement.style.setProperty("--aspect-den", String(cfg.den));
+
+      const ok = await preloadImage(BG_IMAGE);
+      bgLayer.style.backgroundImage = ok ? `url("${BG_IMAGE}")` : "none";
+
+      btn43.classList.toggle("active", format === "4:3");
+      btn75.classList.toggle("active", format === "7:5");
+      btn169.classList.toggle("active", format === "16:9");
+      btn1610.classList.toggle("active", format === "16:10");
+    }
+
+    function requestFullscreen(){
+      const el = document.documentElement;
+      if(el.requestFullscreen) el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if(el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+    function updateControlVisibility(){
+      controls.classList.toggle("hidden", !!document.fullscreenElement);
+    }
+
+    document.addEventListener("fullscreenchange", updateControlVisibility);
+    document.addEventListener("webkitfullscreenchange", updateControlVisibility);
+
+    btn43.addEventListener("click", async () => {
+      await setFormat("4:3");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    btn75.addEventListener("click", async () => {
+      await setFormat("7:5");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    btn169.addEventListener("click", async () => {
+      await setFormat("16:9");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    btn1610.addEventListener("click", async () => {
+      await setFormat("16:10");
+      requestFullscreen();
+      await rebuildWall();
+    });
+
+    function getTask(asset){
+      const taskId = asset?.context?.custom?.task_id || "";
+      const tasks = Array.isArray(APP_CONFIG?.tasks) ? APP_CONFIG.tasks : [];
+      return tasks.find(t => t.id === taskId) || null;
+    }
+
+    function getCardMeta(asset){
+      const task = getTask(asset);
+      const caption = (
+        asset?.context?.custom?.caption ||
+        asset?.context?.custom?.spruch ||
+        asset?.context?.caption ||
+        "Fotochallenge"
+      ).trim();
+
+      return {
+        caption,
+        color: task?.color || "#dfeaf4"
+      };
+    }
+
+    function rememberShown(publicId){
+      recentlyShown.push(publicId);
+      while(recentlyShown.length > MAX_RECENT_TRACK){
+        recentlyShown.shift();
+      }
+    }
+
+    function markShown(publicId){
+      showCounts.set(publicId, (showCounts.get(publicId) || 0) + 1);
+      rememberShown(publicId);
+    }
+
+    function fetchAssets(){
+      return fetch(`https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/fotochallenge.json`)
+        .then(response => {
+          if(!response.ok){
+            throw new Error(`Asset-Liste konnte nicht geladen werden (${response.status}).`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const resources = Array.isArray(data.resources) ? data.resources : [];
+          const onlyImages = resources.filter(asset => {
+            const format = String(asset.format || "").toLowerCase();
+            return ["jpg","jpeg","png","webp","heic"].includes(format);
+          });
+
+          sortByUploadOrder(onlyImages).forEach(asset => {
+            if(!assetIds.has(asset.public_id)){
+              assetIds.add(asset.public_id);
+              allAssets.push(asset);
+            }
+          });
+
+          if(allAssets.length > 0){
+            emptyNote.style.display = "none";
+          }
+        })
+        .catch(error => console.error(error));
+    }
+
+    function isFreshAsset(asset){
+      const uploadMs = Number(asset.version || 0) * 1000;
+      return uploadMs > (Date.now() - 5 * 60 * 1000);
+    }
+
+    function getCurrentPublicIds(){
+      return new Set(currentCards.map(c => c.asset.public_id));
+    }
+
+    function generateVariants(){
+      const tops = anchors.filter(a => a.row === "top").map(a => a.id);
+      const mids = anchors.filter(a => a.row === "middle").map(a => a.id);
+      const bots = anchors.filter(a => a.row === "bottom").map(a => a.id);
+
+      const topPairs = combinations(tops, 2).filter(pair => {
+        const a = getAnchor(pair[0]).anchorX;
+        const b = getAnchor(pair[1]).anchorX;
+        return Math.abs(a - b) >= 17;
+      });
+
+      const midPairs = combinations(mids, 2).filter(pair => {
+        const a = getAnchor(pair[0]).anchorX;
+        const b = getAnchor(pair[1]).anchorX;
+        return Math.abs(a - b) >= 16;
+      });
+
+      const botPairs = combinations(bots, 2).filter(pair => {
+        const a = getAnchor(pair[0]).anchorX;
+        const b = getAnchor(pair[1]).anchorX;
+        return Math.abs(a - b) >= 17;
+      });
+
+      const raw = [];
+
+      // 3er-Varianten
+      tops.forEach(t => {
+        mids.forEach(m => {
+          bots.forEach(b => {
+            raw.push([t, m, b]);
+          });
+        });
+      });
+
+      // 4er-Varianten
+      topPairs.forEach(tp => {
+        mids.forEach(m => {
+          bots.forEach(b => raw.push([...tp, m, b]));
+        });
+      });
+
+      tops.forEach(t => {
+        midPairs.forEach(mp => {
+          bots.forEach(b => raw.push([t, ...mp, b]));
+        });
+      });
+
+      tops.forEach(t => {
+        mids.forEach(m => {
+          botPairs.forEach(bp => raw.push([t, m, ...bp]));
+        });
+      });
+
+      const unique = new Map();
+
+      raw.forEach(ids => {
+        const sortedIds = [...ids].sort();
+        const key = sortedIds.join("|");
+        if(unique.has(key)) return;
+
+        const rows = sortedIds.map(id => getAnchor(id).row);
+        const topCount = rows.filter(r => r === "top").length;
+        const midCount = rows.filter(r => r === "middle").length;
+        const botCount = rows.filter(r => r === "bottom").length;
+
+        if(sortedIds.length === 3){
+          if(!(topCount === 1 && midCount === 1 && botCount === 1)) return;
+        }
+
+        if(sortedIds.length === 4){
+          const okay =
+            (topCount === 2 && midCount === 1 && botCount === 1) ||
+            (topCount === 1 && midCount === 2 && botCount === 1) ||
+            (topCount === 1 && midCount === 1 && botCount === 2);
+          if(!okay) return;
+        }
+
+        unique.set(key, { ids: sortedIds });
+      });
+
+      const list = [...unique.values()];
+
+      const scored = list.map(v => {
+        const xs = v.ids.map(id => getAnchor(id).anchorX);
+        const spread = Math.max(...xs) - Math.min(...xs);
+        const count = v.ids.length;
+        let score = spread + (count === 4 ? 8 : 0);
+
+        const hasCenter = v.ids.some(id => ["m3","m4","b3","t3"].includes(id));
+        if(hasCenter) score += 6;
+
+        return { ...v, score };
+      });
+
+      const ordered = scored
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 60)
+        .map(v => v.ids);
+
+      return ordered;
+    }
+
+    function intersectionCount(a, b){
+      const setB = new Set(b);
+      return a.filter(id => setB.has(id)).length;
+    }
+
+    function chooseNextVariant(currentIds){
+      const targetShareMin = currentIds.length - 2; // max. 2 Fotos tauschen
+      const currentKey = currentIds.slice().sort().join("|");
+
+      const candidates = variants.filter(v => {
+        const key = v.slice().sort().join("|");
+        if(key === currentKey) return false;
+        const shared = intersectionCount(v, currentIds);
+        return shared >= targetShareMin && shared < currentIds.length;
+      });
+
+      const sorted = candidates
+        .map(v => {
+          const shared = intersectionCount(v, currentIds);
+          const diff = v.length - shared;
+          const score = shared * 10 - diff;
+          return { v, score };
+        })
+        .sort((a, b) => b.score - a.score);
+
+      if(sorted.length){
+        return pick(sorted.slice(0, Math.min(10, sorted.length))).v;
+      }
+
+      return pick(variants);
+    }
+
+    function getFreshCandidates(excludedIds){
+      return allAssets.filter(a => isFreshAsset(a) && !excludedIds.has(a.public_id));
+    }
+
+    function chooseAssetsForNewSlots(slotLayouts){
+      const chosen = [];
+      const excludedIds = new Set(getCurrentPublicIds());
+      let freshPicked = 0;
+
+      for(const layout of slotLayouts){
+        let pool = allAssets.filter(a => !excludedIds.has(a.public_id));
+
+        const fresh = getFreshCandidates(excludedIds);
+        if(fresh.length && freshPicked < 2){
+          const rankedFresh = shuffle(fresh)
+            .sort((a, b) => {
+              const sa = showCounts.get(a.public_id) || 0;
+              const sb = showCounts.get(b.public_id) || 0;
+              return sa - sb;
+            });
+          const asset = rankedFresh[0];
+          chosen.push(asset);
+          excludedIds.add(asset.public_id);
+          freshPicked++;
+          continue;
+        }
+
+        pool = pool
+          .map(asset => {
+            const shown = showCounts.get(asset.public_id) || 0;
+            const recentPenalty = recentlyShown.includes(asset.public_id) ? 2 : 0;
+            const freshnessBoost = isFreshAsset(asset) ? -1 : 0;
+            return {
+              asset,
+              score: shown + recentPenalty + freshnessBoost + rand(0, 0.8)
+            };
+          })
+          .sort((a, b) => a.score - b.score)
+          .slice(0, Math.min(14, pool.length));
+
+        if(pool.length){
+          const asset = pick(pool).asset;
+          chosen.push(asset);
+          excludedIds.add(asset.public_id);
+        }
+      }
+
+      return chosen;
+    }
+
+    function estimateCaptionMinWidth(caption){
+      const len = caption.length;
+      if(len <= 18) return 14.5;
+      if(len <= 28) return 16.5;
+      if(len <= 38) return 18.5;
+      if(len <= 52) return 20.5;
+      return 22.5;
+    }
+
+    function getLayoutForSlot(asset, anchor, count){
+      const meta = getCardMeta(asset);
+      const ratio = clamp(Number(asset.width || 1) / Number(asset.height || 1), 0.55, 2.6);
+
+      const isPortrait = ratio < 0.90;
+      const isLandscape = ratio > 1.25;
+      const isSquareish = !isPortrait && !isLandscape;
+
+      const countBase = count === 3 ? 20.8 : 18.8;
+      let frameW = countBase * anchor.wBias;
+
+      if(isPortrait) frameW *= 0.88;
+      if(isLandscape) frameW *= 1.10;
+      if(isSquareish) frameW *= 0.98;
+
+      frameW = Math.max(frameW, estimateCaptionMinWidth(meta.caption));
+
+      if(anchor.row === "top") frameW *= 1.02;
+      if(anchor.row === "bottom" && isPortrait) frameW *= 0.92;
+
+      frameW = clamp(frameW, 14.5, count === 3 ? 26.5 : 23.5);
+
+      const sidePad = clamp(frameW * 0.032, 0.52, 0.86);
+      const topPad = clamp(frameW * 0.024, 0.38, 0.62);
+      const innerW = frameW - sidePad * 2;
+
+      let mediaH = innerW / ratio;
+      const captionFont = clamp(frameW * 0.115, 1.15, 1.95);
+      const captionH = clamp(captionFont * 2.05, 2.45, 4.15);
+
+      // Foto nicht zu klein werden lassen
+      mediaH = Math.max(mediaH, isPortrait ? 11.4 : 8.3);
+
+      let frameH = topPad + mediaH + captionH;
+
+      // untere Reihe begrenzen
+      if(anchor.row === "bottom"){
+        const maxBottom = 28.8;
+        if(frameH > maxBottom){
+          const scale = maxBottom / frameH;
+          frameW *= scale;
+          const newSidePad = clamp(frameW * 0.032, 0.48, 0.82);
+          const newTopPad = clamp(frameW * 0.024, 0.36, 0.60);
+          const newInnerW = frameW - newSidePad * 2;
+          mediaH = Math.max(newInnerW / ratio, isPortrait ? 9.8 : 7.4);
+          const newCaptionFont = clamp(frameW * 0.112, 1.02, 1.78);
+          const newCaptionH = clamp(newCaptionFont * 2.0, 2.2, 3.75);
+
+          return {
+            meta,
+            ratio,
+            frameW,
+            frameH: newTopPad + mediaH + newCaptionH,
+            sidePad: newSidePad,
+            topPad: newTopPad,
+            mediaH,
+            captionH: newCaptionH,
+            captionFont: newCaptionFont,
+            isPortrait,
+            isLandscape
+          };
+        }
+      }
+
+      return {
+        meta,
+        ratio,
+        frameW,
+        frameH,
+        sidePad,
+        topPad,
+        mediaH,
+        captionH,
+        captionFont,
+        isPortrait,
+        isLandscape
+      };
+    }
+
+    function buildCardGeometry(anchor, layout, count){
+      const clipXPercent = clamp(50 + rand(-7, 7), 42, 58);
+
+      const left = anchor.anchorX - (layout.frameW * (clipXPercent / 100));
+      const top = anchor.anchorY;
+
+      const baseRot = clamp(rand(-7.5, 7.5), -7.5, 7.5);
+      const finalRot = clamp(baseRot + rand(-1.3, 1.3), -8.5, 8.5);
+
+      const rect = {
+        x:left,
+        y:top,
+        w:layout.frameW,
+        h:layout.frameH
       };
 
-      const CLIP_PATHS = [
-        "assets/klammer1_uhd.png",
-        "assets/klammer2_uhd.png",
-        "assets/klammer3_uhd.png"
-      ];
+      return {
+        anchor,
+        layout,
+        clipXPercent,
+        left,
+        top,
+        baseRot,
+        finalRot,
+        rect
+      };
+    }
 
-      const MIN_VISIBLE = 2;
-      const MAX_VISIBLE = 5;
+    function overlapArea(a, b){
+      const xOverlap = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+      const yOverlap = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+      return xOverlap * yOverlap;
+    }
 
-      const FETCH_INTERVAL = 15000;
+    function validatePlacement(geometries){
+      for(let i = 0; i < geometries.length; i++){
+        const g = geometries[i];
+        const r = g.rect;
 
-      let currentFormat = "16:9";
-      let resources = [];
-      let activeCards = [];
-      let fetchTimer = null;
-      let cycleTimer = null;
-      let cycleIndex = 0;
+        if(r.x < 1.2) return false;
+        if(r.x + r.w > 98.6) return false;
+        if(r.y < 4.2) return false;
+        if(r.y + r.h > 96.6) return false;
 
-      const slotMemory = new Map();
-
-      function clamp(v, min, max){
-        return Math.max(min, Math.min(max, v));
-      }
-
-      function rand(min, max){
-        return min + Math.random() * (max - min);
-      }
-
-      function pick(arr){
-        return arr[Math.floor(Math.random() * arr.length)];
-      }
-
-      function shuffle(arr){
-        const a = [...arr];
-        for(let i = a.length - 1; i > 0; i--){
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-
-      function toTime(v){
-        const t = new Date(v).getTime();
-        return Number.isFinite(t) ? t : 0;
-      }
-
-      function stageSize(){
-        return { w: stageEl.clientWidth, h: stageEl.clientHeight };
-      }
-
-      function resizeStage(){
-        const fmt = FORMATS[currentFormat];
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-
-        let w = vw;
-        let h = w * fmt.h / fmt.w;
-
-        if(h > vh){
-          h = vh;
-          w = h * fmt.w / fmt.h;
-        }
-
-        stageEl.style.width = `${Math.round(w)}px`;
-        stageEl.style.height = `${Math.round(h)}px`;
-      }
-
-      function enterFullscreen(){
-        const el = document.documentElement;
-        if(!document.fullscreenElement && el.requestFullscreen){
-          el.requestFullscreen().catch(() => {});
+        for(let j = i + 1; j < geometries.length; j++){
+          const other = geometries[j];
+          const area = overlapArea(r, other.rect);
+          const minArea = Math.min(r.w * r.h, other.rect.w * other.rect.h);
+          if(area / minArea > 0.10) return false;
         }
       }
+      return true;
+    }
 
-      function updateControlsVisibility(){
-        if(document.fullscreenElement){
-          controlsEl.classList.add("hidden");
-        } else {
-          controlsEl.classList.remove("hidden");
-        }
-      }
+    function prepareNewCardLayouts(slotIds, assets){
+      const count = slotIds.length;
+      const prepared = [];
 
-      document.addEventListener("fullscreenchange", updateControlsVisibility);
-
-      document.querySelectorAll(".fmt-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".fmt-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentFormat = btn.dataset.format;
-          resizeStage();
-          relayoutAll();
-          enterFullscreen();
-        });
-      });
-
-      window.addEventListener("resize", () => {
-        resizeStage();
-        relayoutAll();
-      });
-
-      function ropeY(row, xNorm){
-        const x = xNorm;
-
-        if(row === 1){
-          return 0.042 + 0.31 * Math.pow(x - 0.5, 2);
-        }
-        if(row === 2){
-          return 0.379 + 0.37 * Math.pow(x - 0.5, 2);
-        }
-        return 0.725 + 0.39 * Math.pow(x - 0.5, 2);
-      }
-
-      function buildSlots(){
-        // dichter und gezielter über die Stricke verteilt
-        const base = [
-          { row:1, x:0.12 }, { row:1, x:0.30 }, { row:1, x:0.50 }, { row:1, x:0.70 }, { row:1, x:0.88 },
-          { row:2, x:0.12 }, { row:2, x:0.31 }, { row:2, x:0.50 }, { row:2, x:0.69 }, { row:2, x:0.88 },
-          { row:3, x:0.13 }, { row:3, x:0.33 }, { row:3, x:0.52 }, { row:3, x:0.72 }, { row:3, x:0.88 }
-        ];
-
-        return base.map((s, i) => {
-          const id = `slot_${s.row}_${i}`;
-          const mem = slotMemory.get(id) || { lastUsed:-999, hits:0 };
-          return {
-            ...s,
-            id,
-            y: ropeY(s.row, s.x),
-            lastUsed: mem.lastUsed,
-            hits: mem.hits
-          };
+      for(let i = 0; i < slotIds.length; i++){
+        const anchor = getAnchor(slotIds[i]);
+        const asset = assets[i];
+        const layout = getLayoutForSlot(asset, anchor, count);
+        const geometry = buildCardGeometry(anchor, layout, count);
+        prepared.push({
+          slotId: slotIds[i],
+          asset,
+          anchor,
+          layout,
+          geometry
         });
       }
 
-      function getOrientation(res){
-        const ar = res.width / res.height;
-        if(ar > 1.18) return "landscape";
-        if(ar < 0.86) return "portrait";
-        return "square";
+      return validatePlacement(prepared.map(p => p.geometry)) ? prepared : null;
+    }
+
+    function resolvePreparedLayouts(slotIds){
+      // mehrere Versuche, bis die Kombination sauber passt
+      for(let attempt = 0; attempt < 120; attempt++){
+        const assets = chooseAssetsForNewSlots(slotIds);
+        if(assets.length !== slotIds.length) return null;
+
+        const prepared = prepareNewCardLayouts(slotIds, assets);
+        if(prepared) return prepared;
+      }
+      return null;
+    }
+
+    function createCard(prepared, attachDelayMs = 0){
+      const { asset, anchor, layout, geometry } = prepared;
+      const meta = layout.meta;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "photo-card attaching";
+      wrapper.style.left = `${geometry.left}%`;
+      wrapper.style.top = `${geometry.top}%`;
+      wrapper.style.width = `${layout.frameW}%`;
+      wrapper.style.zIndex = String(30 + currentCards.length);
+
+      const frame = document.createElement("div");
+      frame.className = "photo-frame";
+      frame.style.width = "100%";
+      frame.style.padding = `${layout.topPad}% ${layout.sidePad}% 0 ${layout.sidePad}%`;
+      frame.style.background = meta.color;
+
+      const photoTop = document.createElement("div");
+      photoTop.className = "photo-top";
+      photoTop.style.height = `${layout.mediaH}%`;
+      photoTop.style.padding = "0";
+      photoTop.style.margin = "0";
+      photoTop.style.background = "#fff";
+
+      const img = document.createElement("img");
+      img.className = "photo-image";
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_2600,h_2600,q_auto,f_auto/${asset.public_id}`;
+      img.alt = meta.caption;
+
+      const captionStrip = document.createElement("div");
+      captionStrip.className = "caption-strip";
+      captionStrip.style.background = meta.color;
+      captionStrip.style.height = `${layout.captionH}%`;
+      captionStrip.style.padding = "0.35em 0.55em 0.48em";
+      captionStrip.style.fontSize = `${layout.captionFont}vw`;
+
+      const captionInner = document.createElement("div");
+      captionInner.className = "caption-inner";
+      captionInner.textContent = meta.caption;
+
+      const clip = document.createElement("img");
+      clip.className = "clip";
+      clip.src = pick(CLIP_IMAGES);
+      clip.onerror = function(){
+        this.style.display = "none";
+      };
+
+      const clipHeight = clamp(layout.frameW * 0.36, 3.4, 5.8); // deutlich größer
+      clip.style.height = `${clipHeight}%`;
+      clip.style.width = "auto";
+      clip.style.left = `${geometry.clipXPercent}%`;
+      clip.style.top = `${-clipHeight * 0.72}%`; // unteres Viertel schneidet den Faden
+      clip.style.marginLeft = "-9999px"; // wird gleich überschrieben
+      clip.style.transform = "translateX(-50%)";
+
+      const clipRestRot = `${rand(-11, 11).toFixed(2)}deg`;
+      const clipStartRot = `${(parseFloat(clipRestRot) + rand(-5, 5)).toFixed(2)}deg`;
+
+      const attachMode = pick(["below","below","left","right"]);
+      let photoStartX = 0;
+      let photoStartY = 0;
+
+      if(attachMode === "below"){
+        photoStartX = rand(-10, 10);
+        photoStartY = rand(16, 28);
+      }else if(attachMode === "left"){
+        photoStartX = rand(-20, -12);
+        photoStartY = rand(4, 16);
+      }else{
+        photoStartX = rand(12, 20);
+        photoStartY = rand(4, 16);
       }
 
-      function getTaskMeta(taskId, fallbackTitle){
-        const t = (APP_CONFIG.tasks || []).find(x => x.id === taskId);
-        return {
-          title: t?.title || fallbackTitle || "Fotochallenge",
-          color: t?.color || "#dbe8f4"
-        };
+      const clipMode = pick(["top","diag-left","diag-right"]);
+      let clipStartX = 0;
+      let clipStartY = 0;
+
+      if(clipMode === "top"){
+        clipStartX = rand(-3, 3);
+        clipStartY = rand(-24, -16);
+      }else if(clipMode === "diag-left"){
+        clipStartX = rand(-14, -8);
+        clipStartY = rand(-23, -15);
+      }else{
+        clipStartX = rand(8, 14);
+        clipStartY = rand(-23, -15);
       }
 
-      function normalizeResource(r){
-        const custom = r.context?.custom || {};
-        const meta = getTaskMeta(custom.task_id, custom.task_title);
+      const photoRestRot = `${geometry.baseRot.toFixed(2)}deg`;
+      const photoFinalRot = `${geometry.finalRot.toFixed(2)}deg`;
 
-        return {
-          assetId: r.asset_id,
-          publicId: r.public_id,
-          width: Number(r.width) || 1000,
-          height: Number(r.height) || 1000,
-          createdAt: custom.created_at || r.created_at,
-          createdNum: toTime(custom.created_at || r.created_at),
-          secureUrl: `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/${r.public_id}.${r.format || "jpg"}`,
-          taskId: custom.task_id || "sammelordner",
-          title: meta.title,
-          color: meta.color,
-          orientation: getOrientation(r),
-          usedCount: 0,
-          recentBoost: false
-        };
-      }
+      wrapper.style.setProperty("--attach-duration", "1s");
 
-      async function fetchResources(){
-        try{
-          const url = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/list/${APP_CONFIG.eventTag}.json?_=${Date.now()}`;
-          const res = await fetch(url, { cache:"no-store" });
-          if(!res.ok) return;
+      wrapper.style.setProperty("--photo-start-x", `${photoStartX}px`);
+      wrapper.style.setProperty("--photo-start-y", `${photoStartY}px`);
+      wrapper.style.setProperty("--photo-start-rot", `${rand(-2.4, 2.4).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-rest-rot", photoRestRot);
+      wrapper.style.setProperty("--photo-final-rot", photoFinalRot);
 
-          const data = await res.json();
-          const incoming = (data.resources || [])
-            .filter(r => r.type === "upload")
-            .map(normalizeResource)
-            .sort((a,b) => b.createdNum - a.createdNum);
+      wrapper.style.setProperty("--clip-start-x", `${clipStartX}px`);
+      wrapper.style.setProperty("--clip-start-y", `${clipStartY}px`);
+      wrapper.style.setProperty("--clip-start-rot", clipStartRot);
+      wrapper.style.setProperty("--clip-rest-rot", clipRestRot);
 
-          const newestIds = new Set(incoming.slice(0, 6).map(x => x.assetId));
-          incoming.forEach(x => x.recentBoost = newestIds.has(x.assetId));
+      wrapper.style.setProperty("--sway-duration", `${rand(1.65, 2.05).toFixed(2)}s`);
+      wrapper.style.setProperty("--sway-r1", `${rand(1.6, 2.8).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r2", `${rand(1.0, 1.8).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r3", `${rand(0.55, 1.05).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r4", `${rand(0.25, 0.58).toFixed(2)}deg`);
+      wrapper.style.setProperty("--sway-r5", `${rand(0.10, 0.28).toFixed(2)}deg`);
 
-          incoming.forEach(x => {
-            const old = resources.find(r => r.assetId === x.assetId);
-            if(old) x.usedCount = old.usedCount || 0;
-          });
+      wrapper.style.setProperty("--sway-x1", `${rand(-1.2, 1.2).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y1", `${rand(-0.6, 0.6).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x2", `${rand(-0.9, 0.9).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y2", `${rand(-0.45, 0.45).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x3", `${rand(-0.55, 0.55).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y3", `${rand(-0.26, 0.26).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x4", `${rand(-0.28, 0.28).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y4", `${rand(-0.12, 0.12).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-x5", `${rand(-0.12, 0.12).toFixed(2)}px`);
+      wrapper.style.setProperty("--sway-y5", `${rand(-0.06, 0.06).toFixed(2)}px`);
 
-          resources = incoming;
-        } catch(err){
-          console.error("Cloudinary list fetch failed:", err);
-        }
-      }
+      wrapper.style.setProperty("--photo-end-x", `${rand(-10, 10).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-y", `${rand(18, 28).toFixed(0)}px`);
+      wrapper.style.setProperty("--photo-end-rot", `${rand(-2.4, 2.4).toFixed(2)}deg`);
 
-      function getCaptionFont(cardW, title){
-        let fs = clamp(cardW * 0.067, 14, 22);
-        if(title.length > 24) fs *= 0.94;
-        if(title.length > 34) fs *= 0.89;
-        if(title.length > 44) fs *= 0.84;
-        if(title.length > 58) fs *= 0.79;
-        return Math.round(fs);
-      }
+      wrapper.style.setProperty("--clip-end-x", `${rand(-10, 10).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-y", `${rand(-18, -10).toFixed(0)}px`);
+      wrapper.style.setProperty("--clip-end-rot", `${rand(-7, 7).toFixed(2)}deg`);
 
-      function getCardMetrics(resource){
-        const { w: stageW, h: stageH } = stageSize();
-        const o = resource.orientation;
-        const ar = resource.width / resource.height;
+      photoTop.appendChild(img);
+      captionInner.style.fontFamily = `"Kalam","Segoe Print","Trebuchet MS",Arial,sans-serif`;
+      captionStrip.appendChild(captionInner);
 
-        const outerBorder = Math.round(stageW * 0.0032);
-        const innerPadX = Math.round(stageW * 0.0065);
-        const innerPadTop = Math.round(stageH * 0.009);
+      frame.appendChild(photoTop);
+      frame.appendChild(captionStrip);
+      wrapper.appendChild(frame);
+      wrapper.appendChild(clip);
 
-        let photoW, photoH, minCardW;
+      clip.style.marginLeft = "0";
 
-        if(o === "landscape"){
-          photoW = stageW * 0.205;
-          photoH = photoW / ar;
-          minCardW = stageW * 0.16;
-        } else if(o === "portrait"){
-          photoH = stageH * 0.255;
-          photoW = photoH * ar;
-          minCardW = stageW * 0.145;
-        } else {
-          photoW = stageW * 0.185;
-          photoH = photoW;
-          minCardW = stageW * 0.16;
-        }
+      wrapper.style.opacity = "0";
+      stage.appendChild(wrapper);
 
-        // bei sehr schmalen Fotos Rahmen etwas breiter für lesbaren Text
-        const cardW = Math.round(Math.max(photoW + innerPadX * 2, minCardW));
-        const captionFont = getCaptionFont(cardW, resource.title);
-        const captionLineH = 1.08;
-        const captionPadY = Math.round(captionFont * 0.34);
-        const captionH = Math.round(captionFont * captionLineH * 2 + captionPadY * 2);
+      const cardObj = {
+        asset,
+        slotId: prepared.slotId,
+        anchor,
+        el: wrapper,
+        mountedAt: Date.now(),
+        layout,
+        geometry
+      };
 
-        const cardH = Math.round(
-          outerBorder * 2 +
-          innerPadTop +
-          photoH +
-          4 +
-          captionH
-        );
+      currentCards.push(cardObj);
+      markShown(asset.public_id);
 
-        const clipH = Math.round(stageH * 0.115); // nochmals größer
-        return {
-          photoW: Math.round(photoW),
-          photoH: Math.round(photoH),
-          cardW,
-          cardH,
-          outerBorder,
-          innerPadX,
-          innerPadTop,
-          captionH,
-          captionFont,
-          clipH
-        };
-      }
+      const startAnimation = () => {
+        wrapper.style.opacity = "1";
+        wrapper.classList.add("attaching");
+      };
 
-      function slotCompatible(slot, orientation){
-        if(orientation === "portrait" && slot.row === 3) return false;
-        return true;
-      }
+      setTimeout(startAnimation, attachDelayMs);
 
-      function scoreSlot(slot, orientation){
-        let score = (cycleIndex - slot.lastUsed) * 10;
-        score -= slot.hits * 22;
-        score += rand(0, 4);
+      setTimeout(() => {
+        wrapper.classList.remove("attaching");
+        wrapper.classList.add("swinging");
+      }, attachDelayMs + 1020);
 
-        if(orientation === "portrait"){
-          if(slot.row === 1) score += 12;
-          if(slot.row === 2) score += 7;
-          if(slot.row === 3) score -= 200;
-        } else if(orientation === "landscape"){
-          if(slot.row === 2) score += 10;
-          if(slot.row === 1) score += 5;
-          if(slot.row === 3) score += 4;
-        } else {
-          if(slot.row === 2) score += 8;
-          if(slot.row === 1) score += 6;
-          if(slot.row === 3) score += 3;
-        }
+      setTimeout(() => {
+        wrapper.classList.remove("swinging");
+      }, attachDelayMs + 3050);
 
-        return score;
-      }
+      return cardObj;
+    }
 
-      function getTopLeftFromSlot(slot, metrics, angleDeg){
-        const { w, h } = stageSize();
-        const ropeX = slot.x * w;
-        const ropeYpx = slot.y * h;
-
-        // Klammeranker: Karte hängt am oberen Rand, nicht in der Luft
-        const clipOverlapIntoCard = metrics.clipH * 0.18;
-        const cardTop = ropeYpx - clipOverlapIntoCard + 2;
-
-        return {
-          x: ropeX - metrics.cardW / 2,
-          y: cardTop
-        };
-      }
-
-      function getBBox(x, y, w, h, angleDeg){
-        const a = Math.abs(angleDeg) * Math.PI / 180;
-        const bw = Math.abs(Math.cos(a) * w) + Math.abs(Math.sin(a) * h);
-        const bh = Math.abs(Math.sin(a) * w) + Math.abs(Math.cos(a) * h);
-
-        return {
-          left: x - (bw - w) / 2,
-          top: y - (bh - h) / 2,
-          right: x + w + (bw - w) / 2,
-          bottom: y + h + (bh - h) / 2
-        };
-      }
-
-      function overlaps(a, b, pad = 16){
-        return !(
-          a.right < b.left + pad ||
-          a.left > b.right - pad ||
-          a.bottom < b.top + pad ||
-          a.top > b.bottom - pad
-        );
-      }
-
-      function choosePlacement(resource, previewPlacements = []){
-        const slots = buildSlots()
-          .filter(s => slotCompatible(s, resource.orientation))
-          .filter(s => !activeCards.some(c => c.slotId === s.id))
-          .filter(s => !previewPlacements.some(p => p.slotId === s.id))
-          .sort((a,b) => scoreSlot(b, resource.orientation) - scoreSlot(a, resource.orientation));
-
-        const { w: stageW, h: stageH } = stageSize();
-        const metrics = getCardMetrics(resource);
-
-        const anglePool =
-          resource.orientation === "portrait"
-            ? [-8,-7,-6,-5,-4,4,5,6,7,8]
-            : resource.orientation === "square"
-              ? [-8,-7,-6,-5,5,6,7,8]
-              : [-7,-6,-5,-4,4,5,6,7];
-
-        for(const slot of slots){
-          const angles = shuffle(anglePool);
-
-          for(const angle of angles){
-            const pos = getTopLeftFromSlot(slot, metrics, angle);
-            const box = getBBox(pos.x, pos.y, metrics.cardW, metrics.cardH, angle);
-
-            if(box.left < 6 || box.right > stageW - 6) continue;
-            if(box.top < 4) continue;
-            if(box.bottom > stageH - 6) continue;
-
-            const conflict1 = activeCards.some(c => overlaps(box, c.bbox, 24));
-            if(conflict1) continue;
-
-            const conflict2 = previewPlacements.some(p => overlaps(box, p.bbox, 24));
-            if(conflict2) continue;
-
-            return {
-              slotId: slot.id,
-              row: slot.row,
-              xNorm: slot.x,
-              yNorm: slot.y,
-              x: pos.x,
-              y: pos.y,
-              angle,
-              metrics,
-              bbox: box
-            };
-          }
-        }
-
-        return null;
-      }
-
-      function createCard(resource, placement){
-        const wrap = document.createElement("div");
-        wrap.className = "polaroid entering";
-        wrap.style.left = `${placement.x}px`;
-        wrap.style.top = `${placement.y}px`;
-        wrap.style.width = `${placement.metrics.cardW}px`;
-        wrap.style.height = `${placement.metrics.cardH}px`;
-        wrap.style.setProperty("--rest-r", `${placement.angle}deg`);
-
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.background = resource.color;
-        card.style.border = `${placement.metrics.outerBorder}px solid rgba(255,255,255,.98)`;
-
-        const inner = document.createElement("div");
-        inner.className = "inner";
-        inner.style.padding =
-          `${placement.metrics.innerPadTop}px ${placement.metrics.innerPadX}px 0`;
-
-        const photoWrap = document.createElement("div");
-        photoWrap.className = "photo-wrap";
-        photoWrap.style.height = `${placement.metrics.photoH}px`;
-        photoWrap.style.marginBottom = `4px`;
-
-        const img = document.createElement("img");
-        img.src = resource.secureUrl;
-        img.alt = resource.title;
-        img.style.width = `${placement.metrics.photoW}px`;
-        img.style.height = `${placement.metrics.photoH}px`;
-
-        const caption = document.createElement("div");
-        caption.className = "caption";
-        caption.textContent = resource.title;
-        caption.style.background = resource.color;
-        caption.style.minHeight = `${placement.metrics.captionH}px`;
-        caption.style.maxHeight = `${placement.metrics.captionH}px`;
-        caption.style.fontSize = `${placement.metrics.captionFont}px`;
-        caption.style.lineHeight = `1.08`;
-        caption.style.padding = `${Math.round(placement.metrics.captionFont * 0.32)}px ${Math.round(placement.metrics.captionFont * 0.34)}px`;
-
-        photoWrap.appendChild(img);
-        inner.appendChild(photoWrap);
-        inner.appendChild(caption);
-        card.appendChild(inner);
-
-        const clip = document.createElement("img");
-        clip.className = "clip";
-        clip.src = pick(CLIP_PATHS);
-        clip.alt = "";
-        clip.style.height = `${Math.round(placement.metrics.clipH)}px`;
-        clip.style.maxHeight = `${Math.round(placement.metrics.clipH)}px`;
-
-        // Klammer genauer am oberen Kartenrand
-        const clipX = rand(-placement.metrics.cardW * 0.09, placement.metrics.cardW * 0.09);
-        const clipY = -placement.metrics.clipH * 0.76;
-        clip.style.setProperty("--clip-xf", `${clipX}px`);
-        clip.style.setProperty("--clip-yf", `${clipY}px`);
-        clip.style.setProperty("--clip-rf", `${rand(-8,8)}deg`);
-        clip.style.transform = `translate(-50%, 0) translate(${clipX}px, ${clipY}px) rotate(${rand(-8,8)}deg)`;
-
-        wrap.appendChild(card);
-        wrap.appendChild(clip);
-
-        return { wrap, card, clip };
-      }
-
-      function setEnterAnimation(dom, finalAngle, delayMs){
-        dom.wrap.style.setProperty("--in-x0", `${rand(-10, 10)}px`);
-        dom.wrap.style.setProperty("--in-y0", `${rand(26, 42)}px`);
-        dom.wrap.style.setProperty("--in-r0", `${finalAngle + rand(-18,18)}deg`);
-        dom.wrap.style.setProperty("--in-x1", `${rand(-8, 8)}px`);
-        dom.wrap.style.setProperty("--in-y1", `${rand(-4, 5)}px`);
-        dom.wrap.style.setProperty("--in-r1", `${finalAngle - rand(4,8)}deg`);
-        dom.wrap.style.setProperty("--in-x2", `${rand(-4, 4)}px`);
-        dom.wrap.style.setProperty("--in-y2", `${rand(-2, 3)}px`);
-        dom.wrap.style.setProperty("--in-r2", `${finalAngle + rand(1,4)}deg`);
-
-        dom.clip.style.setProperty("--clip-x0", `${rand(-6,6)}px`);
-        dom.clip.style.setProperty("--clip-y0", `${rand(-16,-8)}px`);
-        dom.clip.style.setProperty("--clip-r0", `${rand(-18,18)}deg`);
-        dom.clip.style.setProperty("--clip-x1", `${rand(-2,2)}px`);
-        dom.clip.style.setProperty("--clip-y1", `${rand(-1,2)}px`);
-        dom.clip.style.setProperty("--clip-r1", `${rand(-7,7)}deg`);
-
-        dom.wrap.style.animation = `cardIn 2.15s cubic-bezier(.18,.82,.18,1) ${delayMs}ms forwards`;
-        dom.clip.style.animation = `clipIn 1.45s ease-out ${delayMs}ms forwards`;
-      }
-
-      function setLeaveAnimation(state){
-        state.dom.wrap.style.setProperty("--out-x", `${rand(-35,35)}px`);
-        state.dom.wrap.style.setProperty("--out-y", `${rand(58,96)}px`);
-        state.dom.wrap.style.setProperty("--out-r", `${rand(-10,10)}deg`);
-
-        state.dom.clip.style.setProperty("--clip-ox", `${rand(-18,18)}px`);
-        state.dom.clip.style.setProperty("--clip-oy", `${rand(-22,-6)}px`);
-        state.dom.clip.style.setProperty("--clip-or", `${rand(-16,16)}deg`);
-
-        state.dom.wrap.style.animation = `cardOut 1.2s ease-in forwards`;
-        state.dom.clip.style.animation = `clipOut .75s ease-in forwards`;
-      }
-
-      function addCard(resource, placement, delayMs){
-        const dom = createCard(resource, placement);
-        cardsEl.appendChild(dom.wrap);
-
-        setEnterAnimation(dom, placement.angle, delayMs);
-
-        const cardState = {
-          id: resource.assetId,
-          resource,
-          slotId: placement.slotId,
-          row: placement.row,
-          angle: placement.angle,
-          x: placement.x,
-          y: placement.y,
-          bbox: placement.bbox,
-          dom,
-          bornAt: Date.now(),
-          bornCycle: cycleIndex
-        };
-
-        activeCards.push(cardState);
-
-        slotMemory.set(placement.slotId, {
-          lastUsed: cycleIndex,
-          hits: clamp((slotMemory.get(placement.slotId)?.hits || 0) + 1, 0, 5)
-        });
-
-        resources = resources.map(r => r.assetId === resource.assetId
-          ? { ...r, usedCount:(r.usedCount || 0) + 1 }
-          : r
-        );
-
+    function detachCard(cardObj, delay = 0){
+      return new Promise(resolve => {
         setTimeout(() => {
-          dom.wrap.classList.remove("entering");
-        }, delayMs + 2300);
-      }
-
-      function removeCards(cardsToRemove){
-        return new Promise(resolve => {
-          if(!cardsToRemove.length){
-            resolve();
-            return;
-          }
-
-          cardsToRemove.forEach(setLeaveAnimation);
+          cardObj.el.classList.remove("attaching", "swinging");
+          cardObj.el.classList.add("detaching");
 
           setTimeout(() => {
-            cardsToRemove.forEach(c => {
-              c.dom.wrap.remove();
-              activeCards = activeCards.filter(x => x.id !== c.id);
-            });
-            resolve();
-          }, 1250);
-        });
+            cardObj.el.remove();
+            const idx = currentCards.indexOf(cardObj);
+            if(idx >= 0) currentCards.splice(idx, 1);
+            resolve(cardObj.slotId);
+          }, 960);
+        }, delay);
+      });
+    }
+
+    function chooseInitialVariant(){
+      const preferred = variants.filter(v => v.length === 4);
+      return preferred.length ? pick(preferred) : pick(variants);
+    }
+
+    async function initialRender(){
+      if(!allAssets.length){
+        emptyNote.style.display = "grid";
+        return;
       }
 
-      function availableResources(){
-        const activeIds = new Set(activeCards.map(c => c.id));
-        const pool = resources.filter(r => !activeIds.has(r.assetId));
-        return pool.length ? pool : resources;
+      emptyNote.style.display = "none";
+
+      const variant = chooseInitialVariant();
+      variantPointer = variant.slice();
+
+      const prepared = resolvePreparedLayouts(variantPointer);
+      if(!prepared) return;
+
+      prepared.forEach((item, index) => {
+        createCard(item, index * 500);
+      });
+    }
+
+    function currentSlotIds(){
+      return currentCards.map(c => c.slotId).sort();
+    }
+
+    function scheduleNextCycle(delayMs){
+      clearTimeout(nextTimer);
+      nextTimer = setTimeout(runCycle, delayMs);
+    }
+
+    async function runCycle(){
+      if(!allAssets.length || !currentCards.length){
+        scheduleNextCycle(5000);
+        return;
       }
 
-      function chooseResources(n){
-        const pool = availableResources();
-        if(!pool.length) return [];
+      const currentIds = currentSlotIds();
+      const nextVariant = chooseNextVariant(currentIds);
+      variantPointer = nextVariant.slice();
 
-        return pool
-          .map(r => {
-            let score = rand(0, 4);
-            if(r.recentBoost) score += 18;
-            score += Math.max(0, 8 - (r.usedCount || 0) * 2);
-            score += (Date.now() - r.createdNum < 180000) ? 8 : 0;
-            return { r, score };
-          })
-          .sort((a,b) => b.score - a.score)
-          .slice(0, n)
-          .map(x => x.r);
+      const currentSet = new Set(currentIds);
+      const nextSet = new Set(nextVariant);
+
+      const toKeep = currentCards.filter(c => nextSet.has(c.slotId));
+      const toRemove = currentCards.filter(c => !nextSet.has(c.slotId));
+      const toAddSlotIds = nextVariant.filter(id => !currentSet.has(id));
+
+      // max. 2 Fotos tauschen
+      const safeRemove = toRemove.slice(0, 2);
+      const safeAdd = toAddSlotIds.slice(0, 2);
+
+      const prepared = resolvePreparedLayouts(safeAdd);
+      if(!prepared){
+        scheduleNextCycle(6500);
+        return;
       }
 
-      function chooseRemoveCount(currentCount){
-        const possible = [1,2,3].filter(n => currentCount - n >= MIN_VISIBLE);
-        if(!possible.length) return 0;
-        return pick(possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]));
+      await Promise.all(
+        safeRemove.map((card, index) => detachCard(card, index * 130))
+      );
+
+      // kurze Pause nach Entfernen
+      await new Promise(resolve => setTimeout(resolve, 260));
+
+      prepared.forEach((item, index) => {
+        createCard(item, index * 500);
+      });
+
+      // min. 5 Sekunden sichtbar nach Ende des Anbringens
+      const attachEnd = 1000 + (prepared.length > 1 ? (prepared.length - 1) * 500 : 0);
+      scheduleNextCycle(attachEnd + 5000);
+    }
+
+    async function rebuildWall(){
+      clearTimeout(nextTimer);
+
+      while(currentCards.length){
+        const card = currentCards.pop();
+        card.el.remove();
       }
 
-      function chooseAddCount(afterRemove){
-        const possible = [1,2,3].filter(n => afterRemove + n <= MAX_VISIBLE);
-        if(!possible.length) return 0;
-        return pick(possible.flatMap(n => n === 2 ? [2,2,2] : n === 3 ? [3,3] : [1]));
-      }
+      await initialRender();
+      scheduleNextCycle(7000);
+    }
 
-      function chooseRemovalCards(n){
-        return [...activeCards]
-          .sort((a,b) => a.bornAt - b.bornAt || a.bornCycle - b.bornCycle)
-          .slice(0, n);
-      }
+    async function boot(){
+      variants = generateVariants();
 
-      function decaySlotMemory(){
-        for(const [k, v] of slotMemory.entries()){
-          slotMemory.set(k, {
-            lastUsed: v.lastUsed,
-            hits: Math.max(0, (v.hits || 0) - 1)
-          });
-        }
-      }
+      await setFormat("16:9");
+      await fetchAssets();
+      await initialRender();
 
-      function relayoutAll(){
-        const oldCards = [...activeCards];
-        cardsEl.innerHTML = "";
-        activeCards = [];
+      clearInterval(fetchTimer);
+      fetchTimer = setInterval(fetchAssets, 10000);
 
-        const preview = [];
-        oldCards.forEach((old, idx) => {
-          const placement = choosePlacement(old.resource, preview);
-          if(!placement) return;
-          preview.push(placement);
-          addCard(old.resource, placement, idx * 120);
-        });
-      }
+      scheduleNextCycle(7000);
+      updateControlVisibility();
 
-      async function initialFill(){
-        if(!resources.length) return;
-        const wanted = clamp(Math.min(4, resources.length), MIN_VISIBLE, MAX_VISIBLE);
-        const chosen = chooseResources(wanted);
-        const preview = [];
+      // Hilfsbild einmal vorladen, wird aber nie sichtbar angezeigt
+      preloadImage(BG_GUIDE_IMAGE).catch(() => {});
+    }
 
-        chosen.forEach((res, i) => {
-          const placement = choosePlacement(res, preview);
-          if(!placement) return;
-          preview.push(placement);
-          addCard(res, placement, i * 500);
-        });
-
-        scheduleNext(9000);
-      }
-
-      function scheduleNext(ms){
-        clearTimeout(cycleTimer);
-        cycleTimer = setTimeout(runCycle, ms);
-      }
-
-      async function runCycle(){
-        cycleIndex++;
-        decaySlotMemory();
-
-        if(!resources.length){
-          scheduleNext(5000);
-          return;
-        }
-
-        if(activeCards.length < MIN_VISIBLE){
-          const need = MIN_VISIBLE - activeCards.length;
-          const preview = [];
-          chooseResources(need).forEach((res, i) => {
-            const placement = choosePlacement(res, preview);
-            if(!placement) return;
-            preview.push(placement);
-            addCard(res, placement, i * 500);
-          });
-          scheduleNext(7000);
-          return;
-        }
-
-        const removeCount = chooseRemoveCount(activeCards.length);
-        const toRemove = chooseRemovalCards(removeCount);
-        const afterRemove = activeCards.length - toRemove.length;
-        const addCount = chooseAddCount(afterRemove);
-
-        const chosen = chooseResources(addCount);
-        const preview = [];
-        const planned = [];
-
-        chosen.forEach(res => {
-          const placement = choosePlacement(res, preview);
-          if(!placement) return;
-          preview.push(placement);
-          planned.push({ res, placement });
-        });
-
-        await removeCards(toRemove);
-        await new Promise(r => setTimeout(r, 700));
-
-        planned.forEach((p, i) => {
-          addCard(p.res, p.placement, i * 500);
-        });
-
-        const delay =
-          planned.length >= 3 ? 15000 :
-          planned.length === 2 ? 10000 :
-          5000;
-
-        scheduleNext(delay + rand(300, 1200));
-      }
-
-      function startFetchLoop(){
-        clearInterval(fetchTimer);
-        fetchTimer = setInterval(fetchResources, FETCH_INTERVAL);
-      }
-
-      async function init(){
-        resizeStage();
-        await fetchResources();
-        await initialFill();
-        startFetchLoop();
-        updateControlsVisibility();
-      }
-
-      init();
-    })();
+    boot();
   </script>
 </body>
 </html>
