@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fotochallenge</title>
   <script src="config.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -123,48 +120,31 @@
       will-change:transform, opacity;
     }
 
-    .photo-frame{
+    .photo-inner{
       position:relative;
-      box-shadow:var(--shadow);
-      overflow:visible;
+      width:100%;
+      height:100%;
       transform-origin:var(--pin-x) 0px;
       will-change:transform, opacity;
-      background:#fff;
+      filter:drop-shadow(0 14px 22px rgba(0,0,0,.18));
     }
 
-    .media-wrap{
-      overflow:hidden;
-      background:#fff;
-    }
-
-    .media-img{
+    .photo-img{
       display:block;
       width:100%;
       height:100%;
       object-fit:contain;
-      background:#fff;
-    }
-
-    .caption{
-      width:100%;
-      text-align:center;
-      color:#111;
-      line-height:1.02;
-      font-family:'Kalam', cursive;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      word-break:break-word;
-      padding:0 10px;
+      background:transparent;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
     }
 
     .clip{
       position:absolute;
       z-index:8;
       left:var(--clip-x);
-      top:calc(var(--clip-h) * -0.80);
+      top:calc(var(--clip-h) * -0.78);
       height:var(--clip-h);
       width:auto;
       transform:translateX(-50%) rotate(var(--clip-rot));
@@ -176,7 +156,7 @@
       will-change:transform, opacity;
     }
 
-    .photo-card.attaching .photo-frame{
+    .photo-card.attaching .photo-inner{
       animation:attachPhoto var(--attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
@@ -184,11 +164,11 @@
       animation:attachClip var(--clip-attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
-    .photo-card.swinging .photo-frame{
-      animation:swingToRest var(--swing-duration,2.4s) ease-out forwards;
+    .photo-card.swinging .photo-inner{
+      animation:swingToRest var(--swing-duration,2.5s) ease-out forwards;
     }
 
-    .photo-card.detaching .photo-frame{
+    .photo-card.detaching .photo-inner{
       animation:detachPhoto .95s ease forwards;
     }
 
@@ -323,9 +303,9 @@
     const BG_IMAGE = assetUrl("bg_16_9.png");
 
     const CLIP_VARIANTS = [
-      { src: assetUrl("klammer1_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer2_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer3_uhd.png"), scale: 0.425 } // 0.17 * 2.5
+      { src: assetUrl("klammer1_uhd.png"), scale: 0.38 },
+      { src: assetUrl("klammer2_uhd.png"), scale: 0.38 },
+      { src: assetUrl("klammer3_uhd.png"), scale: 0.11 }
     ];
 
     const aspectMap = {
@@ -375,8 +355,8 @@
     const SLOT_POINTS = [
       { id:"t1", row:"top", x:16 },
       { id:"t2", row:"top", x:32 },
-      { id:"t3", row:"top", x:48 },
-      { id:"t4", row:"top", x:66 },
+      { id:"t3", row:"top", x:50 },
+      { id:"t4", row:"top", x:68 },
       { id:"t5", row:"top", x:84 },
 
       { id:"m1", row:"mid", x:18 },
@@ -516,95 +496,78 @@
       }
     }
 
-    function getTaskMeta(asset){
-      const taskId = asset?.context?.custom?.task_id || "";
-      const task = Array.isArray(APP_CONFIG?.tasks)
-        ? APP_CONFIG.tasks.find(t => t.id === taskId)
-        : null;
-
-      const caption =
-        asset?.context?.custom?.caption ||
-        task?.caption ||
-        task?.subtitle ||
-        task?.label ||
-        "Fotochallenge";
-
-      return {
-        taskId,
-        caption,
-        color: task?.color || "#dce9f4"
-      };
-    }
-
-    function buildLayout(asset){
-      const meta = getTaskMeta(asset);
-
+    function buildPhotoLayout(asset){
       const stageRect = stage.getBoundingClientRect();
+
       const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
 
-      // FOTO-DIAGONALE = 30% der BILDSCHIRMDIAGONALE
-      const targetPhotoDiagPx = stageDiagPx * 0.30;
+      // Foto-Diagonale = 30 % der Stage-Diagonale
+      const targetDiagPx = stageDiagPx * 0.30;
 
-      const imgW = Number(asset.width || 1000);
-      const imgH = Number(asset.height || 1000);
+      const imgW = Math.max(1, Number(asset.width || 1000));
+      const imgH = Math.max(1, Number(asset.height || 1000));
       const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
 
-      const scale = targetPhotoDiagPx / imgDiag;
+      const scale = targetDiagPx / imgDiag;
 
-      const photoWPx = imgW * scale;
-      const photoHPx = imgH * scale;
+      let photoWPx = imgW * scale;
+      let photoHPx = imgH * scale;
 
-      // fester farbiger Rahmen
-      const borderSidePx = 14;
-      const borderTopPx = 14;
-      const borderBottomPadPx = 12;
+      // Sicherheitsgrenzen
+      const maxWPx = stageRect.width * 0.34;
+      const maxHPx = stageRect.height * 0.48;
+      const minWPx = stageRect.width * 0.16;
+      const minHPx = stageRect.height * 0.20;
 
-      // erste Schätzung Caption-Höhe
-      let captionFontPx = clamp(targetPhotoDiagPx * 0.075, 22, 42);
-      let captionHeightPx = captionFontPx * 3.35; // max 3 Zeilen
+      if(photoWPx > maxWPx){
+        const s = maxWPx / photoWPx;
+        photoWPx *= s;
+        photoHPx *= s;
+      }
 
-      const frameWPx = photoWPx + borderSidePx * 2;
-      const frameHPx = photoHPx + borderTopPx + borderBottomPadPx + captionHeightPx;
+      if(photoHPx > maxHPx){
+        const s = maxHPx / photoHPx;
+        photoWPx *= s;
+        photoHPx *= s;
+      }
+
+      if(photoWPx < minWPx && imgW >= imgH){
+        const s = minWPx / photoWPx;
+        photoWPx *= s;
+        photoHPx *= s;
+      }
+
+      if(photoHPx < minHPx && imgH > imgW){
+        const s = minHPx / photoHPx;
+        photoWPx *= s;
+        photoHPx *= s;
+      }
 
       return {
-        meta,
         photoWPx,
-        photoHPx,
-        borderSidePx,
-        borderTopPx,
-        borderBottomPadPx,
-        captionFontPx,
-        captionHeightPx,
-        frameWPx,
-        frameHPx,
-        frameW: (frameWPx / stageRect.width) * 100,
-        frameH: (frameHPx / stageRect.height) * 100
+        photoHPx
       };
     }
 
-    function rectForPlacement(slot, layout, rotDeg){
+    function rectForPlacementPx(slot, layout, rotDeg){
       const stageRect = stage.getBoundingClientRect();
 
-      const frameWPercent = (layout.frameWPx / stageRect.width) * 100;
-      const frameHPercent = (layout.frameHPx / stageRect.height) * 100;
+      const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
+      const leftPx = (slot.x / 100) * stageRect.width - (layout.photoWPx * (clipXPercent / 100));
+      const topPx = (slot.y / 100) * stageRect.height;
 
-      const clipXPercent = clamp(50 + rand(-7, 7), 44, 56);
-
-      const left = slot.x - (frameWPercent * (clipXPercent / 100));
-      const top = slot.y;
-
-      const inflate = Math.abs(rotDeg) * 0.10 + 0.7;
+      const inflate = Math.abs(rotDeg) * 1.2 + 10;
 
       return {
         clipXPercent,
-        left,
-        top,
-        width: frameWPercent,
-        height: frameHPercent,
-        boxLeft: left - inflate,
-        boxTop: top - 0.8,
-        boxRight: left + frameWPercent + inflate,
-        boxBottom: top + frameHPercent + inflate
+        leftPx,
+        topPx,
+        widthPx: layout.photoWPx,
+        heightPx: layout.photoHPx,
+        boxLeft: leftPx - inflate,
+        boxTop: topPx - 4,
+        boxRight: leftPx + layout.photoWPx + inflate,
+        boxBottom: topPx + layout.photoHPx + inflate
       };
     }
 
@@ -624,11 +587,12 @@
     }
 
     function withinStage(rect){
+      const stageRect = stage.getBoundingClientRect();
       return (
-        rect.left >= 1 &&
-        rect.top >= 1 &&
-        rect.left + rect.width <= 99 &&
-        rect.top + rect.height <= 97.5
+        rect.leftPx >= 10 &&
+        rect.topPx >= 10 &&
+        rect.leftPx + rect.widthPx <= stageRect.width - 10 &&
+        rect.topPx + rect.heightPx <= stageRect.height - 10
       );
     }
 
@@ -642,7 +606,7 @@
           const dx = Math.abs(a.x - b.x);
           const sameRow = a.row === b.row;
 
-          if((sameRow && dx >= 20) || (!sameRow && dx >= 10)){
+          if((sameRow && dx >= 26) || (!sameRow && dx >= 12)){
             twoers.push([a.id, b.id]);
           }
         }
@@ -661,7 +625,7 @@
               for(let b = a + 1; b < ids.length; b++){
                 const dx = Math.abs(ids[a].x - ids[b].x);
                 const sameRow = ids[a].row === ids[b].row;
-                if((sameRow && dx < 18) || (!sameRow && dx < 10)){
+                if((sameRow && dx < 22) || (!sameRow && dx < 12)){
                   ok = false;
                 }
               }
@@ -723,64 +687,29 @@
       return chosen.slice(0, count);
     }
 
-    function fitCaption(captionEl, maxPx = 42, minPx = 16, maxLines = 3){
-      let size = maxPx;
-      captionEl.style.fontSize = `${size}px`;
-      captionEl.style.lineHeight = "1.02";
-      captionEl.style.maxHeight = `${maxLines * 1.08}em`;
-
-      while(size > minPx && captionEl.scrollHeight > captionEl.clientHeight + 1){
-        size -= 1;
-        captionEl.style.fontSize = `${size}px`;
-      }
-    }
-
     function createCard(asset, slotId, startDelay = 0){
       const slot = getSlot(slotId);
-      const layout = buildLayout(asset);
-      const restRot = rand(-7.5, 7.5);
-      const rect = rectForPlacement(slot, layout, restRot);
-      const stageRect = stage.getBoundingClientRect();
+      const layout = buildPhotoLayout(asset);
+      const restRot = rand(-7.0, 7.0);
+      const rect = rectForPlacementPx(slot, layout, restRot);
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
-      wrapper.style.left = `${rect.left}%`;
-      wrapper.style.top = `${rect.top}%`;
-      wrapper.style.width = `${rect.width}%`;
-      wrapper.style.height = `${rect.height}%`;
+      wrapper.style.left = `${rect.leftPx}px`;
+      wrapper.style.top = `${rect.topPx}px`;
+      wrapper.style.width = `${layout.photoWPx}px`;
+      wrapper.style.height = `${layout.photoHPx}px`;
 
-      const frame = document.createElement("div");
-      frame.className = "photo-frame";
-      frame.style.width = "100%";
-      frame.style.height = "100%";
-      frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
-      frame.style.background = "#fff";
+      const inner = document.createElement("div");
+      inner.className = "photo-inner";
+      inner.style.width = "100%";
+      inner.style.height = "100%";
+      inner.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
 
-      const mediaWrap = document.createElement("div");
-      mediaWrap.className = "media-wrap";
-      mediaWrap.style.position = "absolute";
-      mediaWrap.style.left = `${(layout.borderSidePx / stageRect.width) * 100}%`;
-      mediaWrap.style.top = `${(layout.borderTopPx / stageRect.height) * 100}%`;
-      mediaWrap.style.width = `${(layout.photoWPx / stageRect.width) * 100}%`;
-      mediaWrap.style.height = `${(layout.photoHPx / stageRect.height) * 100}%`;
-      mediaWrap.style.border = `${layout.borderSidePx}px solid ${layout.meta.color}`;
-      mediaWrap.style.borderTopWidth = `${layout.borderTopPx}px`;
-      mediaWrap.style.borderBottomWidth = "0px";
-
-      const mediaImg = document.createElement("img");
-      mediaImg.className = "media-img";
-      mediaImg.alt = layout.meta.caption;
-      mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
-
-      const caption = document.createElement("div");
-      caption.className = "caption";
-      caption.style.position = "absolute";
-      caption.style.left = "0";
-      caption.style.bottom = "0";
-      caption.style.width = "100%";
-      caption.style.height = `${(layout.captionHeightPx + layout.borderBottomPadPx) / stageRect.height * 100}%`;
-      caption.style.background = layout.meta.color;
-      caption.textContent = layout.meta.caption;
+      const img = document.createElement("img");
+      img.className = "photo-img";
+      img.alt = "";
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
 
       const clipDef = pick(CLIP_VARIANTS);
       const clip = document.createElement("img");
@@ -788,7 +717,7 @@
       clip.src = clipDef.src;
       clip.alt = "";
       clip.style.setProperty("--clip-x", `${rect.clipXPercent}%`);
-      clip.style.setProperty("--clip-h", `${(rect.width * clipDef.scale).toFixed(2)}%`);
+      clip.style.setProperty("--clip-h", `${(layout.photoWPx * clipDef.scale).toFixed(1)}px`);
 
       const clipRot = `${rand(-9, 9).toFixed(2)}deg`;
       const restRotCss = `${restRot.toFixed(2)}deg`;
@@ -805,7 +734,7 @@
 
       wrapper.style.setProperty("--photo-start-x", `${photoStartX}px`);
       wrapper.style.setProperty("--photo-start-y", `${photoStartY}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-2.8, 2.8)).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-2.5, 2.5)).toFixed(2)}deg`);
 
       wrapper.style.setProperty("--clip-start-x", `${rand(-10, 10).toFixed(1)}px`);
       wrapper.style.setProperty("--clip-start-y", `${rand(-34, -20).toFixed(1)}px`);
@@ -821,7 +750,7 @@
 
       wrapper.style.setProperty("--attach-duration", `${rand(0.95, 1.08).toFixed(2)}s`);
       wrapper.style.setProperty("--clip-attach-duration", `${rand(0.92, 1.03).toFixed(2)}s`);
-      wrapper.style.setProperty("--swing-duration", `${rand(2.0, 2.9).toFixed(2)}s`);
+      wrapper.style.setProperty("--swing-duration", `${rand(2.0, 3.0).toFixed(2)}s`);
 
       wrapper.style.setProperty("--swing-a", `${rand(2.2, 3.5).toFixed(2)}deg`);
       wrapper.style.setProperty("--swing-b", `${rand(1.4, 2.2).toFixed(2)}deg`);
@@ -841,10 +770,8 @@
       wrapper.style.setProperty("--swing-x5", `${rand(-0.20, 0.20).toFixed(2)}px`);
       wrapper.style.setProperty("--swing-y5", `${rand(-0.14, 0.14).toFixed(2)}px`);
 
-      mediaWrap.appendChild(mediaImg);
-      frame.appendChild(mediaWrap);
-      frame.appendChild(caption);
-      wrapper.appendChild(frame);
+      inner.appendChild(img);
+      wrapper.appendChild(inner);
       wrapper.appendChild(clip);
 
       wrapper.style.opacity = "0";
@@ -853,7 +780,6 @@
       requestAnimationFrame(() => {
         setTimeout(() => {
           wrapper.style.opacity = "1";
-          fitCaption(caption, layout.captionFontPx, 16, 3);
           wrapper.classList.add("attaching");
         }, startDelay);
       });
@@ -899,9 +825,9 @@
 
     function cardBoundingFor(slotId, asset){
       const slot = getSlot(slotId);
-      const layout = buildLayout(asset);
+      const layout = buildPhotoLayout(asset);
       const testRot = 0;
-      return rectForPlacement(slot, layout, testRot);
+      return rectForPlacementPx(slot, layout, testRot);
     }
 
     function candidateOk(pattern, assetsBySlot){
@@ -914,7 +840,7 @@
         if(!withinStage(rect)) return false;
 
         for(const other of rects){
-          if(overlapRatio(rect, other) > 0.08) return false;
+          if(overlapRatio(rect, other) > 0.16) return false;
         }
         rects.push(rect);
       }
@@ -1057,7 +983,7 @@
 
         let ok = true;
         for(const other of valid){
-          if(overlapRatio(rect, other.rect) > 0.08){
+          if(overlapRatio(rect, other.rect) > 0.16){
             ok = false;
             break;
           }
