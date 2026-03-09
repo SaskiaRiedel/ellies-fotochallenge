@@ -125,6 +125,8 @@
 
     .photo-frame{
       position:relative;
+      width:100%;
+      height:100%;
       box-shadow:var(--shadow);
       overflow:visible;
       transform-origin:var(--pin-x) 0px;
@@ -132,7 +134,9 @@
     }
 
     .media-wrap{
+      position:absolute;
       overflow:hidden;
+      background:#fff;
     }
 
     .media-img{
@@ -140,10 +144,12 @@
       width:100%;
       height:100%;
       object-fit:cover;
+      object-position:center center;
       background:#fff;
     }
 
     .caption{
+      position:absolute;
       text-align:center;
       color:#111;
       line-height:1.04;
@@ -310,7 +316,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308h";
+    const CACHE_BUSTER = "v=20260309a";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -337,7 +343,6 @@
       assetIds: new Set(),
       cards: new Map(),
       showCounts: new Map(),
-      usedPatterns: [],
       nextTimer: null,
       fetchTimer: null
     };
@@ -372,10 +377,23 @@
       { id:"t1", row:"top", x:18 },
       { id:"t2", row:"top", x:50 },
       { id:"t3", row:"top", x:82 },
-
       { id:"m1", row:"mid", x:20 },
       { id:"m2", row:"mid", x:50 },
       { id:"m3", row:"mid", x:80 }
+    ];
+
+    const PATTERNS = [
+      ["t1","m2"],
+      ["t2","m1"],
+      ["t2","m3"],
+      ["t3","m2"],
+      ["t1","t3"],
+      ["m1","m3"],
+      ["t1","m2","t3"],
+      ["t2","m1","m3"],
+      ["t1","m1","m3"],
+      ["t3","m1","m2"],
+      ["t1","t3","m2"]
     ];
 
     function clamp(value, min, max){
@@ -547,10 +565,10 @@
 
       const sideFramePx = 16;
       const topFramePx = 16;
-      const bottomFrameMinPx = 68;
+      const bottomFramePx = 74;
 
       let frameWPx = mediaWPx + sideFramePx * 2;
-      let frameHPx = mediaHPx + topFramePx + bottomFrameMinPx;
+      let frameHPx = mediaHPx + topFramePx + bottomFramePx;
 
       const cardDiagPx = Math.sqrt(frameWPx * frameWPx + frameHPx * frameHPx);
       if(cardDiagPx > maxCardDiagPx){
@@ -558,41 +576,30 @@
         mediaWPx *= shrink;
         mediaHPx *= shrink;
         frameWPx = mediaWPx + sideFramePx * 2;
-        frameHPx = mediaHPx + topFramePx + bottomFrameMinPx;
+        frameHPx = mediaHPx + topFramePx + bottomFramePx;
       }
-
-      const frameW = (frameWPx / stageRect.width) * 100;
-      const frameH = (frameHPx / stageRect.height) * 100;
-      const mediaW = (mediaWPx / stageRect.width) * 100;
-      const mediaH = (mediaHPx / stageRect.height) * 100;
-
-      const sidePad = (sideFramePx / frameWPx) * 100;
-      const topPad = (topFramePx / frameHPx) * 100;
-      const captionBoxH = (bottomFrameMinPx / frameHPx) * 100;
-
-      const captionFontPx = clamp(frameWPx * 0.075, 18, 30);
 
       return {
         meta,
-        mediaW,
-        mediaH,
-        frameW,
-        frameH,
-        sidePad,
-        topPad,
-        captionBoxH,
-        captionFontPx
+        frameWStagePct: (frameWPx / stageRect.width) * 100,
+        frameHStagePct: (frameHPx / stageRect.height) * 100,
+        mediaWFramePct: (mediaWPx / frameWPx) * 100,
+        mediaHFramePct: (mediaHPx / frameHPx) * 100,
+        sidePadFramePct: (sideFramePx / frameWPx) * 100,
+        topPadFramePct: (topFramePx / frameHPx) * 100,
+        captionHFramePct: (bottomFramePx / frameHPx) * 100,
+        captionFontPx: clamp(frameWPx * 0.075, 18, 30)
       };
     }
 
     function rectForPlacement(slot, layout, rotDeg){
       const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
 
-      const left = slot.x - (layout.frameW * (clipXPercent / 100));
+      const left = slot.x - (layout.frameWStagePct * (clipXPercent / 100));
       const top = slot.y;
 
-      const w = layout.frameW;
-      const h = layout.frameH;
+      const w = layout.frameWStagePct;
+      const h = layout.frameHStagePct;
 
       const inflate = Math.abs(rotDeg) * 0.08 + 0.5;
 
@@ -632,24 +639,6 @@
         rect.top + rect.height <= 97.5
       );
     }
-
-    function generatePatterns(){
-      return [
-        ["t1","m2"],
-        ["t2","m1"],
-        ["t2","m3"],
-        ["t3","m2"],
-        ["t1","t3"],
-        ["m1","m3"],
-        ["t1","m2","t3"],
-        ["t2","m1","m3"],
-        ["t1","m1","m3"],
-        ["t3","m1","m2"],
-        ["t1","t3","m2"]
-      ];
-    }
-
-    const PATTERNS = generatePatterns();
 
     function getShownCount(id){
       return state.showCounts.get(id) || 0;
@@ -720,42 +709,34 @@
       wrapper.className = "photo-card attaching";
       wrapper.style.left = `${rect.left}%`;
       wrapper.style.top = `${rect.top}%`;
-      wrapper.style.width = `${layout.frameW}%`;
-      wrapper.style.height = `${layout.frameH}%`;
+      wrapper.style.width = `${layout.frameWStagePct}%`;
+      wrapper.style.height = `${layout.frameHStagePct}%`;
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.width = "100%";
-      frame.style.height = "100%";
       frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
       frame.style.background = layout.meta.color;
-      frame.style.position = "relative";
 
       const mediaWrap = document.createElement("div");
       mediaWrap.className = "media-wrap";
-      mediaWrap.style.position = "absolute";
-      mediaWrap.style.left = `${layout.sidePad}%`;
-      mediaWrap.style.right = `${layout.sidePad}%`;
-      mediaWrap.style.top = `${layout.topPad}%`;
-      mediaWrap.style.height = `${layout.mediaH}%`;
-      mediaWrap.style.background = "#fff";
+      mediaWrap.style.left = `${layout.sidePadFramePct}%`;
+      mediaWrap.style.top = `${layout.topPadFramePct}%`;
+      mediaWrap.style.width = `${layout.mediaWFramePct}%`;
+      mediaWrap.style.height = `${layout.mediaHFramePct}%`;
 
       const mediaImg = document.createElement("img");
       mediaImg.className = "media-img";
       mediaImg.alt = layout.meta.caption;
       mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
-      mediaImg.style.objectFit = "cover";
-      mediaImg.style.objectPosition = "center center";
 
       const caption = document.createElement("div");
       caption.className = "caption";
-      caption.style.position = "absolute";
       caption.style.left = "0";
       caption.style.right = "0";
       caption.style.bottom = "0";
-      caption.style.height = `${layout.captionBoxH}%`;
+      caption.style.height = `${layout.captionHFramePct}%`;
       caption.style.background = layout.meta.color;
-      caption.style.padding = `0 ${layout.sidePad}%`;
+      caption.style.padding = `0 ${layout.sidePadFramePct}%`;
       caption.textContent = layout.meta.caption;
 
       const clipDef = pick(CLIP_VARIANTS);
@@ -764,7 +745,7 @@
       clip.src = clipDef.src;
       clip.alt = "";
       clip.style.setProperty("--clip-x", `${rect.clipXPercent}%`);
-      clip.style.setProperty("--clip-h", `${(layout.frameW * clipDef.scale).toFixed(2)}%`);
+      clip.style.setProperty("--clip-h", `${(layout.frameWStagePct * clipDef.scale).toFixed(2)}%`);
 
       const clipRot = `${rand(-9, 9).toFixed(2)}deg`;
       const restRotCss = `${restRot.toFixed(2)}deg`;
