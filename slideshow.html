@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fotochallenge</title>
   <script src="config.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -126,18 +129,51 @@
       height:100%;
       transform-origin:var(--pin-x) 0px;
       will-change:transform, opacity;
-      filter:drop-shadow(0 14px 22px rgba(0,0,0,.18));
     }
 
-    .photo-img{
+    .photo-frame{
+      width:100%;
+      height:100%;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .photo-media{
+      position:relative;
+      width:100%;
+      flex:0 0 auto;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .photo-media img{
       display:block;
       width:100%;
       height:100%;
       object-fit:contain;
-      background:transparent;
+      background:#fff;
       user-select:none;
       -webkit-user-drag:none;
       pointer-events:none;
+    }
+
+    .photo-caption{
+      width:100%;
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:6px 10px 8px;
+      color:#111;
+      font-family:'Kalam', cursive;
+      font-weight:700;
+      line-height:1.02;
+      overflow:hidden;
+      word-break:break-word;
     }
 
     .clip{
@@ -294,7 +330,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308g";
+    const CACHE_BUSTER = "v=20260308h";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -302,11 +338,10 @@
 
     const BG_IMAGE = assetUrl("bg_16_9.png");
 
-    // Klammer 1 und 2 gleich groß, Klammer 3 deutlich größer als zuletzt
     const CLIP_VARIANTS = [
       { src: assetUrl("klammer1_uhd.png"), diagScale: 0.085 },
       { src: assetUrl("klammer2_uhd.png"), diagScale: 0.085 },
-      { src: assetUrl("klammer3_uhd.png"), diagScale: 0.070 }
+      { src: assetUrl("klammer3_uhd.png"), diagScale: 0.078 }
     ];
 
     const aspectMap = {
@@ -497,64 +532,125 @@
       }
     }
 
+    function getTaskMeta(asset){
+      const taskId = asset?.context?.custom?.task_id || "";
+      const task = Array.isArray(APP_CONFIG?.tasks)
+        ? APP_CONFIG.tasks.find(t => t.id === taskId)
+        : null;
+
+      const caption =
+        asset?.context?.custom?.caption ||
+        task?.caption ||
+        task?.subtitle ||
+        task?.label ||
+        "Fotochallenge";
+
+      return {
+        taskId,
+        caption,
+        color: task?.color || "#dce9f4"
+      };
+    }
+
     function getStageRect(){
       return stage.getBoundingClientRect();
     }
 
-    function buildPhotoLayout(asset){
+    function buildLayout(asset){
+      const meta = getTaskMeta(asset);
       const stageRect = getStageRect();
       const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
-
-      // Foto-Diagonale = 40 % der Stage-Diagonale
-      const targetDiagPx = stageDiagPx * 0.40;
 
       const imgW = Math.max(1, Number(asset.width || 1000));
       const imgH = Math.max(1, Number(asset.height || 1000));
       const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
 
-      const scale = targetDiagPx / imgDiag;
+      // FOTO ALLEIN = 38 % der Bildschirmdiagonale
+      const targetPhotoDiagPx = stageDiagPx * 0.38;
+      const photoScale = targetPhotoDiagPx / imgDiag;
 
-      let photoWPx = imgW * scale;
-      let photoHPx = imgH * scale;
+      let mediaWPx = imgW * photoScale;
+      let mediaHPx = imgH * photoScale;
 
-      // Sicherheitsgrenzen gegen Ausreißer und harte Überlagerungen
+      const ratio = mediaWPx / mediaHPx;
+
+      // fester, kleiner Farbrahmen
+      let sidePadPx = clamp(stageRect.width * 0.010, 10, 18);
+      let topPadPx = clamp(stageRect.height * 0.010, 10, 18);
+
+      let captionFontPx = clamp(stageDiagPx * 0.020, 20, 34);
+      let captionHeightPx = captionFontPx * 2.9;
+
+      // gesamtes Objekt erst einmal berechnen
+      let frameWPx = mediaWPx + sidePadPx * 2;
+      let frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      // FOTO + RAHMEN = max 50 % der Bildschirmdiagonale
+      const totalDiagPx = Math.sqrt(frameWPx * frameWPx + frameHPx * frameHPx);
+      const maxTotalDiagPx = stageDiagPx * 0.50;
+
+      if(totalDiagPx > maxTotalDiagPx){
+        const s = maxTotalDiagPx / totalDiagPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
+      }
+
+      // Sicherheitsgrenzen
       const maxWPx = stageRect.width * 0.44;
-      const maxHPx = stageRect.height * 0.56;
-      const minWPx = stageRect.width * 0.20;
-      const minHPx = stageRect.height * 0.24;
+      const maxHPx = stageRect.height * 0.58;
 
-      if(photoWPx > maxWPx){
-        const s = maxWPx / photoWPx;
-        photoWPx *= s;
-        photoHPx *= s;
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      if(frameWPx > maxWPx){
+        const s = maxWPx / frameWPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
       }
 
-      if(photoHPx > maxHPx){
-        const s = maxHPx / photoHPx;
-        photoWPx *= s;
-        photoHPx *= s;
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      if(frameHPx > maxHPx){
+        const s = maxHPx / frameHPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
       }
 
-      if(photoWPx < minWPx && imgW >= imgH){
-        const s = minWPx / photoWPx;
-        photoWPx *= s;
-        photoHPx *= s;
-      }
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
 
-      if(photoHPx < minHPx && imgH > imgW){
-        const s = minHPx / photoHPx;
-        photoWPx *= s;
-        photoHPx *= s;
-      }
-
-      return { photoWPx, photoHPx };
+      return {
+        meta,
+        ratio,
+        mediaWPx,
+        mediaHPx,
+        frameWPx,
+        frameHPx,
+        sidePadPx,
+        topPadPx,
+        captionHeightPx,
+        captionFontPx
+      };
     }
 
     function rectForPlacementPx(slot, layout, rotDeg){
       const stageRect = getStageRect();
 
       const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
-      const leftPx = (slot.x / 100) * stageRect.width - (layout.photoWPx * (clipXPercent / 100));
+      const leftPx = (slot.x / 100) * stageRect.width - (layout.frameWPx * (clipXPercent / 100));
       const topPx = (slot.y / 100) * stageRect.height;
 
       const inflate = Math.abs(rotDeg) * 1.2 + 10;
@@ -563,12 +659,12 @@
         clipXPercent,
         leftPx,
         topPx,
-        widthPx: layout.photoWPx,
-        heightPx: layout.photoHPx,
+        widthPx: layout.frameWPx,
+        heightPx: layout.frameHPx,
         boxLeft: leftPx - inflate,
         boxTop: topPx - 4,
-        boxRight: leftPx + layout.photoWPx + inflate,
-        boxBottom: topPx + layout.photoHPx + inflate
+        boxRight: leftPx + layout.frameWPx + inflate,
+        boxBottom: topPx + layout.frameHPx + inflate
       };
     }
 
@@ -688,15 +784,26 @@
       return chosen.slice(0, count);
     }
 
+    function fitCaption(captionEl, maxPx, minPx = 16){
+      let size = maxPx;
+      captionEl.style.fontSize = `${size}px`;
+      captionEl.style.lineHeight = "1.02";
+
+      while(size > minPx && captionEl.scrollHeight > captionEl.clientHeight + 1){
+        size -= 1;
+        captionEl.style.fontSize = `${size}px`;
+      }
+    }
+
     function getClipHeightPx(clipDef){
       const stageRect = getStageRect();
       const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
-      return clamp(stageDiagPx * clipDef.diagScale, 72, 180);
+      return clamp(stageDiagPx * clipDef.diagScale, 72, 190);
     }
 
     function createCard(asset, slotId, startDelay = 0){
       const slot = getSlot(slotId);
-      const layout = buildPhotoLayout(asset);
+      const layout = buildLayout(asset);
       const restRot = rand(-7.0, 7.0);
       const rect = rectForPlacementPx(slot, layout, restRot);
 
@@ -704,8 +811,8 @@
       wrapper.className = "photo-card attaching";
       wrapper.style.left = `${rect.leftPx}px`;
       wrapper.style.top = `${rect.topPx}px`;
-      wrapper.style.width = `${layout.photoWPx}px`;
-      wrapper.style.height = `${layout.photoHPx}px`;
+      wrapper.style.width = `${layout.frameWPx}px`;
+      wrapper.style.height = `${layout.frameHPx}px`;
 
       const inner = document.createElement("div");
       inner.className = "photo-inner";
@@ -713,10 +820,32 @@
       inner.style.height = "100%";
       inner.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
 
+      const frame = document.createElement("div");
+      frame.className = "photo-frame";
+      frame.style.background = "#fff";
+
+      const media = document.createElement("div");
+      media.className = "photo-media";
+      media.style.marginLeft = `${layout.sidePadPx}px`;
+      media.style.marginRight = `${layout.sidePadPx}px`;
+      media.style.marginTop = `${layout.topPadPx}px`;
+      media.style.height = `${layout.mediaHPx}px`;
+      media.style.background = layout.meta.color;
+
       const img = document.createElement("img");
-      img.className = "photo-img";
-      img.alt = "";
+      img.alt = layout.meta.caption;
       img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
+
+      const caption = document.createElement("div");
+      caption.className = "photo-caption";
+      caption.style.background = layout.meta.color;
+      caption.style.height = `${layout.captionHeightPx}px`;
+      caption.textContent = layout.meta.caption;
+
+      media.appendChild(img);
+      frame.appendChild(media);
+      frame.appendChild(caption);
+      inner.appendChild(frame);
 
       const clipDef = pick(CLIP_VARIANTS);
       const clip = document.createElement("img");
@@ -777,15 +906,14 @@
       wrapper.style.setProperty("--swing-x5", `${rand(-0.20, 0.20).toFixed(2)}px`);
       wrapper.style.setProperty("--swing-y5", `${rand(-0.14, 0.14).toFixed(2)}px`);
 
-      inner.appendChild(img);
       wrapper.appendChild(inner);
       wrapper.appendChild(clip);
-
       wrapper.style.opacity = "0";
       stage.appendChild(wrapper);
 
       requestAnimationFrame(() => {
         setTimeout(() => {
+          fitCaption(caption, layout.captionFontPx, 16);
           wrapper.style.opacity = "1";
           wrapper.classList.add("attaching");
         }, startDelay);
@@ -832,7 +960,7 @@
 
     function cardBoundingFor(slotId, asset){
       const slot = getSlot(slotId);
-      const layout = buildPhotoLayout(asset);
+      const layout = buildLayout(asset);
       const testRot = 0;
       return rectForPlacementPx(slot, layout, testRot);
     }
