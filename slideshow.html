@@ -134,11 +134,11 @@
     .photo-frame{
       width:100%;
       height:100%;
-      background:#fff;
       overflow:hidden;
       box-shadow:var(--shadow);
       display:flex;
       flex-direction:column;
+      border-radius:0;
     }
 
     .photo-media{
@@ -330,7 +330,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260308h";
+    const CACHE_BUSTER = "v=20260309a";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -341,7 +341,7 @@
     const CLIP_VARIANTS = [
       { src: assetUrl("klammer1_uhd.png"), diagScale: 0.085 },
       { src: assetUrl("klammer2_uhd.png"), diagScale: 0.085 },
-      { src: assetUrl("klammer3_uhd.png"), diagScale: 0.078 }
+      { src: assetUrl("klammer3_uhd.png"), diagScale: 0.078 * 2.5 }
     ];
 
     const aspectMap = {
@@ -565,27 +565,24 @@
       const imgH = Math.max(1, Number(asset.height || 1000));
       const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
 
-      // FOTO ALLEIN = 38 % der Bildschirmdiagonale
+      // Foto alleine = 38 % der Bildschirmdiagonale
       const targetPhotoDiagPx = stageDiagPx * 0.38;
       const photoScale = targetPhotoDiagPx / imgDiag;
 
       let mediaWPx = imgW * photoScale;
       let mediaHPx = imgH * photoScale;
 
-      const ratio = mediaWPx / mediaHPx;
-
-      // fester, kleiner Farbrahmen
-      let sidePadPx = clamp(stageRect.width * 0.010, 10, 18);
-      let topPadPx = clamp(stageRect.height * 0.010, 10, 18);
+      // Farbrahmen
+      let sidePadPx = clamp(stageRect.width * 0.012, 12, 22);
+      let topPadPx = clamp(stageRect.height * 0.012, 12, 22);
 
       let captionFontPx = clamp(stageDiagPx * 0.020, 20, 34);
-      let captionHeightPx = captionFontPx * 2.9;
+      let captionHeightPx = captionFontPx * 2.95;
 
-      // gesamtes Objekt erst einmal berechnen
       let frameWPx = mediaWPx + sidePadPx * 2;
       let frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
 
-      // FOTO + RAHMEN = max 50 % der Bildschirmdiagonale
+      // Foto+Rahmen max 50 % der Bildschirmdiagonale
       const totalDiagPx = Math.sqrt(frameWPx * frameWPx + frameHPx * frameHPx);
       const maxTotalDiagPx = stageDiagPx * 0.50;
 
@@ -599,7 +596,6 @@
         captionHeightPx = captionFontPx * 2.95;
       }
 
-      // Sicherheitsgrenzen
       const maxWPx = stageRect.width * 0.44;
       const maxHPx = stageRect.height * 0.58;
 
@@ -634,7 +630,6 @@
 
       return {
         meta,
-        ratio,
         mediaWPx,
         mediaHPx,
         frameWPx,
@@ -798,7 +793,7 @@
     function getClipHeightPx(clipDef){
       const stageRect = getStageRect();
       const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
-      return clamp(stageDiagPx * clipDef.diagScale, 72, 190);
+      return clamp(stageDiagPx * clipDef.diagScale, 72, 220);
     }
 
     function createCard(asset, slotId, startDelay = 0){
@@ -822,7 +817,7 @@
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.background = "#fff";
+      frame.style.background = layout.meta.color;
 
       const media = document.createElement("div");
       media.className = "photo-media";
@@ -830,7 +825,7 @@
       media.style.marginRight = `${layout.sidePadPx}px`;
       media.style.marginTop = `${layout.topPadPx}px`;
       media.style.height = `${layout.mediaHPx}px`;
-      media.style.background = layout.meta.color;
+      media.style.background = "#fff";
 
       const img = document.createElement("img");
       img.alt = layout.meta.caption;
@@ -838,7 +833,7 @@
 
       const caption = document.createElement("div");
       caption.className = "photo-caption";
-      caption.style.background = layout.meta.color;
+      caption.style.background = "transparent";
       caption.style.height = `${layout.captionHeightPx}px`;
       caption.textContent = layout.meta.caption;
 
