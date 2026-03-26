@@ -123,41 +123,55 @@
       will-change:transform, opacity;
     }
 
-    .photo-frame{
+    .photo-inner{
       position:relative;
       width:100%;
       height:100%;
-      box-shadow:var(--shadow);
-      overflow:visible;
       transform-origin:var(--pin-x) 0px;
       will-change:transform, opacity;
     }
 
-    .media-wrap{
-      position:absolute;
+    .photo-frame{
+      width:100%;
+      height:100%;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .photo-media{
+      position:relative;
+      width:100%;
+      flex:0 0 auto;
       overflow:hidden;
       background:#fff;
     }
 
-    .media-img{
+    .photo-media img{
       display:block;
       width:100%;
       height:100%;
-      object-fit:cover;
-      object-position:center center;
+      object-fit:contain;
       background:#fff;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
     }
 
-    .caption{
-      position:absolute;
-      text-align:center;
-      color:#111;
-      line-height:1.04;
-      font-family:'Kalam', cursive;
-      font-weight:700;
+    .photo-caption{
+      width:100%;
+      flex:0 0 auto;
       display:flex;
       align-items:center;
       justify-content:center;
+      text-align:center;
+      padding:6px 10px 8px;
+      color:#111;
+      font-family:'Kalam', cursive;
+      font-weight:700;
+      line-height:1.02;
       overflow:hidden;
       word-break:break-word;
     }
@@ -166,7 +180,7 @@
       position:absolute;
       z-index:8;
       left:var(--clip-x);
-      top:calc(var(--clip-h) * -0.80);
+      top:calc(var(--clip-h) * -0.78);
       height:var(--clip-h);
       width:auto;
       transform:translateX(-50%) rotate(var(--clip-rot));
@@ -178,7 +192,7 @@
       will-change:transform, opacity;
     }
 
-    .photo-card.attaching .photo-frame{
+    .photo-card.attaching .photo-inner{
       animation:attachPhoto var(--attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
@@ -186,11 +200,11 @@
       animation:attachClip var(--clip-attach-duration,1.0s) cubic-bezier(.22,.7,.2,1) forwards;
     }
 
-    .photo-card.swinging .photo-frame{
-      animation:swingToRest var(--swing-duration,2.4s) ease-out forwards;
+    .photo-card.swinging .photo-inner{
+      animation:swingToRest var(--swing-duration,2.5s) ease-out forwards;
     }
 
-    .photo-card.detaching .photo-frame{
+    .photo-card.detaching .photo-inner{
       animation:detachPhoto .95s ease forwards;
     }
 
@@ -316,7 +330,7 @@
     const btn1610 = document.getElementById("btn1610");
 
     const REPO_BASE = "/ellies-fotochallenge/";
-    const CACHE_BUSTER = "v=20260309a";
+    const CACHE_BUSTER = "v=20260308h";
 
     function assetUrl(filename){
       return `${window.location.origin}${REPO_BASE}assets/${filename}?${CACHE_BUSTER}`;
@@ -325,9 +339,9 @@
     const BG_IMAGE = assetUrl("bg_16_9.png");
 
     const CLIP_VARIANTS = [
-      { src: assetUrl("klammer1_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer2_uhd.png"), scale: 0.34 },
-      { src: assetUrl("klammer3_uhd.png"), scale: 0.425 }
+      { src: assetUrl("klammer1_uhd.png"), diagScale: 0.085 },
+      { src: assetUrl("klammer2_uhd.png"), diagScale: 0.085 },
+      { src: assetUrl("klammer3_uhd.png"), diagScale: 0.078 }
     ];
 
     const aspectMap = {
@@ -343,6 +357,7 @@
       assetIds: new Set(),
       cards: new Map(),
       showCounts: new Map(),
+      usedPatterns: [],
       nextTimer: null,
       fetchTimer: null
     };
@@ -374,26 +389,17 @@
     ];
 
     const SLOT_POINTS = [
-      { id:"t1", row:"top", x:18 },
-      { id:"t2", row:"top", x:50 },
-      { id:"t3", row:"top", x:82 },
-      { id:"m1", row:"mid", x:20 },
-      { id:"m2", row:"mid", x:50 },
-      { id:"m3", row:"mid", x:80 }
-    ];
+      { id:"t1", row:"top", x:16 },
+      { id:"t2", row:"top", x:32 },
+      { id:"t3", row:"top", x:50 },
+      { id:"t4", row:"top", x:68 },
+      { id:"t5", row:"top", x:84 },
 
-    const PATTERNS = [
-      ["t1","m2"],
-      ["t2","m1"],
-      ["t2","m3"],
-      ["t3","m2"],
-      ["t1","t3"],
-      ["m1","m3"],
-      ["t1","m2","t3"],
-      ["t2","m1","m3"],
-      ["t1","m1","m3"],
-      ["t3","m1","m2"],
-      ["t1","t3","m2"]
+      { id:"m1", row:"mid", x:18 },
+      { id:"m2", row:"mid", x:36 },
+      { id:"m3", row:"mid", x:52 },
+      { id:"m4", row:"mid", x:68 },
+      { id:"m5", row:"mid", x:84 }
     ];
 
     function clamp(value, min, max){
@@ -546,73 +552,119 @@
       };
     }
 
+    function getStageRect(){
+      return stage.getBoundingClientRect();
+    }
+
     function buildLayout(asset){
       const meta = getTaskMeta(asset);
-      const imgW = Number(asset.width || 1000);
-      const imgH = Number(asset.height || 1000);
-
-      const stageRect = stage.getBoundingClientRect();
+      const stageRect = getStageRect();
       const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
 
+      const imgW = Math.max(1, Number(asset.width || 1000));
+      const imgH = Math.max(1, Number(asset.height || 1000));
+      const imgDiag = Math.sqrt(imgW * imgW + imgH * imgH);
+
+      // FOTO ALLEIN = 38 % der Bildschirmdiagonale
       const targetPhotoDiagPx = stageDiagPx * 0.38;
-      const maxCardDiagPx = stageDiagPx * 0.50;
+      const photoScale = targetPhotoDiagPx / imgDiag;
 
-      const imgDiagPx = Math.sqrt(imgW * imgW + imgH * imgH);
-      const imgScale = targetPhotoDiagPx / imgDiagPx;
+      let mediaWPx = imgW * photoScale;
+      let mediaHPx = imgH * photoScale;
 
-      let mediaWPx = imgW * imgScale;
-      let mediaHPx = imgH * imgScale;
+      const ratio = mediaWPx / mediaHPx;
 
-      const sideFramePx = 16;
-      const topFramePx = 16;
-      const bottomFramePx = 74;
+      // fester, kleiner Farbrahmen
+      let sidePadPx = clamp(stageRect.width * 0.010, 10, 18);
+      let topPadPx = clamp(stageRect.height * 0.010, 10, 18);
 
-      let frameWPx = mediaWPx + sideFramePx * 2;
-      let frameHPx = mediaHPx + topFramePx + bottomFramePx;
+      let captionFontPx = clamp(stageDiagPx * 0.020, 20, 34);
+      let captionHeightPx = captionFontPx * 2.9;
 
-      const cardDiagPx = Math.sqrt(frameWPx * frameWPx + frameHPx * frameHPx);
-      if(cardDiagPx > maxCardDiagPx){
-        const shrink = maxCardDiagPx / cardDiagPx;
-        mediaWPx *= shrink;
-        mediaHPx *= shrink;
-        frameWPx = mediaWPx + sideFramePx * 2;
-        frameHPx = mediaHPx + topFramePx + bottomFramePx;
+      // gesamtes Objekt erst einmal berechnen
+      let frameWPx = mediaWPx + sidePadPx * 2;
+      let frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      // FOTO + RAHMEN = max 50 % der Bildschirmdiagonale
+      const totalDiagPx = Math.sqrt(frameWPx * frameWPx + frameHPx * frameHPx);
+      const maxTotalDiagPx = stageDiagPx * 0.50;
+
+      if(totalDiagPx > maxTotalDiagPx){
+        const s = maxTotalDiagPx / totalDiagPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
       }
+
+      // Sicherheitsgrenzen
+      const maxWPx = stageRect.width * 0.44;
+      const maxHPx = stageRect.height * 0.58;
+
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      if(frameWPx > maxWPx){
+        const s = maxWPx / frameWPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
+      }
+
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
+
+      if(frameHPx > maxHPx){
+        const s = maxHPx / frameHPx;
+        mediaWPx *= s;
+        mediaHPx *= s;
+        sidePadPx *= s;
+        topPadPx *= s;
+        captionFontPx = clamp(captionFontPx * s, 18, 30);
+        captionHeightPx = captionFontPx * 2.95;
+      }
+
+      frameWPx = mediaWPx + sidePadPx * 2;
+      frameHPx = mediaHPx + topPadPx + sidePadPx + captionHeightPx;
 
       return {
         meta,
-        frameWStagePct: (frameWPx / stageRect.width) * 100,
-        frameHStagePct: (frameHPx / stageRect.height) * 100,
-        mediaWFramePct: (mediaWPx / frameWPx) * 100,
-        mediaHFramePct: (mediaHPx / frameHPx) * 100,
-        sidePadFramePct: (sideFramePx / frameWPx) * 100,
-        topPadFramePct: (topFramePx / frameHPx) * 100,
-        captionHFramePct: (bottomFramePx / frameHPx) * 100,
-        captionFontPx: clamp(frameWPx * 0.075, 18, 30)
+        ratio,
+        mediaWPx,
+        mediaHPx,
+        frameWPx,
+        frameHPx,
+        sidePadPx,
+        topPadPx,
+        captionHeightPx,
+        captionFontPx
       };
     }
 
-    function rectForPlacement(slot, layout, rotDeg){
+    function rectForPlacementPx(slot, layout, rotDeg){
+      const stageRect = getStageRect();
+
       const clipXPercent = clamp(50 + rand(-6, 6), 44, 56);
+      const leftPx = (slot.x / 100) * stageRect.width - (layout.frameWPx * (clipXPercent / 100));
+      const topPx = (slot.y / 100) * stageRect.height;
 
-      const left = slot.x - (layout.frameWStagePct * (clipXPercent / 100));
-      const top = slot.y;
-
-      const w = layout.frameWStagePct;
-      const h = layout.frameHStagePct;
-
-      const inflate = Math.abs(rotDeg) * 0.08 + 0.5;
+      const inflate = Math.abs(rotDeg) * 1.2 + 10;
 
       return {
         clipXPercent,
-        left,
-        top,
-        width: w,
-        height: h,
-        boxLeft: left - inflate,
-        boxTop: top - 0.8,
-        boxRight: left + w + inflate,
-        boxBottom: top + h + inflate
+        leftPx,
+        topPx,
+        widthPx: layout.frameWPx,
+        heightPx: layout.frameHPx,
+        boxLeft: leftPx - inflate,
+        boxTop: topPx - 4,
+        boxRight: leftPx + layout.frameWPx + inflate,
+        boxBottom: topPx + layout.frameHPx + inflate
       };
     }
 
@@ -632,13 +684,58 @@
     }
 
     function withinStage(rect){
+      const stageRect = getStageRect();
       return (
-        rect.left >= 1 &&
-        rect.top >= 1 &&
-        rect.left + rect.width <= 99 &&
-        rect.top + rect.height <= 97.5
+        rect.leftPx >= 10 &&
+        rect.topPx >= 10 &&
+        rect.leftPx + rect.widthPx <= stageRect.width - 10 &&
+        rect.topPx + rect.heightPx <= stageRect.height - 10
       );
     }
+
+    function generatePatterns(){
+      const twoers = [];
+      const threeers = [];
+
+      for(let i = 0; i < SLOTS.length; i++){
+        for(let j = i + 1; j < SLOTS.length; j++){
+          const a = SLOTS[i], b = SLOTS[j];
+          const dx = Math.abs(a.x - b.x);
+          const sameRow = a.row === b.row;
+
+          if((sameRow && dx >= 26) || (!sameRow && dx >= 12)){
+            twoers.push([a.id, b.id]);
+          }
+        }
+      }
+
+      for(let i = 0; i < SLOTS.length; i++){
+        for(let j = i + 1; j < SLOTS.length; j++){
+          for(let k = j + 1; k < SLOTS.length; k++){
+            const ids = [SLOTS[i], SLOTS[j], SLOTS[k]];
+            const topCount = ids.filter(s => s.row === "top").length;
+            const midCount = ids.filter(s => s.row === "mid").length;
+            if(topCount === 0 || midCount === 0) continue;
+
+            let ok = true;
+            for(let a = 0; a < ids.length; a++){
+              for(let b = a + 1; b < ids.length; b++){
+                const dx = Math.abs(ids[a].x - ids[b].x);
+                const sameRow = ids[a].row === ids[b].row;
+                if((sameRow && dx < 22) || (!sameRow && dx < 12)){
+                  ok = false;
+                }
+              }
+            }
+            if(ok) threeers.push(ids.map(s => s.id));
+          }
+        }
+      }
+
+      return [...twoers, ...threeers];
+    }
+
+    const PATTERNS = generatePatterns();
 
     function getShownCount(id){
       return state.showCounts.get(id) || 0;
@@ -687,11 +784,10 @@
       return chosen.slice(0, count);
     }
 
-    function fitCaption(captionEl, maxPx = 32, minPx = 16){
+    function fitCaption(captionEl, maxPx, minPx = 16){
       let size = maxPx;
       captionEl.style.fontSize = `${size}px`;
       captionEl.style.lineHeight = "1.02";
-      captionEl.style.maxHeight = "2.8em";
 
       while(size > minPx && captionEl.scrollHeight > captionEl.clientHeight + 1){
         size -= 1;
@@ -699,45 +795,57 @@
       }
     }
 
+    function getClipHeightPx(clipDef){
+      const stageRect = getStageRect();
+      const stageDiagPx = Math.sqrt(stageRect.width * stageRect.width + stageRect.height * stageRect.height);
+      return clamp(stageDiagPx * clipDef.diagScale, 72, 190);
+    }
+
     function createCard(asset, slotId, startDelay = 0){
       const slot = getSlot(slotId);
       const layout = buildLayout(asset);
-      const restRot = rand(-6.5, 6.5);
-      const rect = rectForPlacement(slot, layout, restRot);
+      const restRot = rand(-7.0, 7.0);
+      const rect = rectForPlacementPx(slot, layout, restRot);
 
       const wrapper = document.createElement("div");
       wrapper.className = "photo-card attaching";
-      wrapper.style.left = `${rect.left}%`;
-      wrapper.style.top = `${rect.top}%`;
-      wrapper.style.width = `${layout.frameWStagePct}%`;
-      wrapper.style.height = `${layout.frameHStagePct}%`;
+      wrapper.style.left = `${rect.leftPx}px`;
+      wrapper.style.top = `${rect.topPx}px`;
+      wrapper.style.width = `${layout.frameWPx}px`;
+      wrapper.style.height = `${layout.frameHPx}px`;
+
+      const inner = document.createElement("div");
+      inner.className = "photo-inner";
+      inner.style.width = "100%";
+      inner.style.height = "100%";
+      inner.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
 
       const frame = document.createElement("div");
       frame.className = "photo-frame";
-      frame.style.setProperty("--pin-x", `${rect.clipXPercent}%`);
-      frame.style.background = layout.meta.color;
+      frame.style.background = "#fff";
 
-      const mediaWrap = document.createElement("div");
-      mediaWrap.className = "media-wrap";
-      mediaWrap.style.left = `${layout.sidePadFramePct}%`;
-      mediaWrap.style.top = `${layout.topPadFramePct}%`;
-      mediaWrap.style.width = `${layout.mediaWFramePct}%`;
-      mediaWrap.style.height = `${layout.mediaHFramePct}%`;
+      const media = document.createElement("div");
+      media.className = "photo-media";
+      media.style.marginLeft = `${layout.sidePadPx}px`;
+      media.style.marginRight = `${layout.sidePadPx}px`;
+      media.style.marginTop = `${layout.topPadPx}px`;
+      media.style.height = `${layout.mediaHPx}px`;
+      media.style.background = layout.meta.color;
 
-      const mediaImg = document.createElement("img");
-      mediaImg.className = "media-img";
-      mediaImg.alt = layout.meta.caption;
-      mediaImg.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
+      const img = document.createElement("img");
+      img.alt = layout.meta.caption;
+      img.src = `https://res.cloudinary.com/${APP_CONFIG.cloudName}/image/upload/c_limit,w_3000,h_3000,q_auto,f_auto/${asset.public_id}`;
 
       const caption = document.createElement("div");
-      caption.className = "caption";
-      caption.style.left = "0";
-      caption.style.right = "0";
-      caption.style.bottom = "0";
-      caption.style.height = `${layout.captionHFramePct}%`;
+      caption.className = "photo-caption";
       caption.style.background = layout.meta.color;
-      caption.style.padding = `0 ${layout.sidePadFramePct}%`;
+      caption.style.height = `${layout.captionHeightPx}px`;
       caption.textContent = layout.meta.caption;
+
+      media.appendChild(img);
+      frame.appendChild(media);
+      frame.appendChild(caption);
+      inner.appendChild(frame);
 
       const clipDef = pick(CLIP_VARIANTS);
       const clip = document.createElement("img");
@@ -745,7 +853,7 @@
       clip.src = clipDef.src;
       clip.alt = "";
       clip.style.setProperty("--clip-x", `${rect.clipXPercent}%`);
-      clip.style.setProperty("--clip-h", `${(layout.frameWStagePct * clipDef.scale).toFixed(2)}%`);
+      clip.style.setProperty("--clip-h", `${getClipHeightPx(clipDef).toFixed(1)}px`);
 
       const clipRot = `${rand(-9, 9).toFixed(2)}deg`;
       const restRotCss = `${restRot.toFixed(2)}deg`;
@@ -762,7 +870,7 @@
 
       wrapper.style.setProperty("--photo-start-x", `${photoStartX}px`);
       wrapper.style.setProperty("--photo-start-y", `${photoStartY}px`);
-      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-2.8, 2.8)).toFixed(2)}deg`);
+      wrapper.style.setProperty("--photo-start-rot", `${(restRot + rand(-2.5, 2.5)).toFixed(2)}deg`);
 
       wrapper.style.setProperty("--clip-start-x", `${rand(-10, 10).toFixed(1)}px`);
       wrapper.style.setProperty("--clip-start-y", `${rand(-34, -20).toFixed(1)}px`);
@@ -778,7 +886,7 @@
 
       wrapper.style.setProperty("--attach-duration", `${rand(0.95, 1.08).toFixed(2)}s`);
       wrapper.style.setProperty("--clip-attach-duration", `${rand(0.92, 1.03).toFixed(2)}s`);
-      wrapper.style.setProperty("--swing-duration", `${rand(2.0, 2.9).toFixed(2)}s`);
+      wrapper.style.setProperty("--swing-duration", `${rand(2.0, 3.0).toFixed(2)}s`);
 
       wrapper.style.setProperty("--swing-a", `${rand(2.2, 3.5).toFixed(2)}deg`);
       wrapper.style.setProperty("--swing-b", `${rand(1.4, 2.2).toFixed(2)}deg`);
@@ -798,19 +906,15 @@
       wrapper.style.setProperty("--swing-x5", `${rand(-0.20, 0.20).toFixed(2)}px`);
       wrapper.style.setProperty("--swing-y5", `${rand(-0.14, 0.14).toFixed(2)}px`);
 
-      mediaWrap.appendChild(mediaImg);
-      frame.appendChild(mediaWrap);
-      frame.appendChild(caption);
-      wrapper.appendChild(frame);
+      wrapper.appendChild(inner);
       wrapper.appendChild(clip);
-
       wrapper.style.opacity = "0";
       stage.appendChild(wrapper);
 
       requestAnimationFrame(() => {
         setTimeout(() => {
-          wrapper.style.opacity = "1";
           fitCaption(caption, layout.captionFontPx, 16);
+          wrapper.style.opacity = "1";
           wrapper.classList.add("attaching");
         }, startDelay);
       });
@@ -858,7 +962,7 @@
       const slot = getSlot(slotId);
       const layout = buildLayout(asset);
       const testRot = 0;
-      return rectForPlacement(slot, layout, testRot);
+      return rectForPlacementPx(slot, layout, testRot);
     }
 
     function candidateOk(pattern, assetsBySlot){
@@ -871,7 +975,7 @@
         if(!withinStage(rect)) return false;
 
         for(const other of rects){
-          if(overlapRatio(rect, other) > 0.12) return false;
+          if(overlapRatio(rect, other) > 0.16) return false;
         }
         rects.push(rect);
       }
@@ -901,19 +1005,29 @@
 
       const preferred = PATTERNS.filter(pattern => {
         const overlap = pattern.filter(id => currentSet.has(id)).length;
-        if(currentIds.length === 0) return true;
-        return overlap >= 1 && overlap <= 2;
+        if(currentIds.length === 0) return pattern.length >= 2 && pattern.length <= 3;
+        return pattern.length >= 2 && pattern.length <= 3 && overlap >= 1 && overlap <= 2;
       });
 
-      for(const pattern of shuffle(preferred.length ? preferred : PATTERNS)){
-        const keepCards = Array.from(state.cards.values()).filter(c => pattern.includes(c.slotId));
-        const assetsBySlot = chooseAssetsForPattern(pattern, keepCards);
-        if(candidateOk(pattern, assetsBySlot)){
-          return { pattern, assetsBySlot };
+      const tryPools = [
+        preferred,
+        PATTERNS.filter(p => p.length >= 2 && p.length <= 3),
+        PATTERNS
+      ];
+
+      for(const pool of tryPools){
+        for(const pattern of shuffle(pool)){
+          const keepCards = Array.from(state.cards.values()).filter(c => pattern.includes(c.slotId));
+          const assetsBySlot = chooseAssetsForPattern(pattern, keepCards);
+          if(candidateOk(pattern, assetsBySlot)){
+            state.usedPatterns.push(pattern.join("|"));
+            if(state.usedPatterns.length > 50) state.usedPatterns.shift();
+            return { pattern, assetsBySlot };
+          }
         }
       }
 
-      const fallback = pick(PATTERNS);
+      const fallback = pick(preferred.length ? preferred : PATTERNS);
       const keepCards = Array.from(state.cards.values()).filter(c => fallback.includes(c.slotId));
       return {
         pattern: fallback,
@@ -996,12 +1110,15 @@
       const valid = [];
 
       for(const entry of currentEntries){
+        const slot = getSlot(entry.slotId);
+        if(!slot) continue;
+
         const rect = cardBoundingFor(entry.slotId, entry.asset);
         if(!withinStage(rect)) continue;
 
         let ok = true;
         for(const other of valid){
-          if(overlapRatio(rect, other.rect) > 0.12){
+          if(overlapRatio(rect, other.rect) > 0.16){
             ok = false;
             break;
           }
