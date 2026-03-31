@@ -5,48 +5,48 @@ window.APP_CONFIG = {
   eventTag: "ellie60",
   eventTitle: "Fotochallenge",
 
-  sections: [
-    {
-      id: "geburtstagskinder",
-      title: 'Rund um die Geburtstags"kinder"',
-      color: "#f3d7dc"
-    },
-    {
-      id: "gruppen",
-      title: "Gemeinsam aufs Bild",
-      color: "#ffe8cc"
-    },
-    {
-      id: "begegnungen",
-      title: "Freunde, Familie & Begegnungen",
-      color: "#dcecc8"
-    },
-    {
-      id: "tanz",
-      title: "Tanz & Stimmung",
-      color: "#ffd9c7"
-    },
-    {
-      id: "genuss",
-      title: "Genussmomente",
-      color: "#fff1c9"
-    },
-    {
-      id: "kreativ",
-      title: "Quatsch & Kreativität",
-      color: "#e7dcf8"
-    },
-    {
-      id: "details",
-      title: "Blickwinkel & Details",
-      color: "#d6e7f5"
-    },
-    {
-      id: "erinnerungen",
-      title: "Erinnerungen",
-      color: "#eadfce"
-    }
-  ],
+sections: [
+  {
+    id: "geburtstagskinder",
+    title: 'Rund um die Geburtstags"kinder"',
+    color: "#f4c9a8"
+  },
+  {
+    id: "gruppen",
+    title: "Gemeinsam aufs Bild",
+    color: "#e8dccb"
+  },
+  {
+    id: "begegnungen",
+    title: "Freunde, Familie & Begegnungen",
+    color: "#ceddbb"
+  },
+  {
+    id: "tanz",
+    title: "Tanz & Stimmung",
+    color: "#f2b38f"
+  },
+  {
+    id: "genuss",
+    title: "Genussmomente",
+    color: "#f7e7b7"
+  },
+  {
+    id: "kreativ",
+    title: "Quatsch & Kreativität",
+    color: "#dcd1ef"
+  },
+  {
+    id: "details",
+    title: "Blickwinkel & Details",
+    color: "#cfe0ee"
+  },
+  {
+    id: "erinnerungen",
+    title: "Erinnerungen",
+    color: "#ddd2c3"
+  }
+]
 
   tasks: [
     {

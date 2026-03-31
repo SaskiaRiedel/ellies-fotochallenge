@@ -12,10 +12,11 @@
       --text: #161616;
       --muted: #5b5b5b;
       --shadow: 0 10px 28px rgba(0,0,0,0.10);
-      --radius: 26px;
+      --section-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      --radius: 24px;
       --btn-dark: #222;
       --btn-light: #fff;
-      --section-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      --border: rgba(0,0,0,0.08);
     }
 
     * {
@@ -45,24 +46,48 @@
     .subtitle {
       text-align: center;
       color: var(--muted);
-      font-size: clamp(1rem, 2.2vw, 1.35rem);
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
       line-height: 1.35;
       max-width: 820px;
       margin: 0 auto 30px;
     }
 
-    .section-block {
-      margin: 34px 0 42px;
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 18px;
     }
 
-    .section-header {
+    .section-block {
+      border-radius: 24px;
+      box-shadow: var(--section-shadow);
+      overflow: hidden;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .section-toggle {
+      width: 100%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .section-toggle:hover {
+      filter: brightness(0.99);
+    }
+
+    .section-left {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 18px;
-      padding: 14px 18px;
-      border-radius: 18px;
-      box-shadow: var(--section-shadow);
+      min-width: 0;
     }
 
     .section-dot {
@@ -74,36 +99,65 @@
     }
 
     .section-title {
-      font-size: clamp(1.35rem, 2.4vw, 2rem);
+      font-size: clamp(1.25rem, 2.5vw, 1.9rem);
       font-weight: 800;
       line-height: 1.2;
       margin: 0;
     }
 
+    .section-count {
+      font-size: 0.98rem;
+      color: #444;
+      margin-top: 4px;
+    }
+
+    .section-arrow {
+      font-size: 1.4rem;
+      font-weight: 700;
+      transition: transform 0.2s ease;
+      flex: 0 0 auto;
+    }
+
+    .section-block.open .section-arrow {
+      transform: rotate(180deg);
+    }
+
+    .section-content {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.30);
+    }
+
+    .section-block.open .section-content {
+      display: block;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 24px;
+      gap: 22px;
+      padding-top: 18px;
     }
 
     .task-card {
       border-radius: var(--radius);
-      padding: 26px 24px 22px;
+      padding: 24px 22px 20px;
       box-shadow: var(--shadow);
     }
 
     .task-title {
-      font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+      font-size: clamp(1.25rem, 2.2vw, 1.7rem);
       line-height: 1.18;
       font-weight: 800;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .task-caption {
-      font-size: clamp(1rem, 1.8vw, 1.12rem);
+      font-size: clamp(0.98rem, 1.8vw, 1.08rem);
       line-height: 1.4;
       color: #444;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .actions {
@@ -147,7 +201,7 @@
     }
 
     .hint {
-      margin-top: 28px;
+      margin-top: 30px;
       text-align: center;
       color: var(--muted);
       font-size: 0.98rem;
@@ -167,12 +221,16 @@
         padding-top: 14px;
       }
 
-      .section-header {
-        padding: 12px 14px;
+      .section-toggle {
+        padding: 18px 16px;
+      }
+
+      .section-content {
+        padding: 0 14px 16px;
       }
 
       .task-card {
-        padding: 22px 20px 20px;
+        padding: 22px 18px 18px;
       }
 
       .actions {
@@ -182,6 +240,10 @@
       .action-btn {
         width: 100%;
       }
+
+      .section-title {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
@@ -189,10 +251,10 @@
   <div class="wrap">
     <h1>📸 Fotochallenge</h1>
     <p class="subtitle">
-      Wähle eine Aufgabe und lade direkt ein Foto oder Video hoch.
+      Wähle eine Kategorie, öffne eine Aufgabe und lade direkt ein Foto oder Video hoch.
     </p>
 
-    <div id="sectionsContainer"></div>
+    <div id="sectionsContainer" class="accordion"></div>
 
     <p class="hint">
       <strong>Aufnehmen</strong> öffnet die Kamera für ein neues Foto.
@@ -268,7 +330,7 @@
           `task_id=${task.id}`,
           `task_title=${task.title}`,
           `task_section=${task.section || ""}`,
-          `caption=${task.caption}`
+          `caption=${task.caption || ""}`
         ].join("|")
       );
 
@@ -337,6 +399,68 @@
       return card;
     }
 
+    function createSectionBlock(section, sectionTasks, isOpen = false) {
+      const block = document.createElement("section");
+      block.className = "section-block";
+      if (isOpen) block.classList.add("open");
+
+      const toggle = document.createElement("button");
+      toggle.className = "section-toggle";
+      toggle.type = "button";
+      toggle.style.background = section.color || "#ffffff";
+
+      const left = document.createElement("div");
+      left.className = "section-left";
+
+      const dot = document.createElement("div");
+      dot.className = "section-dot";
+      dot.style.background = section.color || "#ffffff";
+
+      const textWrap = document.createElement("div");
+
+      const title = document.createElement("h2");
+      title.className = "section-title";
+      title.textContent = section.title;
+
+      const count = document.createElement("div");
+      count.className = "section-count";
+      count.textContent = `${sectionTasks.length} Aufgaben`;
+
+      textWrap.appendChild(title);
+      textWrap.appendChild(count);
+
+      left.appendChild(dot);
+      left.appendChild(textWrap);
+
+      const arrow = document.createElement("div");
+      arrow.className = "section-arrow";
+      arrow.textContent = "⌄";
+
+      toggle.appendChild(left);
+      toggle.appendChild(arrow);
+
+      const content = document.createElement("div");
+      content.className = "section-content";
+
+      const grid = document.createElement("div");
+      grid.className = "grid";
+
+      sectionTasks.forEach(task => {
+        grid.appendChild(createTaskCard(task));
+      });
+
+      content.appendChild(grid);
+
+      toggle.addEventListener("click", () => {
+        block.classList.toggle("open");
+      });
+
+      block.appendChild(toggle);
+      block.appendChild(content);
+
+      return block;
+    }
+
     function renderSections() {
       const config = window.APP_CONFIG;
       const sections = Array.isArray(config.sections) ? config.sections : [];
@@ -344,74 +468,14 @@
 
       sectionsContainer.innerHTML = "";
 
-      sections.forEach((section) => {
+      sections.forEach((section, index) => {
         const sectionTasks = tasks.filter(task => task.section === section.id);
-
         if (!sectionTasks.length) return;
 
-        const block = document.createElement("section");
-        block.className = "section-block";
-
-        const header = document.createElement("div");
-        header.className = "section-header";
-        header.style.background = section.color || "#ffffff";
-
-        const dot = document.createElement("div");
-        dot.className = "section-dot";
-        dot.style.background = section.color || "#ffffff";
-
-        const title = document.createElement("h2");
-        title.className = "section-title";
-        title.textContent = section.title;
-
-        const grid = document.createElement("div");
-        grid.className = "grid";
-
-        sectionTasks.forEach(task => {
-          grid.appendChild(createTaskCard(task));
-        });
-
-        header.appendChild(dot);
-        header.appendChild(title);
-
-        block.appendChild(header);
-        block.appendChild(grid);
-
+        const isOpenByDefault = section.id === "erinnerungen";
+        const block = createSectionBlock(section, sectionTasks, isOpenByDefault);
         sectionsContainer.appendChild(block);
       });
-
-      const tasksWithoutSection = tasks.filter(task => !task.section);
-      if (tasksWithoutSection.length) {
-        const fallbackBlock = document.createElement("section");
-        fallbackBlock.className = "section-block";
-
-        const header = document.createElement("div");
-        header.className = "section-header";
-        header.style.background = "#ffffff";
-
-        const dot = document.createElement("div");
-        dot.className = "section-dot";
-        dot.style.background = "#ffffff";
-
-        const title = document.createElement("h2");
-        title.className = "section-title";
-        title.textContent = "Weitere Aufgaben";
-
-        const grid = document.createElement("div");
-        grid.className = "grid";
-
-        tasksWithoutSection.forEach(task => {
-          grid.appendChild(createTaskCard(task));
-        });
-
-        header.appendChild(dot);
-        header.appendChild(title);
-
-        fallbackBlock.appendChild(header);
-        fallbackBlock.appendChild(grid);
-
-        sectionsContainer.appendChild(fallbackBlock);
-      }
     }
 
     renderSections();
