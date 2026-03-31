@@ -189,6 +189,21 @@
       min-height: 1.3em;
     }
 
+    .special-upload-wrapper {
+      margin-top: 24px;
+    }
+
+    .special-upload-card {
+      border-radius: 28px;
+      box-shadow: var(--section-shadow);
+      padding: 28px 26px 24px;
+    }
+
+    .special-upload-card .task-title {
+      font-size: clamp(1.4rem, 2.7vw, 2.1rem);
+      margin-bottom: 22px;
+    }
+
     .hint {
       margin-top: 30px;
       text-align: center;
@@ -218,7 +233,8 @@
         padding: 0 14px 16px;
       }
 
-      .task-card {
+      .task-card,
+      .special-upload-card {
         padding: 22px 18px 18px;
       }
 
@@ -240,10 +256,11 @@
   <div class="wrap">
     <h1>📸 Fotochallenge</h1>
     <p class="subtitle">
-      Wähle eine Kategorie, öffne eine Aufgabe und lade direkt ein Foto oder Video hoch.
+      Wähle eine Kategorie, öffne eine Aufgabe und lade direkt ein Foto hoch.
     </p>
 
     <div id="sectionsContainer" class="accordion"></div>
+    <div id="specialUploadContainer" class="special-upload-wrapper"></div>
 
     <p class="hint">
       <strong>Aufnehmen</strong> öffnet die Kamera für ein neues Foto.
@@ -254,6 +271,7 @@
 
   <script>
     const sectionsContainer = document.getElementById("sectionsContainer");
+    const specialUploadContainer = document.getElementById("specialUploadContainer");
 
     function createHiddenInput(task, mode) {
       const input = document.createElement("input");
@@ -336,9 +354,9 @@
       return response.json();
     }
 
-    function createTaskCard(task) {
+    function createTaskCard(task, isSpecial = false) {
       const card = document.createElement("div");
-      card.className = "task-card";
+      card.className = isSpecial ? "special-upload-card" : "task-card";
       card.style.background = task.color || "#ffffff";
 
       const title = document.createElement("div");
@@ -451,10 +469,20 @@
       }
 
       sectionsContainer.innerHTML = "";
+      specialUploadContainer.innerHTML = "";
+
+      const specialSectionId = "fotos_aus_allen_zeiten";
 
       config.sections.forEach((section) => {
         const sectionTasks = config.tasks.filter(task => task.section === section.id);
         if (!sectionTasks.length) return;
+
+        if (section.id === specialSectionId) {
+          const specialTask = sectionTasks[0];
+          const specialCard = createTaskCard(specialTask, true);
+          specialUploadContainer.appendChild(specialCard);
+          return;
+        }
 
         const block = createSectionBlock(section, sectionTasks);
         sectionsContainer.appendChild(block);
