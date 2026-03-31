@@ -17,10 +17,19 @@
       --btn-dark: #222;
       --btn-light: #fff;
       --border: rgba(0,0,0,0.08);
+      --pill-bg: rgba(255,255,255,0.78);
+      --highlight: #fff7c7;
+      --success: #1f7a3d;
+      --warning: #9a6700;
+      --danger: #8a1c1c;
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
@@ -48,8 +57,49 @@
       color: var(--muted);
       font-size: clamp(1rem, 2.2vw, 1.3rem);
       line-height: 1.35;
-      max-width: 820px;
-      margin: 0 auto 30px;
+      max-width: 900px;
+      margin: 0 auto 22px;
+    }
+
+    .top-tools {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 0 auto 26px;
+    }
+
+    .tool-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 18px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 800;
+      background: #fff;
+      color: #111;
+      box-shadow: var(--section-shadow);
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+
+    .tool-btn:hover,
+    .tool-btn:focus-visible {
+      transform: translateY(-1px);
+      opacity: 0.96;
+      outline: none;
+    }
+
+    .tool-btn.active {
+      background: #222;
+      color: #fff;
+    }
+
+    .filter-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.98rem;
+      margin: -8px auto 18px;
+      min-height: 1.2em;
     }
 
     .accordion {
@@ -101,10 +151,21 @@
       margin: 0;
     }
 
-    .section-count {
-      font-size: 0.98rem;
-      color: #444;
-      margin-top: 4px;
+    .section-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 7px;
+    }
+
+    .section-count,
+    .section-status {
+      font-size: 0.95rem;
+      color: #333;
+      background: var(--pill-bg);
+      padding: 6px 10px;
+      border-radius: 999px;
     }
 
     .section-arrow {
@@ -138,15 +199,69 @@
 
     .task-card {
       border-radius: var(--radius);
-      padding: 24px 22px 20px;
+      padding: 22px 20px 18px;
       box-shadow: var(--shadow);
+      transition: transform .12s ease, box-shadow .12s ease, outline-color .12s ease;
+      position: relative;
+      scroll-margin-top: 20px;
+    }
+
+    .task-card.highlight {
+      outline: 4px solid rgba(255,255,255,0.9);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.08), 0 16px 34px rgba(0,0,0,0.16);
+      animation: pulseHighlight 1.6s ease;
+    }
+
+    @keyframes pulseHighlight {
+      0% { transform: scale(1); }
+      25% { transform: scale(1.015); }
+      50% { transform: scale(1); }
+      75% { transform: scale(1.01); }
+      100% { transform: scale(1); }
+    }
+
+    .task-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .task-icon {
+      font-size: 1.9rem;
+      line-height: 1;
+      flex: 0 0 auto;
     }
 
     .task-title {
-      font-size: clamp(1.2rem, 2.1vw, 1.55rem);
-      line-height: 1.2;
+      font-size: clamp(1.12rem, 2.1vw, 1.42rem);
+      line-height: 1.24;
       font-weight: 800;
-      margin-bottom: 18px;
+      margin: 0;
+    }
+
+    .task-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .task-badge {
+      font-size: 0.93rem;
+      line-height: 1.25;
+      background: rgba(255,255,255,0.82);
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: #222;
+    }
+
+    .task-counter {
+      font-weight: 700;
+    }
+
+    .task-motivation {
+      font-weight: 700;
     }
 
     .actions {
@@ -182,6 +297,20 @@
       color: #111;
     }
 
+    .task-deeplink {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #333;
+      opacity: 0.8;
+      word-break: break-all;
+    }
+
+    .task-deeplink a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(0,0,0,0.35);
+    }
+
     .status {
       margin-top: 12px;
       font-size: 0.95rem;
@@ -200,8 +329,16 @@
     }
 
     .special-upload-card .task-title {
-      font-size: clamp(1.4rem, 2.7vw, 2.1rem);
-      margin-bottom: 22px;
+      font-size: clamp(1.35rem, 2.7vw, 2rem);
+    }
+
+    .special-heading {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #444;
+      margin: 0 0 10px;
+      text-transform: uppercase;
     }
 
     .hint {
@@ -213,6 +350,13 @@
       max-width: 920px;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px 12px 8px;
+      font-size: 1rem;
     }
 
     input[type="file"] {
@@ -235,7 +379,7 @@
 
       .task-card,
       .special-upload-card {
-        padding: 22px 18px 18px;
+        padding: 20px 17px 17px;
       }
 
       .actions {
@@ -249,6 +393,10 @@
       .section-title {
         font-size: 1.2rem;
       }
+
+      .task-top {
+        gap: 10px;
+      }
     }
   </style>
 </head>
@@ -256,8 +404,16 @@
   <div class="wrap">
     <h1>📸 Fotochallenge</h1>
     <p class="subtitle">
-      Wähle eine Kategorie, öffne eine Aufgabe und lade direkt ein Foto hoch.
+      Wähle eine Kategorie, such dir eine Aufgabe aus oder lass dir per Zufall eine geben.
+      Aufgaben, die noch niemand gemacht hat, rutschen automatisch nach oben.
     </p>
+
+    <div class="top-tools">
+      <button id="randomTaskBtn" class="tool-btn" type="button">🎲 Zufallsaufgabe</button>
+      <button id="openTasksBtn" class="tool-btn" type="button">⭐ Unerledigte Aufgaben</button>
+    </div>
+
+    <div id="filterNote" class="filter-note"></div>
 
     <div id="sectionsContainer" class="accordion"></div>
     <div id="specialUploadContainer" class="special-upload-wrapper"></div>
@@ -272,6 +428,102 @@
   <script>
     const sectionsContainer = document.getElementById("sectionsContainer");
     const specialUploadContainer = document.getElementById("specialUploadContainer");
+    const randomTaskBtn = document.getElementById("randomTaskBtn");
+    const openTasksBtn = document.getElementById("openTasksBtn");
+    const filterNote = document.getElementById("filterNote");
+
+    const state = {
+      taskCounts: {},
+      showOnlyOpenTasks: false,
+      highlightedTaskId: null
+    };
+
+    function getHashTaskId() {
+      const raw = decodeURIComponent((window.location.hash || "").replace(/^#/, "").trim());
+      return raw || null;
+    }
+
+    function getTaskById(taskId) {
+      return (window.APP_CONFIG?.tasks || []).find(task => task.id === taskId) || null;
+    }
+
+    function buildDeepLink(taskId) {
+      return `${window.location.origin}${window.location.pathname}#${encodeURIComponent(taskId)}`;
+    }
+
+    function getTaskCount(taskId) {
+      return Number(state.taskCounts[taskId] || 0);
+    }
+
+    function getTaskCounterText(count) {
+      return `🔁 Schon ${count}× gemacht`;
+    }
+
+    function getTaskMotivationText(count) {
+      if (count === 0) return "⭐ Noch niemand hat diese Aufgabe gemacht!";
+      if (count === 1) return "🔥 Nur 1× gemacht – trau dich!";
+      return "";
+    }
+
+    function getSectionStatus(sectionTasks) {
+      if (!sectionTasks.length) return "🟢 noch nicht gemacht";
+
+      const counts = sectionTasks.map(task => getTaskCount(task.id));
+      const total = counts.reduce((sum, value) => sum + value, 0);
+
+      if (total === 0) return "🟢 noch nicht gemacht";
+
+      const avg = total / sectionTasks.length;
+      if (avg < 2) return "🟡 Selten gemacht";
+      return "🔥 Beliebt";
+    }
+
+    function sortTasks(tasks) {
+      return [...tasks].sort((a, b) => {
+        const countDiff = getTaskCount(a.id) - getTaskCount(b.id);
+        if (countDiff !== 0) return countDiff;
+        return a.title.localeCompare(b.title, "de");
+      });
+    }
+
+    async function fetchTaskCounts() {
+      state.taskCounts = {};
+
+      const fallbackCounts = {};
+
+      try {
+        const listUrl = `https://res.cloudinary.com/${window.APP_CONFIG.cloudName}/image/list/${window.APP_CONFIG.eventTag}.json`;
+        const response = await fetch(listUrl, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`Cloudinary-Liste konnte nicht geladen werden (${response.status}).`);
+        }
+
+        const data = await response.json();
+        const resources = Array.isArray(data.resources) ? data.resources : [];
+
+        for (const asset of resources) {
+          const taskId =
+            asset?.context?.custom?.task_id ||
+            extractTaskIdFromPublicId(asset?.public_id || "");
+
+          if (!taskId) continue;
+          fallbackCounts[taskId] = (fallbackCounts[taskId] || 0) + 1;
+        }
+      } catch (error) {
+        console.warn("Zähler konnten nicht aus Cloudinary geladen werden:", error);
+      }
+
+      state.taskCounts = fallbackCounts;
+    }
+
+    function extractTaskIdFromPublicId(publicId) {
+      if (!publicId) return "";
+      const parts = String(publicId).split("/");
+      const last = parts[parts.length - 1] || "";
+      const match = last.match(/(aufgabe\d+|sammelordner)/i);
+      return match ? match[1] : "";
+    }
 
     function createHiddenInput(task, mode) {
       const input = document.createElement("input");
@@ -304,6 +556,10 @@
           status.textContent = files.length > 1
             ? `✓ ${files.length} Uploads erfolgreich!`
             : "✓ Upload erfolgreich!";
+
+          state.taskCounts[task.id] = (state.taskCounts[task.id] || 0) + files.length;
+          await renderSections();
+          openAndHighlightTask(task.id, { updateHash: true, pulse: false });
         } catch (err) {
           console.error(err);
           status.textContent = "Upload fehlgeschlagen.";
@@ -356,12 +612,42 @@
 
     function createTaskCard(task, isSpecial = false) {
       const card = document.createElement("div");
-      card.className = isSpecial ? "special-upload-card" : "task-card";
+      card.className = isSpecial ? "special-upload-card task-card" : "task-card";
       card.style.background = task.color || "#ffffff";
+      card.id = `task-${task.id}`;
+      card.dataset.taskId = task.id;
 
-      const title = document.createElement("div");
+      const count = getTaskCount(task.id);
+      const motivation = getTaskMotivationText(count);
+
+      const top = document.createElement("div");
+      top.className = "task-top";
+
+      const icon = document.createElement("div");
+      icon.className = "task-icon";
+      icon.textContent = "📸";
+
+      const title = document.createElement("h3");
       title.className = "task-title";
       title.textContent = task.title;
+
+      top.appendChild(icon);
+      top.appendChild(title);
+
+      const badges = document.createElement("div");
+      badges.className = "task-badges";
+
+      const counterBadge = document.createElement("div");
+      counterBadge.className = "task-badge task-counter";
+      counterBadge.textContent = getTaskCounterText(count);
+      badges.appendChild(counterBadge);
+
+      if (motivation) {
+        const motivationBadge = document.createElement("div");
+        motivationBadge.className = "task-badge task-motivation";
+        motivationBadge.textContent = motivation;
+        badges.appendChild(motivationBadge);
+      }
 
       const actions = document.createElement("div");
       actions.className = "actions";
@@ -387,12 +673,34 @@
       status.className = "status";
       status.id = `status-${task.id}`;
 
+      const deeplink = document.createElement("div");
+      deeplink.className = "task-deeplink";
+
+      const link = document.createElement("a");
+      link.href = `#${encodeURIComponent(task.id)}`;
+      link.textContent = `Direktlink: #${task.id}`;
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        openAndHighlightTask(task.id, { updateHash: true, pulse: true });
+      });
+
+      deeplink.appendChild(link);
+
       actions.appendChild(cameraBtn);
       actions.appendChild(uploadBtn);
 
-      card.appendChild(title);
+      if (isSpecial) {
+        const heading = document.createElement("div");
+        heading.className = "special-heading";
+        heading.textContent = "Erinnerungen hochladen";
+        card.appendChild(heading);
+      }
+
+      card.appendChild(top);
+      card.appendChild(badges);
       card.appendChild(actions);
       card.appendChild(status);
+      card.appendChild(deeplink);
       card.appendChild(cameraInput);
       card.appendChild(uploadInput);
 
@@ -402,6 +710,7 @@
     function createSectionBlock(section, sectionTasks) {
       const block = document.createElement("section");
       block.className = "section-block";
+      block.id = `section-${section.id}`;
 
       const toggle = document.createElement("button");
       toggle.className = "section-toggle";
@@ -421,12 +730,22 @@
       title.className = "section-title";
       title.textContent = section.title;
 
+      const meta = document.createElement("div");
+      meta.className = "section-meta";
+
       const count = document.createElement("div");
       count.className = "section-count";
       count.textContent = `${sectionTasks.length} Aufgaben`;
 
+      const sectionStatus = document.createElement("div");
+      sectionStatus.className = "section-status";
+      sectionStatus.textContent = getSectionStatus(sectionTasks);
+
+      meta.appendChild(count);
+      meta.appendChild(sectionStatus);
+
       textWrap.appendChild(title);
-      textWrap.appendChild(count);
+      textWrap.appendChild(meta);
 
       left.appendChild(dot);
       left.appendChild(textWrap);
@@ -444,11 +763,22 @@
       const grid = document.createElement("div");
       grid.className = "grid";
 
-      sectionTasks.forEach(task => {
-        grid.appendChild(createTaskCard(task));
-      });
+      const sortedTasks = sortTasks(sectionTasks);
+      const visibleTasks = state.showOnlyOpenTasks
+        ? sortedTasks.filter(task => getTaskCount(task.id) === 0)
+        : sortedTasks;
 
-      content.appendChild(grid);
+      if (!visibleTasks.length) {
+        const emptyState = document.createElement("div");
+        emptyState.className = "empty-state";
+        emptyState.textContent = "In dieser Kategorie gibt es aktuell keine unerledigten Aufgaben mehr.";
+        content.appendChild(emptyState);
+      } else {
+        visibleTasks.forEach(task => {
+          grid.appendChild(createTaskCard(task));
+        });
+        content.appendChild(grid);
+      }
 
       toggle.addEventListener("click", () => {
         block.classList.toggle("open");
@@ -460,7 +790,7 @@
       return block;
     }
 
-    function renderSections() {
+    async function renderSections() {
       const config = window.APP_CONFIG;
 
       if (!config || !Array.isArray(config.sections) || !Array.isArray(config.tasks)) {
@@ -487,9 +817,155 @@
         const block = createSectionBlock(section, sectionTasks);
         sectionsContainer.appendChild(block);
       });
+
+      updateFilterNote();
     }
 
-    renderSections();
+    function updateFilterNote() {
+      if (state.showOnlyOpenTasks) {
+        filterNote.textContent = "Es werden gerade nur Aufgaben angezeigt, die noch niemand erledigt hat.";
+        openTasksBtn.classList.add("active");
+      } else {
+        filterNote.textContent = "";
+        openTasksBtn.classList.remove("active");
+      }
+    }
+
+    function clearHighlight() {
+      document.querySelectorAll(".task-card.highlight").forEach(el => {
+        el.classList.remove("highlight");
+      });
+    }
+
+    function openSection(sectionId) {
+      const block = document.getElementById(`section-${sectionId}`);
+      if (!block) return null;
+      block.classList.add("open");
+      return block;
+    }
+
+    function ensureTaskVisibleInFilter(taskId) {
+      if (!state.showOnlyOpenTasks) return false;
+
+      const count = getTaskCount(taskId);
+      if (count === 0) return false;
+
+      state.showOnlyOpenTasks = false;
+      updateFilterNote();
+      return true;
+    }
+
+    function scrollToElement(el) {
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function openAndHighlightTask(taskId, options = {}) {
+      const { updateHash = true, pulse = true } = options;
+      const task = getTaskById(taskId);
+      if (!task) return;
+
+      const didDisableFilter = ensureTaskVisibleInFilter(taskId);
+
+      const continueWork = () => {
+        if (task.section !== "fotos_aus_allen_zeiten") {
+          openSection(task.section);
+        }
+
+        setTimeout(() => {
+          clearHighlight();
+
+          const el = document.getElementById(`task-${task.id}`);
+          if (!el) return;
+
+          if (pulse) {
+            el.classList.add("highlight");
+          }
+
+          scrollToElement(el);
+
+          if (updateHash) {
+            history.replaceState(null, "", `#${encodeURIComponent(task.id)}`);
+          }
+        }, didDisableFilter ? 60 : 20);
+      };
+
+      if (didDisableFilter) {
+        renderSections().then(continueWork);
+      } else {
+        continueWork();
+      }
+    }
+
+    function getNormalTasks() {
+      return (window.APP_CONFIG?.tasks || []).filter(task => task.id !== "sammelordner");
+    }
+
+    function getOpenNormalTasks() {
+      return getNormalTasks().filter(task => getTaskCount(task.id) === 0);
+    }
+
+    function pickRandomTask() {
+      const openTasks = getOpenNormalTasks();
+      const source = openTasks.length ? openTasks : getNormalTasks();
+
+      if (!source.length) return;
+
+      const randomTask = source[Math.floor(Math.random() * source.length)];
+      openAndHighlightTask(randomTask.id, { updateHash: true, pulse: true });
+    }
+
+    async function handleInitialHash() {
+      const hashTaskId = getHashTaskId();
+      if (!hashTaskId) return;
+
+      const task = getTaskById(hashTaskId);
+      if (!task) return;
+
+      if (task.id === "sammelordner") {
+        setTimeout(() => {
+          const el = document.getElementById(`task-${task.id}`);
+          if (el) {
+            clearHighlight();
+            el.classList.add("highlight");
+            scrollToElement(el);
+          }
+        }, 80);
+        return;
+      }
+
+      openAndHighlightTask(task.id, { updateHash: false, pulse: true });
+    }
+
+    randomTaskBtn.addEventListener("click", () => {
+      pickRandomTask();
+    });
+
+    openTasksBtn.addEventListener("click", async () => {
+      state.showOnlyOpenTasks = !state.showOnlyOpenTasks;
+      await renderSections();
+
+      if (state.showOnlyOpenTasks) {
+        const firstOpenTask = getOpenNormalTasks()[0];
+        if (firstOpenTask) {
+          openAndHighlightTask(firstOpenTask.id, { updateHash: true, pulse: true });
+        }
+      }
+    });
+
+    window.addEventListener("hashchange", () => {
+      const taskId = getHashTaskId();
+      if (!taskId) return;
+      openAndHighlightTask(taskId, { updateHash: false, pulse: true });
+    });
+
+    async function boot() {
+      await fetchTaskCounts();
+      await renderSections();
+      await handleInitialHash();
+    }
+
+    boot();
   </script>
 </body>
 </html>
