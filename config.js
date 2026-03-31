@@ -49,579 +49,87 @@ window.APP_CONFIG = {
   ],
 
   tasks: [
-    {
-      id: "aufgabe01",
-      section: "geburtstagskinder",
-      title: "Foto mit beiden Geburtstagskindern gleichzeitig",
-      caption: "Doppeltes Geburtstagsglück!",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe02",
-      section: "geburtstagskinder",
-      title: "Geburtstagskind beim Lachen erwischen",
-      caption: "Das Lachen des Abends",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe03",
-      section: "geburtstagskinder",
-      title: "Ein Herz-Foto mit einem der Geburtstagskinder",
-      caption: "Herz für das Geburtstagskind",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe04",
-      section: "gruppen",
-      title: "Foto mit den Geburtstagskindern und mindestens 5 Gästen",
-      caption: "Geburtstagscrew komplett",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe05",
-      section: "geburtstagskinder",
-      title: "Geburtstagskind mit seinem Lieblingsgetränk",
-      caption: "Prost auf dich!",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe06",
-      section: "erinnerungen",
-      title: "Ein altes Erinnerungsfoto nachstellen",
-      caption: "Damals vs. heute",
-      color: "#ddd2c3"
-    },
-    {
-      id: "aufgabe07",
-      section: "geburtstagskinder",
-      title: "Geburtstagskind beim Tanzen",
-      caption: "Tanzmodus aktiviert",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe08",
-      section: "geburtstagskinder",
-      title: "Geburtstagskind mit jemandem aus der gleichen Generation",
-      caption: "Generationen verbinden",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe09",
-      section: "kreativ",
-      title: "Jemand macht eine extrem lustige Grimasse",
-      caption: "Grimassenalarm!",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe10",
-      section: "kreativ",
-      title: "Drei Gäste machen gleichzeitig eine verrückte Pose",
-      caption: "Verrückte Pose hoch drei",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe11",
-      section: "kreativ",
-      title: "Jemand tut so, als wäre er ein Supermodel",
-      caption: "Laufsteg-Feeling",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe12",
-      section: "kreativ",
-      title: "Dramatische Titanic-Pose nachstellen",
-      caption: "„Ich fliege, Jack!“",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe13",
-      section: "tanz",
-      title: "Foto von der vollsten Stelle der Tanzfläche",
-      caption: "Hier steppt der Bär",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe14",
-      section: "kreativ",
-      title: "Jemand springt in die Luft",
-      caption: "Sprung ins Glück",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe15",
-      section: "gruppen",
-      title: "Gruppe beim Anstoßen",
-      caption: "Prost zusammen!",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe16",
-      section: "tanz",
-      title: "Foto mit Konfetti oder Deko",
-      caption: "Partydeko in Aktion",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe17",
-      section: "tanz",
-      title: "Foto von jemandem, der laut singt",
-      caption: "Singen aus voller Seele",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe18",
-      section: "tanz",
-      title: "Tanz-Battle Foto",
-      caption: "Dance Battle!",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe19",
-      section: "tanz",
-      title: "Foto von jemandem beim DJ-Wunsch äußern",
-      caption: "DJ, spiel unseren Song!",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe20",
-      section: "tanz",
-      title: "Beste Tanzpose des Abends",
-      caption: "Die Tanzpose des Abends",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe21",
-      section: "genuss",
-      title: "Schönstes Foto vom Geburtstagskuchen",
-      caption: "Süßer Mittelpunkt",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe22",
-      section: "genuss",
-      title: "Jemand füttert jemanden",
-      caption: "Liebe geht durch den Magen",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe23",
-      section: "genuss",
-      title: "Foto vom Buffet",
-      caption: "Buffetträume",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe24",
-      section: "genuss",
-      title: "Ein Gast mit einem riesigen Teller Essen",
-      caption: "Hunger deluxe",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe25",
-      section: "genuss",
-      title: "Zwei Gäste stoßen mit verschiedenen Getränken an",
-      caption: "Prost, aber anders",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe26",
-      section: "genuss",
-      title: "Foto eines Desserts",
-      caption: "Süße Versuchung",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe27",
-      section: "genuss",
-      title: "Jemand beim Genießen eines Snacks",
-      caption: "Snackmoment",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe28",
-      section: "begegnungen",
-      title: "Foto mit jemandem, den du noch nicht kanntest",
-      caption: "Neue Bekanntschaft",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe29",
-      section: "begegnungen",
-      title: "Ältester Gast des Abends",
-      caption: "Weisheit des Abends",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe30",
-      section: "begegnungen",
-      title: "Jüngster Gast des Abends",
-      caption: "Nachwuchs der Party",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe31",
-      section: "details",
-      title: "Foto mit jemandem im gleichen Outfit-Farbschema",
-      caption: "Style-Zwillinge",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe32",
-      section: "begegnungen",
-      title: "Gäste aus verschiedenen Generationen",
-      caption: "Generationen vereint",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe33",
-      section: "begegnungen",
-      title: "Zwei Menschen, die sich lange kennen",
-      caption: "Freundschaft seit Ewigkeiten",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe34",
-      section: "begegnungen",
-      title: "Ein Foto mit einem neuen Freund des Abends",
-      caption: "Neuer Freund des Abends",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe35",
-      section: "details",
-      title: "Jemand, der extrem elegant gekleidet ist",
-      caption: "Eleganz pur",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe36",
-      section: "details",
-      title: "Foto durch ein Glas oder eine Flasche",
-      caption: "Durch Glas betrachtet",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe37",
-      section: "details",
-      title: "Spiegel-Selfie",
-      caption: "Spiegelmoment",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe38",
-      section: "details",
-      title: "Foto nur von Schatten",
-      caption: "Schattenkunst",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe39",
-      section: "details",
-      title: "Foto aus Vogelperspektive",
-      caption: "Blick von oben",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe40",
-      section: "details",
-      title: "Foto aus Bodenperspektive",
-      caption: "Perspektive von unten",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe41",
-      section: "gruppen",
-      title: "Kreativstes Gruppenfoto",
-      caption: "Kreativität in der Gruppe",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe42",
-      section: "details",
-      title: "Foto mit Bewegungsunschärfe",
-      caption: "Bewegung im Bild",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe43",
-      section: "details",
-      title: "Finde jemanden mit roten Schuhen",
-      caption: "Die roten Schuhe",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe44",
-      section: "details",
-      title: "Finde jemanden mit Brille",
-      caption: "Brille gefunden!",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe45",
-      section: "details",
-      title: "Finde jemanden mit Hut",
-      caption: "Hutträger entdeckt",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe46",
-      section: "begegnungen",
-      title: "Foto mit einem Familienmitglied",
-      caption: "Familienmoment",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe47",
-      section: "begegnungen",
-      title: "Finde jemanden, der nicht tanzen will",
-      caption: "Tanzmuffel gesichtet",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe48",
-      section: "begegnungen",
-      title: "Foto mit einem Kindheitsfreund",
-      caption: "Kindheitsfreundschaft",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe49",
-      section: "gruppen",
-      title: "Gruppenfoto der Familie",
-      caption: "Familienfoto!",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe50",
-      section: "begegnungen",
-      title: "Foto von alten Freunden",
-      caption: "Freunde von früher",
-      color: "#ceddbb"
-    },
-    {
-      id: "aufgabe51",
-      section: "erinnerungen",
-      title: "Jemand zeigt ein altes Foto auf dem Handy",
-      caption: "Erinnerungen auf dem Handy",
-      color: "#ddd2c3"
-    },
-    {
-      id: "aufgabe52",
-      section: "gruppen",
-      title: "Gäste machen ein „60 Finger“ Foto",
-      caption: "60 Finger für 60 Jahre",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe53",
-      section: "gruppen",
-      title: "Gäste formen die Zahl 60",
-      caption: "Die große 60",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe54",
-      section: "erinnerungen",
-      title: "Nostalgie-Moment einfangen",
-      caption: "Nostalgie pur",
-      color: "#ddd2c3"
-    },
-    {
-      id: "aufgabe55",
-      section: "tanz",
-      title: "Romantischstes Foto des Abends",
-      caption: "Romantik liegt in der Luft",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe56",
-      section: "kreativ",
-      title: "Verrücktestes Foto des Abends",
-      caption: "Verrückt, verrückter, Party!",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe57",
-      section: "tanz",
-      title: "Lautestes Foto (Applaus / Jubel)",
-      caption: "Lauter Jubel!",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe58",
-      section: "tanz",
-      title: "Tanzfreudigstes Foto",
-      caption: "Tanzenergie pur",
-      color: "#f2b38f"
-    },
-    {
-      id: "aufgabe59",
-      section: "kreativ",
-      title: "Kreativstes Selfie",
-      caption: "Selfie-Kunstwerk",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe60",
-      section: "details",
-      title: "Perfektes Timing-Foto",
-      caption: "Perfektes Timing!",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe61",
-      section: "gruppen",
-      title: "Chaotischstes Gruppenfoto",
-      caption: "Chaos, aber schön",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe62",
-      section: "gruppen",
-      title: "Gäste bilden eine Menschenkette",
-      caption: "Menschenkette!",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe63",
-      section: "gruppen",
-      title: "Alle springen gleichzeitig",
-      caption: "Alle springen!",
-      color: "#e8dccb"
-    },
-    {
-      id: "aufgabe64",
-      section: "erinnerungen",
-      title: "Perfektes Erinnerungsfoto des Abends",
-      caption: "Erinnerungen fürs Leben",
-      color: "#ddd2c3"
-    },
-    {
-      id: "aufgabe65",
-      section: "details",
-      title: "Foto mit jemandem, der eine Uhr trägt",
-      caption: "Zeit im Blick",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe66",
-      section: "details",
-      title: "Finde jemanden mit bunten Socken",
-      caption: "Bunte Socken entdeckt",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe67",
-      section: "geburtstagskinder",
-      title: "Foto mit jemandem, der mit einem Geburtstagskind verreist ist",
-      caption: "Reisegefährten",
-      color: "#f4c9a8"
-    },
-    {
-      id: "aufgabe68",
-      section: "details",
-      title: "Finde jemanden mit lockigen Haaren",
-      caption: "Lockenpower",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe69",
-      section: "details",
-      title: "Foto mit jemandem mit blauem Kleidungsstück",
-      caption: "Blau steht dir",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe70",
-      section: "details",
-      title: "Finde jemanden mit Bart",
-      caption: "Bart entdeckt",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe71",
-      section: "details",
-      title: "Finde jemanden mit auffälligem Schmuck",
-      caption: "Schmuckstück entdeckt",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe72",
-      section: "details",
-      title: "Finde jemanden mit gestreifter Kleidung",
-      caption: "Streifenlook",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe73",
-      section: "details",
-      title: "Finde jemanden mit lustigem T-Shirt",
-      caption: "Lustiges Shirt",
-      color: "#cfe0ee"
-    },
-    {
-      id: "aufgabe74",
-      section: "genuss",
-      title: "Foto mit jemandem, der einen Toast ausspricht",
-      caption: "Toast auf das Leben",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe75",
-      section: "genuss",
-      title: "Foto mit jemandem mit Geschenk für die Geburtstagskinder",
-      caption: "Geschenkzeit",
-      color: "#f7e7b7"
-    },
-    {
-      id: "aufgabe76",
-      section: "kreativ",
-      title: "Alle tun so, als würden sie schreien",
-      caption: "Alle schreien!",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe77",
-      section: "kreativ",
-      title: "Fünf Gäste als eingefrorene Statue",
-      caption: "Eingefrorene Statuen",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe78",
-      section: "kreativ",
-      title: "Jemand spielt eine 120-jährige Person",
-      caption: "120 Jahre später",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe79",
-      section: "kreativ",
-      title: "Zwei Gäste ziehen ein unsichtbares Seil",
-      caption: "Unsichtbares Seilziehen",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe80",
-      section: "kreativ",
-      title: "Alle schauen extrem überrascht",
-      caption: "Überraschung!",
-      color: "#dcd1ef"
-    },
-    {
-      id: "aufgabe81",
-      section: "kreativ",
-      title: "Alle posieren wie Hühner",
-      caption: "Hühneralarm",
-      color: "#dcd1ef"
-    },
-    {
-      id: "sammelordner",
-      section: "erinnerungen",
-      title: "Erinnerungen aus allen Zeiten",
-      caption: "Erinnerungen aus allen Zeiten",
-      color: "#ddd2c3"
-    }
+    { id: "aufgabe01", section: "geburtstagskinder", title: "Foto mit beiden Geburtstagskindern gleichzeitig", caption: "Doppeltes Geburtstagsglück!", color: "#f4c9a8" },
+    { id: "aufgabe02", section: "geburtstagskinder", title: "Geburtstagskind beim Lachen erwischen", caption: "Das Lachen des Abends", color: "#f4c9a8" },
+    { id: "aufgabe03", section: "geburtstagskinder", title: "Ein Herz-Foto mit einem der Geburtstagskinder", caption: "Herz für das Geburtstagskind", color: "#f4c9a8" },
+    { id: "aufgabe04", section: "gruppen", title: "Foto mit den Geburtstagskindern und mindestens 5 Gästen", caption: "Geburtstagscrew komplett", color: "#e8dccb" },
+    { id: "aufgabe05", section: "geburtstagskinder", title: "Geburtstagskind mit seinem Lieblingsgetränk", caption: "Prost auf dich!", color: "#f4c9a8" },
+    { id: "aufgabe06", section: "erinnerungen", title: "Ein altes Erinnerungsfoto nachstellen", caption: "Damals vs. heute", color: "#ddd2c3" },
+    { id: "aufgabe07", section: "geburtstagskinder", title: "Geburtstagskind beim Tanzen", caption: "Tanzmodus aktiviert", color: "#f4c9a8" },
+    { id: "aufgabe08", section: "geburtstagskinder", title: "Geburtstagskind mit jemandem aus der gleichen Generation", caption: "Generationen verbinden", color: "#f4c9a8" },
+    { id: "aufgabe09", section: "kreativ", title: "Jemand macht eine extrem lustige Grimasse", caption: "Grimassenalarm!", color: "#dcd1ef" },
+    { id: "aufgabe10", section: "kreativ", title: "Drei Gäste machen gleichzeitig eine verrückte Pose", caption: "Verrückte Pose hoch drei", color: "#dcd1ef" },
+    { id: "aufgabe11", section: "kreativ", title: "Jemand tut so, als wäre er ein Supermodel", caption: "Laufsteg-Feeling", color: "#dcd1ef" },
+    { id: "aufgabe12", section: "kreativ", title: "Dramatische Titanic-Pose nachstellen", caption: "„Ich fliege, Jack!“", color: "#dcd1ef" },
+    { id: "aufgabe13", section: "tanz", title: "Foto von der vollsten Stelle der Tanzfläche", caption: "Hier steppt der Bär", color: "#f2b38f" },
+    { id: "aufgabe14", section: "kreativ", title: "Jemand springt in die Luft", caption: "Sprung ins Glück", color: "#dcd1ef" },
+    { id: "aufgabe15", section: "gruppen", title: "Gruppe beim Anstoßen", caption: "Prost zusammen!", color: "#e8dccb" },
+    { id: "aufgabe16", section: "tanz", title: "Foto mit Konfetti oder Deko", caption: "Partydeko in Aktion", color: "#f2b38f" },
+    { id: "aufgabe17", section: "tanz", title: "Foto von jemandem, der laut singt", caption: "Singen aus voller Seele", color: "#f2b38f" },
+    { id: "aufgabe18", section: "tanz", title: "Tanz-Battle Foto", caption: "Dance Battle!", color: "#f2b38f" },
+    { id: "aufgabe19", section: "tanz", title: "Foto von jemandem beim DJ-Wunsch äußern", caption: "DJ, spiel unseren Song!", color: "#f2b38f" },
+    { id: "aufgabe20", section: "tanz", title: "Beste Tanzpose des Abends", caption: "Die Tanzpose des Abends", color: "#f2b38f" },
+    { id: "aufgabe21", section: "genuss", title: "Schönstes Foto vom Geburtstagskuchen", caption: "Süßer Mittelpunkt", color: "#f7e7b7" },
+    { id: "aufgabe22", section: "genuss", title: "Jemand füttert jemanden", caption: "Liebe geht durch den Magen", color: "#f7e7b7" },
+    { id: "aufgabe23", section: "genuss", title: "Foto vom Buffet", caption: "Buffetträume", color: "#f7e7b7" },
+    { id: "aufgabe24", section: "genuss", title: "Ein Gast mit einem riesigen Teller Essen", caption: "Hunger deluxe", color: "#f7e7b7" },
+    { id: "aufgabe25", section: "genuss", title: "Zwei Gäste stoßen mit verschiedenen Getränken an", caption: "Prost, aber anders", color: "#f7e7b7" },
+    { id: "aufgabe26", section: "genuss", title: "Foto eines Desserts", caption: "Süße Versuchung", color: "#f7e7b7" },
+    { id: "aufgabe27", section: "genuss", title: "Jemand beim Genießen eines Snacks", caption: "Snackmoment", color: "#f7e7b7" },
+    { id: "aufgabe28", section: "begegnungen", title: "Foto mit jemandem, den du noch nicht kanntest", caption: "Neue Bekanntschaft", color: "#ceddbb" },
+    { id: "aufgabe29", section: "begegnungen", title: "Ältester Gast des Abends", caption: "Weisheit des Abends", color: "#ceddbb" },
+    { id: "aufgabe30", section: "begegnungen", title: "Jüngster Gast des Abends", caption: "Nachwuchs der Party", color: "#ceddbb" },
+    { id: "aufgabe31", section: "details", title: "Foto mit jemandem im gleichen Outfit-Farbschema", caption: "Style-Zwillinge", color: "#cfe0ee" },
+    { id: "aufgabe32", section: "begegnungen", title: "Gäste aus verschiedenen Generationen", caption: "Generationen vereint", color: "#ceddbb" },
+    { id: "aufgabe33", section: "begegnungen", title: "Zwei Menschen, die sich lange kennen", caption: "Freundschaft seit Ewigkeiten", color: "#ceddbb" },
+    { id: "aufgabe34", section: "begegnungen", title: "Ein Foto mit einem neuen Freund des Abends", caption: "Neuer Freund des Abends", color: "#ceddbb" },
+    { id: "aufgabe35", section: "details", title: "Jemand, der extrem elegant gekleidet ist", caption: "Eleganz pur", color: "#cfe0ee" },
+    { id: "aufgabe36", section: "details", title: "Foto durch ein Glas oder eine Flasche", caption: "Durch Glas betrachtet", color: "#cfe0ee" },
+    { id: "aufgabe37", section: "details", title: "Spiegel-Selfie", caption: "Spiegelmoment", color: "#cfe0ee" },
+    { id: "aufgabe38", section: "details", title: "Foto nur von Schatten", caption: "Schattenkunst", color: "#cfe0ee" },
+    { id: "aufgabe39", section: "details", title: "Foto aus Vogelperspektive", caption: "Blick von oben", color: "#cfe0ee" },
+    { id: "aufgabe40", section: "details", title: "Foto aus Bodenperspektive", caption: "Perspektive von unten", color: "#cfe0ee" },
+    { id: "aufgabe41", section: "gruppen", title: "Kreativstes Gruppenfoto", caption: "Kreativität in der Gruppe", color: "#e8dccb" },
+    { id: "aufgabe42", section: "details", title: "Foto mit Bewegungsunschärfe", caption: "Bewegung im Bild", color: "#cfe0ee" },
+    { id: "aufgabe43", section: "details", title: "Finde jemanden mit roten Schuhen", caption: "Die roten Schuhe", color: "#cfe0ee" },
+    { id: "aufgabe44", section: "details", title: "Finde jemanden mit Brille", caption: "Brille gefunden!", color: "#cfe0ee" },
+    { id: "aufgabe45", section: "details", title: "Finde jemanden mit Hut", caption: "Hutträger entdeckt", color: "#cfe0ee" },
+    { id: "aufgabe46", section: "begegnungen", title: "Foto mit einem Familienmitglied", caption: "Familienmoment", color: "#ceddbb" },
+    { id: "aufgabe47", section: "begegnungen", title: "Finde jemanden, der nicht tanzen will", caption: "Tanzmuffel gesichtet", color: "#ceddbb" },
+    { id: "aufgabe48", section: "begegnungen", title: "Foto mit einem Kindheitsfreund", caption: "Kindheitsfreundschaft", color: "#ceddbb" },
+    { id: "aufgabe49", section: "gruppen", title: "Gruppenfoto der Familie", caption: "Familienfoto!", color: "#e8dccb" },
+    { id: "aufgabe50", section: "begegnungen", title: "Foto von alten Freunden", caption: "Freunde von früher", color: "#ceddbb" },
+    { id: "aufgabe51", section: "erinnerungen", title: "Jemand zeigt ein altes Foto auf dem Handy", caption: "Erinnerungen auf dem Handy", color: "#ddd2c3" },
+    { id: "aufgabe52", section: "gruppen", title: "Gäste machen ein „60 Finger“ Foto", caption: "60 Finger für 60 Jahre", color: "#e8dccb" },
+    { id: "aufgabe53", section: "gruppen", title: "Gäste formen die Zahl 60", caption: "Die große 60", color: "#e8dccb" },
+    { id: "aufgabe54", section: "erinnerungen", title: "Nostalgie-Moment einfangen", caption: "Nostalgie pur", color: "#ddd2c3" },
+    { id: "aufgabe55", section: "tanz", title: "Romantischstes Foto des Abends", caption: "Romantik liegt in der Luft", color: "#f2b38f" },
+    { id: "aufgabe56", section: "kreativ", title: "Verrücktestes Foto des Abends", caption: "Verrückt, verrückter, Party!", color: "#dcd1ef" },
+    { id: "aufgabe57", section: "tanz", title: "Lautestes Foto (Applaus / Jubel)", caption: "Lauter Jubel!", color: "#f2b38f" },
+    { id: "aufgabe58", section: "tanz", title: "Tanzfreudigstes Foto", caption: "Tanzenergie pur", color: "#f2b38f" },
+    { id: "aufgabe59", section: "kreativ", title: "Kreativstes Selfie", caption: "Selfie-Kunstwerk", color: "#dcd1ef" },
+    { id: "aufgabe60", section: "details", title: "Perfektes Timing-Foto", caption: "Perfektes Timing!", color: "#cfe0ee" },
+    { id: "aufgabe61", section: "gruppen", title: "Chaotischstes Gruppenfoto", caption: "Chaos, aber schön", color: "#e8dccb" },
+    { id: "aufgabe62", section: "gruppen", title: "Gäste bilden eine Menschenkette", caption: "Menschenkette!", color: "#e8dccb" },
+    { id: "aufgabe63", section: "gruppen", title: "Alle springen gleichzeitig", caption: "Alle springen!", color: "#e8dccb" },
+    { id: "aufgabe64", section: "erinnerungen", title: "Perfektes Erinnerungsfoto des Abends", caption: "Erinnerungen fürs Leben", color: "#ddd2c3" },
+    { id: "aufgabe65", section: "details", title: "Foto mit jemandem, der eine Uhr trägt", caption: "Zeit im Blick", color: "#cfe0ee" },
+    { id: "aufgabe66", section: "details", title: "Finde jemanden mit bunten Socken", caption: "Bunte Socken entdeckt", color: "#cfe0ee" },
+    { id: "aufgabe67", section: "geburtstagskinder", title: "Foto mit jemandem, der mit einem Geburtstagskind verreist ist", caption: "Reisegefährten", color: "#f4c9a8" },
+    { id: "aufgabe68", section: "details", title: "Finde jemanden mit lockigen Haaren", caption: "Lockenpower", color: "#cfe0ee" },
+    { id: "aufgabe69", section: "details", title: "Foto mit jemandem mit blauem Kleidungsstück", caption: "Blau steht dir", color: "#cfe0ee" },
+    { id: "aufgabe70", section: "details", title: "Finde jemanden mit Bart", caption: "Bart entdeckt", color: "#cfe0ee" },
+    { id: "aufgabe71", section: "details", title: "Finde jemanden mit auffälligem Schmuck", caption: "Schmuckstück entdeckt", color: "#cfe0ee" },
+    { id: "aufgabe72", section: "details", title: "Finde jemanden mit gestreifter Kleidung", caption: "Streifenlook", color: "#cfe0ee" },
+    { id: "aufgabe73", section: "details", title: "Finde jemanden mit lustigem T-Shirt", caption: "Lustiges Shirt", color: "#cfe0ee" },
+    { id: "aufgabe74", section: "genuss", title: "Foto mit jemandem, der einen Toast ausspricht", caption: "Toast auf das Leben", color: "#f7e7b7" },
+    { id: "aufgabe75", section: "genuss", title: "Foto mit jemandem mit Geschenk für die Geburtstagskinder", caption: "Geschenkzeit", color: "#f7e7b7" },
+    { id: "aufgabe76", section: "kreativ", title: "Alle tun so, als würden sie schreien", caption: "Alle schreien!", color: "#dcd1ef" },
+    { id: "aufgabe77", section: "kreativ", title: "Fünf Gäste als eingefrorene Statue", caption: "Eingefrorene Statuen", color: "#dcd1ef" },
+    { id: "aufgabe78", section: "kreativ", title: "Jemand spielt eine 120-jährige Person", caption: "120 Jahre später", color: "#dcd1ef" },
+    { id: "aufgabe79", section: "kreativ", title: "Zwei Gäste ziehen ein unsichtbares Seil", caption: "Unsichtbares Seilziehen", color: "#dcd1ef" },
+    { id: "aufgabe80", section: "kreativ", title: "Alle schauen extrem überrascht", caption: "Überraschung!", color: "#dcd1ef" },
+    { id: "aufgabe81", section: "kreativ", title: "Alle posieren wie Hühner", caption: "Hühneralarm", color: "#dcd1ef" },
+    { id: "sammelordner", section: "erinnerungen", title: "Erinnerungen aus allen Zeiten", caption: "Erinnerungen aus allen Zeiten", color: "#ddd2c3" }
   ]
 };
