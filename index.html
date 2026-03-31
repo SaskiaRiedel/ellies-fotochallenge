@@ -15,6 +15,7 @@
       --radius: 26px;
       --btn-dark: #222;
       --btn-light: #fff;
+      --section-shadow: 0 6px 20px rgba(0,0,0,0.06);
     }
 
     * {
@@ -29,9 +30,9 @@
     }
 
     .wrap {
-      width: min(1100px, calc(100vw - 28px));
+      width: min(1180px, calc(100vw - 28px));
       margin: 0 auto;
-      padding: 24px 0 40px;
+      padding: 24px 0 50px;
     }
 
     h1 {
@@ -47,7 +48,36 @@
       font-size: clamp(1rem, 2.2vw, 1.35rem);
       line-height: 1.35;
       max-width: 820px;
-      margin: 0 auto 28px;
+      margin: 0 auto 30px;
+    }
+
+    .section-block {
+      margin: 34px 0 42px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 14px 18px;
+      border-radius: 18px;
+      box-shadow: var(--section-shadow);
+    }
+
+    .section-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex: 0 0 18px;
+      border: 2px solid rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-size: clamp(1.35rem, 2.4vw, 2rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin: 0;
     }
 
     .grid {
@@ -63,14 +93,14 @@
     }
 
     .task-title {
-      font-size: clamp(1.45rem, 2.8vw, 2rem);
+      font-size: clamp(1.35rem, 2.3vw, 1.8rem);
       line-height: 1.18;
       font-weight: 800;
       margin-bottom: 18px;
     }
 
     .task-caption {
-      font-size: clamp(1.02rem, 1.9vw, 1.18rem);
+      font-size: clamp(1rem, 1.8vw, 1.12rem);
       line-height: 1.4;
       color: #444;
       margin-bottom: 22px;
@@ -105,7 +135,7 @@
     }
 
     .btn-upload {
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.86);
       color: #111;
     }
 
@@ -117,7 +147,7 @@
     }
 
     .hint {
-      margin-top: 24px;
+      margin-top: 28px;
       text-align: center;
       color: var(--muted);
       font-size: 0.98rem;
@@ -135,6 +165,10 @@
       .wrap {
         width: min(calc(100vw - 20px), 1000px);
         padding-top: 14px;
+      }
+
+      .section-header {
+        padding: 12px 14px;
       }
 
       .task-card {
@@ -158,16 +192,17 @@
       Wähle eine Aufgabe und lade direkt ein Foto oder Video hoch.
     </p>
 
-    <div id="taskGrid" class="grid"></div>
+    <div id="sectionsContainer"></div>
 
     <p class="hint">
       <strong>Aufnehmen</strong> öffnet die Kamera für ein neues Foto.
-      <strong>Hochladen</strong> öffnet Galerie oder Dateien. Beim Sammelordner können mehrere Dateien auf einmal ausgewählt werden.
+      <strong>Hochladen</strong> öffnet Galerie oder Dateien.
+      Bei <strong>„Erinnerungen aus allen Zeiten“</strong> können mehrere Dateien auf einmal ausgewählt werden.
     </p>
   </div>
 
   <script>
-    const grid = document.getElementById("taskGrid");
+    const sectionsContainer = document.getElementById("sectionsContainer");
 
     function createHiddenInput(task, mode) {
       const input = document.createElement("input");
@@ -213,25 +248,26 @@
     }
 
     async function uploadToCloudinary(file, task) {
-      const endpoint = `https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudName}/auto/upload`;
+      const endpoint = `https://api.cloudinary.com/v1_1/${window.APP_CONFIG.cloudName}/auto/upload`;
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", APP_CONFIG.uploadPreset);
-      formData.append("folder", APP_CONFIG.eventTag);
+      formData.append("upload_preset", window.APP_CONFIG.uploadPreset);
+      formData.append("folder", window.APP_CONFIG.eventTag);
 
       formData.append(
         "tags",
-        `${APP_CONFIG.eventTag},fotochallenge,${task.id}`
+        `${window.APP_CONFIG.eventTag},fotochallenge,${task.id},${task.section || "ohne-section"}`
       );
 
       formData.append(
         "context",
         [
-          `event_title=${APP_CONFIG.eventTitle}`,
-          `event_tag=${APP_CONFIG.eventTag}`,
+          `event_title=${window.APP_CONFIG.eventTitle}`,
+          `event_tag=${window.APP_CONFIG.eventTag}`,
           `task_id=${task.id}`,
           `task_title=${task.title}`,
+          `task_section=${task.section || ""}`,
           `caption=${task.caption}`
         ].join("|")
       );
@@ -249,10 +285,10 @@
       return response.json();
     }
 
-    function renderTask(task) {
+    function createTaskCard(task) {
       const card = document.createElement("div");
       card.className = "task-card";
-      card.style.background = task.color;
+      card.style.background = task.color || "#ffffff";
 
       const title = document.createElement("div");
       title.className = "task-title";
@@ -260,7 +296,7 @@
 
       const caption = document.createElement("div");
       caption.className = "task-caption";
-      caption.textContent = task.caption;
+      caption.textContent = task.caption || "";
 
       const actions = document.createElement("div");
       actions.className = "actions";
@@ -271,7 +307,9 @@
       const cameraBtn = document.createElement("button");
       cameraBtn.className = "action-btn btn-camera";
       cameraBtn.type = "button";
-      cameraBtn.textContent = "📷 Aufnehmen";
+      cameraBtn.textContent = task.id === "sammelordner"
+        ? "📷 Foto aufnehmen"
+        : "📷 Aufnehmen";
       cameraBtn.addEventListener("click", () => cameraInput.click());
 
       const uploadBtn = document.createElement("button");
@@ -296,10 +334,87 @@
       card.appendChild(cameraInput);
       card.appendChild(uploadInput);
 
-      grid.appendChild(card);
+      return card;
     }
 
-    APP_CONFIG.tasks.forEach(renderTask);
+    function renderSections() {
+      const config = window.APP_CONFIG;
+      const sections = Array.isArray(config.sections) ? config.sections : [];
+      const tasks = Array.isArray(config.tasks) ? config.tasks : [];
+
+      sectionsContainer.innerHTML = "";
+
+      sections.forEach((section) => {
+        const sectionTasks = tasks.filter(task => task.section === section.id);
+
+        if (!sectionTasks.length) return;
+
+        const block = document.createElement("section");
+        block.className = "section-block";
+
+        const header = document.createElement("div");
+        header.className = "section-header";
+        header.style.background = section.color || "#ffffff";
+
+        const dot = document.createElement("div");
+        dot.className = "section-dot";
+        dot.style.background = section.color || "#ffffff";
+
+        const title = document.createElement("h2");
+        title.className = "section-title";
+        title.textContent = section.title;
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        sectionTasks.forEach(task => {
+          grid.appendChild(createTaskCard(task));
+        });
+
+        header.appendChild(dot);
+        header.appendChild(title);
+
+        block.appendChild(header);
+        block.appendChild(grid);
+
+        sectionsContainer.appendChild(block);
+      });
+
+      const tasksWithoutSection = tasks.filter(task => !task.section);
+      if (tasksWithoutSection.length) {
+        const fallbackBlock = document.createElement("section");
+        fallbackBlock.className = "section-block";
+
+        const header = document.createElement("div");
+        header.className = "section-header";
+        header.style.background = "#ffffff";
+
+        const dot = document.createElement("div");
+        dot.className = "section-dot";
+        dot.style.background = "#ffffff";
+
+        const title = document.createElement("h2");
+        title.className = "section-title";
+        title.textContent = "Weitere Aufgaben";
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        tasksWithoutSection.forEach(task => {
+          grid.appendChild(createTaskCard(task));
+        });
+
+        header.appendChild(dot);
+        header.appendChild(title);
+
+        fallbackBlock.appendChild(header);
+        fallbackBlock.appendChild(grid);
+
+        sectionsContainer.appendChild(fallbackBlock);
+      }
+    }
+
+    renderSections();
   </script>
 </body>
 </html>
