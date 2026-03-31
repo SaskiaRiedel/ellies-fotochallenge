@@ -63,7 +63,7 @@
       border-radius: 24px;
       box-shadow: var(--section-shadow);
       overflow: hidden;
-      background: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.40);
     }
 
     .section-toggle {
@@ -122,7 +122,7 @@
       display: none;
       padding: 0 20px 20px;
       border-top: 1px solid var(--border);
-      background: rgba(255,255,255,0.30);
+      background: rgba(255,255,255,0.28);
     }
 
     .section-block.open .section-content {
@@ -143,17 +143,10 @@
     }
 
     .task-title {
-      font-size: clamp(1.25rem, 2.2vw, 1.7rem);
-      line-height: 1.18;
+      font-size: clamp(1.2rem, 2.1vw, 1.55rem);
+      line-height: 1.2;
       font-weight: 800;
-      margin-bottom: 16px;
-    }
-
-    .task-caption {
-      font-size: clamp(0.98rem, 1.8vw, 1.08rem);
-      line-height: 1.4;
-      color: #444;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .actions {
@@ -169,6 +162,14 @@
       cursor: pointer;
       font-size: 1rem;
       font-weight: 700;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .action-btn:hover,
+    .action-btn:focus-visible {
+      transform: translateY(-1px);
+      opacity: 0.95;
+      outline: none;
     }
 
     .btn-camera {
@@ -177,7 +178,7 @@
     }
 
     .btn-upload {
-      background: rgba(255,255,255,0.86);
+      background: rgba(255,255,255,0.88);
       color: #111;
     }
 
@@ -247,7 +248,7 @@
     <p class="hint">
       <strong>Aufnehmen</strong> öffnet die Kamera für ein neues Foto.
       <strong>Hochladen</strong> öffnet Galerie oder Dateien.
-      Bei <strong>„Erinnerungen aus allen Zeiten“</strong> können mehrere Dateien auf einmal ausgewählt werden.
+      Bei <strong>„Fotos aus allen Zeiten“</strong> können mehrere Dateien auf einmal ausgewählt werden.
     </p>
   </div>
 
@@ -344,10 +345,6 @@
       title.className = "task-title";
       title.textContent = task.title;
 
-      const caption = document.createElement("div");
-      caption.className = "task-caption";
-      caption.textContent = task.caption || "";
-
       const actions = document.createElement("div");
       actions.className = "actions";
 
@@ -376,7 +373,6 @@
       actions.appendChild(uploadBtn);
 
       card.appendChild(title);
-      card.appendChild(caption);
       card.appendChild(actions);
       card.appendChild(status);
       card.appendChild(cameraInput);
@@ -385,10 +381,9 @@
       return card;
     }
 
-    function createSectionBlock(section, sectionTasks, isOpen = false) {
+    function createSectionBlock(section, sectionTasks) {
       const block = document.createElement("section");
       block.className = "section-block";
-      if (isOpen) block.classList.add("open");
 
       const toggle = document.createElement("button");
       toggle.className = "section-toggle";
@@ -461,7 +456,7 @@
         const sectionTasks = config.tasks.filter(task => task.section === section.id);
         if (!sectionTasks.length) return;
 
-        const block = createSectionBlock(section, sectionTasks, false);
+        const block = createSectionBlock(section, sectionTasks);
         sectionsContainer.appendChild(block);
       });
     }
