@@ -209,6 +209,9 @@
         0 0 0 8px rgba(0,0,0,0.10),
         0 20px 42px rgba(0,0,0,0.26);
       z-index: 5;
+    }
+
+    .task-card.highlight.pulsing {
       animation: strongPulse 5s ease-in-out;
     }
 
@@ -422,7 +425,7 @@
     const state = {
       taskCounts: {},
       showOnlyOpenTasks: false,
-      highlightTimer: null
+      pulseTimer: null
     };
 
     function getHashTaskId() {
@@ -809,9 +812,9 @@
     }
 
     function clearHighlight() {
-      clearTimeout(state.highlightTimer);
+      clearTimeout(state.pulseTimer);
       document.querySelectorAll(".task-card.highlight").forEach(el => {
-        el.classList.remove("highlight");
+        el.classList.remove("highlight", "pulsing");
       });
     }
 
@@ -819,10 +822,10 @@
       if (!el) return;
 
       clearHighlight();
-      el.classList.add("highlight");
+      el.classList.add("highlight", "pulsing");
 
-      state.highlightTimer = setTimeout(() => {
-        el.classList.remove("highlight");
+      state.pulseTimer = setTimeout(() => {
+        el.classList.remove("pulsing");
       }, 5000);
     }
 
@@ -869,6 +872,9 @@
 
           if (pulse) {
             applyHighlight(el);
+          } else {
+            clearHighlight();
+            el.classList.add("highlight");
           }
 
           if (updateHash) {
