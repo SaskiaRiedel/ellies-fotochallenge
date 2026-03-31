@@ -17,7 +17,7 @@
       --btn-dark: #222;
       --btn-light: #fff;
       --border: rgba(0,0,0,0.08);
-      --pill-bg: rgba(255,255,255,0.78);
+      --pill-bg: rgba(255,255,255,0.82);
     }
 
     * {
@@ -53,7 +53,7 @@
       color: var(--muted);
       font-size: clamp(1rem, 2.2vw, 1.3rem);
       line-height: 1.35;
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto 22px;
     }
 
@@ -197,26 +197,34 @@
       border-radius: var(--radius);
       padding: 22px 20px 18px;
       box-shadow: var(--shadow);
-      transition: transform .12s ease, box-shadow .12s ease, outline-color .12s ease;
       position: relative;
-      scroll-margin-top: 20px;
+      scroll-margin-top: 24px;
+      outline: 0 solid transparent;
+      z-index: 1;
     }
 
     .task-card.highlight {
       outline: 6px solid #000;
       box-shadow:
-        0 0 0 6px rgba(0,0,0,0.15),
-        0 18px 40px rgba(0,0,0,0.25);
-      animation: strongPulse 2.4s ease-in-out;
+        0 0 0 8px rgba(0,0,0,0.10),
+        0 20px 42px rgba(0,0,0,0.26);
       z-index: 5;
+      animation: strongPulse 5s ease-in-out;
     }
 
     @keyframes strongPulse {
       0%   { transform: scale(1); }
-      20%  { transform: scale(1.04); }
-      40%  { transform: scale(0.99); }
-      60%  { transform: scale(1.03); }
-      80%  { transform: scale(1.00); }
+      8%   { transform: scale(1.035); }
+      16%  { transform: scale(0.995); }
+      24%  { transform: scale(1.03); }
+      32%  { transform: scale(1); }
+      40%  { transform: scale(1.028); }
+      48%  { transform: scale(0.998); }
+      56%  { transform: scale(1.022); }
+      64%  { transform: scale(1); }
+      72%  { transform: scale(1.018); }
+      80%  { transform: scale(0.999); }
+      88%  { transform: scale(1.012); }
       100% { transform: scale(1); }
     }
 
@@ -250,7 +258,7 @@
     .task-badge {
       font-size: 0.93rem;
       line-height: 1.25;
-      background: rgba(255,255,255,0.82);
+      background: rgba(255,255,255,0.84);
       border-radius: 999px;
       padding: 7px 11px;
       color: #222;
@@ -413,7 +421,8 @@
 
     const state = {
       taskCounts: {},
-      showOnlyOpenTasks: false
+      showOnlyOpenTasks: false,
+      highlightTimer: null
     };
 
     function getHashTaskId() {
@@ -462,7 +471,7 @@
 
     async function fetchTaskCounts() {
       state.taskCounts = {};
-      const fallbackCounts = {};
+      const counts = {};
 
       try {
         const listUrl = `https://res.cloudinary.com/${window.APP_CONFIG.cloudName}/image/list/${window.APP_CONFIG.eventTag}.json`;
@@ -481,20 +490,20 @@
             extractTaskIdFromPublicId(asset?.public_id || "");
 
           if (!taskId) continue;
-          fallbackCounts[taskId] = (fallbackCounts[taskId] || 0) + 1;
+          counts[taskId] = (counts[taskId] || 0) + 1;
         }
       } catch (error) {
         console.warn("Zähler konnten nicht aus Cloudinary geladen werden:", error);
       }
 
-      state.taskCounts = fallbackCounts;
+      state.taskCounts = counts;
     }
 
     function extractTaskIdFromPublicId(publicId) {
       if (!publicId) return "";
       const parts = String(publicId).split("/");
       const last = parts[parts.length - 1] || "";
-      const match = last.match(/(aufgabe\\d+|sammelordner)/i);
+      const match = last.match(/(aufgabe\d+|sammelordner)/i);
       return match ? match[1] : "";
     }
 
@@ -800,9 +809,21 @@
     }
 
     function clearHighlight() {
+      clearTimeout(state.highlightTimer);
       document.querySelectorAll(".task-card.highlight").forEach(el => {
         el.classList.remove("highlight");
       });
+    }
+
+    function applyHighlight(el) {
+      if (!el) return;
+
+      clearHighlight();
+      el.classList.add("highlight");
+
+      state.highlightTimer = setTimeout(() => {
+        el.classList.remove("highlight");
+      }, 5000);
     }
 
     function openSection(sectionId) {
@@ -841,24 +862,19 @@
         }
 
         setTimeout(() => {
-          clearHighlight();
-
           const el = document.getElementById(`task-${task.id}`);
           if (!el) return;
 
-          if (pulse) {
-            el.classList.add("highlight");
-            setTimeout(() => {
-              el.classList.remove("highlight");
-            }, 4000);
-          }
-
           scrollToElement(el);
+
+          if (pulse) {
+            applyHighlight(el);
+          }
 
           if (updateHash) {
             history.replaceState(null, "", `#${encodeURIComponent(task.id)}`);
           }
-        }, didDisableFilter ? 60 : 20);
+        }, didDisableFilter ? 100 : 40);
       };
 
       if (didDisableFilter) {
@@ -893,21 +909,6 @@
       const task = getTaskById(hashTaskId);
       if (!task) return;
 
-      if (task.id === "sammelordner") {
-        setTimeout(() => {
-          const el = document.getElementById(`task-${task.id}`);
-          if (el) {
-            clearHighlight();
-            el.classList.add("highlight");
-            setTimeout(() => {
-              el.classList.remove("highlight");
-            }, 4000);
-            scrollToElement(el);
-          }
-        }, 80);
-        return;
-      }
-
       openAndHighlightTask(task.id, { updateHash: false, pulse: true });
     }
 
@@ -930,23 +931,6 @@
     window.addEventListener("hashchange", () => {
       const taskId = getHashTaskId();
       if (!taskId) return;
-
-      const task = getTaskById(taskId);
-      if (!task) return;
-
-      if (task.id === "sammelordner") {
-        const el = document.getElementById(`task-${task.id}`);
-        if (el) {
-          clearHighlight();
-          el.classList.add("highlight");
-          setTimeout(() => {
-            el.classList.remove("highlight");
-          }, 4000);
-          scrollToElement(el);
-        }
-        return;
-      }
-
       openAndHighlightTask(taskId, { updateHash: false, pulse: true });
     });
 
