@@ -624,7 +624,7 @@
       badges.className = "task-badges";
 
       if (!isMemoryFolder) {
-        if (count > 0) {
+        if (count >= 2) {
           const counterBadge = document.createElement("div");
           counterBadge.className = "task-badge";
           counterBadge.textContent = getTaskCounterText(count);
